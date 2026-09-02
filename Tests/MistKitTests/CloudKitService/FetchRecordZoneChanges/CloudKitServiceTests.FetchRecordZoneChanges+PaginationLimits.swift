@@ -113,7 +113,7 @@ extension CloudKitServiceTests.FetchRecordZoneChanges {
           database: .private
         )
         Issue.record("expected .paginationLimitExceeded")
-      } catch let error {
+      } catch {
         guard case .paginationLimitExceeded(let maxPages, let records) = error else {
           Issue.record("expected .paginationLimitExceeded, got \(error)")
           return

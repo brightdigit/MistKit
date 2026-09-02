@@ -62,7 +62,7 @@ extension CloudKitServiceTests.Tokens {
           database: Self.database
         )
         Issue.record("expected createAPNsToken to throw")
-      } catch let error {
+      } catch {
         guard case .badRequest(let reason) = error else {
           Issue.record("expected .badRequest, got \(error)")
           return
@@ -88,7 +88,7 @@ extension CloudKitServiceTests.Tokens {
           database: Self.database
         )
         Issue.record("expected createAPNsToken to throw")
-      } catch let error {
+      } catch {
         guard case .authenticationFailed = error else {
           Issue.record("expected .authenticationFailed, got \(error)")
           return
@@ -116,7 +116,7 @@ extension CloudKitServiceTests.Tokens {
           database: Self.database
         )
         Issue.record("expected registerAPNsToken to throw")
-      } catch let error {
+      } catch {
         guard case .badRequest = error else {
           Issue.record("expected .badRequest, got \(error)")
           return

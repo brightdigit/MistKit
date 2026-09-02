@@ -118,7 +118,7 @@ extension CloudKitServiceTests.FetchDatabaseChanges {
       do {
         _ = try await service.fetchAllDatabaseChanges(maxPages: 2, database: .private)
         Issue.record("expected .zonePaginationLimitExceeded")
-      } catch let error {
+      } catch {
         guard case .zonePaginationLimitExceeded(let maxPages, let zones) = error else {
           Issue.record("expected .zonePaginationLimitExceeded, got \(error)")
           return

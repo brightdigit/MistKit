@@ -14,12 +14,10 @@ extension FieldValueConversionTests {
         return
       }
       let intZero = FieldValue.int64(0)
-      let intComponents = Components.Schemas.FieldValueRequest(from: intZero)
-      // #expect(#expect(intComponents.type == .int64)
+      _ = Components.Schemas.FieldValueRequest(from: intZero)
 
       let doubleZero = FieldValue.double(0.0)
-      let doubleComponents = Components.Schemas.FieldValueRequest(from: doubleZero)
-      // #expect(#expect(doubleComponents.type == .double)
+      _ = Components.Schemas.FieldValueRequest(from: doubleZero)
     }
 
     @Test("Convert negative values")
@@ -29,12 +27,10 @@ extension FieldValueConversionTests {
         return
       }
       let negativeInt = FieldValue.int64(-100)
-      let intComponents = Components.Schemas.FieldValueRequest(from: negativeInt)
-      // #expect(#expect(intComponents.type == .int64)
+      _ = Components.Schemas.FieldValueRequest(from: negativeInt)
 
       let negativeDouble = FieldValue.double(-3.14)
-      let doubleComponents = Components.Schemas.FieldValueRequest(from: negativeDouble)
-      // #expect(#expect(doubleComponents.type == .double)
+      _ = Components.Schemas.FieldValueRequest(from: negativeDouble)
     }
 
     @Test("Convert large numbers")
@@ -44,12 +40,10 @@ extension FieldValueConversionTests {
         return
       }
       let largeInt = FieldValue.int64(Int.max)
-      let intComponents = Components.Schemas.FieldValueRequest(from: largeInt)
-      // #expect(#expect(intComponents.type == .int64)
+      _ = Components.Schemas.FieldValueRequest(from: largeInt)
 
       let largeDouble = FieldValue.double(Double.greatestFiniteMagnitude)
-      let doubleComponents = Components.Schemas.FieldValueRequest(from: largeDouble)
-      // #expect(#expect(doubleComponents.type == .double)
+      _ = Components.Schemas.FieldValueRequest(from: largeDouble)
     }
 
     @Test("Convert empty string")
@@ -59,7 +53,7 @@ extension FieldValueConversionTests {
         return
       }
       let emptyString = FieldValue.string("")
-      let components = Components.Schemas.FieldValueRequest(from: emptyString)
+      _ = Components.Schemas.FieldValueRequest(from: emptyString)
     }
 
     @Test("Convert string with special characters")
@@ -69,7 +63,7 @@ extension FieldValueConversionTests {
         return
       }
       let specialString = FieldValue.string("Hello\nWorld\t🌍")
-      let components = Components.Schemas.FieldValueRequest(from: specialString)
+      _ = Components.Schemas.FieldValueRequest(from: specialString)
     }
   }
 }

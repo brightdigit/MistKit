@@ -51,7 +51,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
       let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
-        _ = try await service.fetchZoneChanges(syncToken: "garbage-token")
+        _ = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+          service,
+          syncToken: "garbage-token"
+        )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .badRequest(let reason) = ckError
@@ -78,7 +81,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
       let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
-        _ = try await service.fetchZoneChanges(syncToken: "expired-token")
+        _ = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+          service,
+          syncToken: "expired-token"
+        )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .badRequest(let reason) = ckError
@@ -98,7 +104,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
       )
 
       await #expect {
-        _ = try await service.fetchZoneChanges()
+        _ = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(service)
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError
