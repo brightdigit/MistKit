@@ -80,35 +80,67 @@
       let body = #"{"ck":{"qry":{"fo":1,"sid":"s","rid":"r"}}}"#
       actor PollCounter {
         private(set) var count = 0
-        func increment() {
+        func increment() -> Int {
           count += 1
+          return count
         }
       }
       let polls = PollCounter()
       let transport: Courier.Transport = { _, _ in
-        await polls.increment()
-        let pollCount = await polls.count
+        let pollCount = await polls.increment()
         if pollCount == 1 {
           return (statusCode: 200, data: Data(body.utf8))
         }
-        try await Task.sleep(nanoseconds: 30_000_000_000)
+        // Would hang the test if Courier.notifications keeps polling after cancel.
+        try await Task.sleep(for: .seconds(60))
         return (statusCode: 200, data: Data())
       }
 
-      let stream = Courier.notifications(courierURL: url, perPollTimeout: 1, transport: transport)
-      let task = Task<CourierNotification?, Error> {
-        for try await notification in stream {
-          return notification
-        }
-        return nil
-      }
-      defer { task.cancel() }
+      actor FirstNotificationGate {
+        private var notification: CourierNotification?
+        private var continuation: CheckedContinuation<Void, Never>?
 
-      let notification = try await task.value
-      let decoded = try #require(notification)
+        func store(_ notification: CourierNotification) {
+          self.notification = notification
+          continuation?.resume()
+          continuation = nil
+        }
+
+        func waitForFirst() async {
+          if notification != nil {
+            return
+          }
+          await withCheckedContinuation { continuation = $0 }
+        }
+
+        func firstNotification() -> CourierNotification? {
+          notification
+        }
+      }
+
+      let stream = Courier.notifications(courierURL: url, perPollTimeout: 1, transport: transport)
+      let gate = FirstNotificationGate()
+      let consumeTask = Task {
+        do {
+          for try await notification in stream {
+            await gate.store(notification)
+          }
+        } catch {
+          // Expected when cancellation tears down the stream mid-poll.
+        }
+      }
+      defer { consumeTask.cancel() }
+
+      await gate.waitForFirst()
+      // Cancel while blocked on the next stream element so onTermination stops polling.
+      consumeTask.cancel()
+
+      let decoded = try #require(await gate.firstNotification())
       #expect(decoded.reason == CourierNotification.Reason.recordCreated)
+
+      try await Task.sleep(for: .milliseconds(100))
       let finalCount = await polls.count
-      #expect(finalCount >= 1)
+      #expect(finalCount <= 2)
     }
   }
 #endif
