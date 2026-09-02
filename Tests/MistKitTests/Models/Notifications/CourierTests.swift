@@ -91,7 +91,7 @@
         if pollCount == 1 {
           return (statusCode: 200, data: Data(body.utf8))
         }
-        try await Task.sleep(for: .seconds(30))
+        try await Task.sleep(nanoseconds: 30_000_000_000)
         return (statusCode: 200, data: Data())
       }
 

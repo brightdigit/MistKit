@@ -53,13 +53,11 @@ internal import OpenAPIRuntime
 /// example, public-database record reads via server-to-server signing **and**
 /// `fetchCaller` via web-auth from one fully-populated `Credentials`.
 public struct CloudKitService: Sendable {
+  // swift-format-ignore: NeverForceUnwrap
+  // swiftlint:disable force_unwrapping
   /// The base URL for CloudKit Web Services.
-  public static let baseURL: URL = {
-    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-      preconditionFailure("invalid CloudKit base URL")
-    }
-    return url
-  }()
+  public static let baseURL = URL(string: "https://api.apple-cloudkit.com")!
+  // swiftlint:enable force_unwrapping
 
   /// CloudKit's maximum number of items (records, lookups, or operations)
   /// accepted or returned per batch request. The auto-chunking convenience
