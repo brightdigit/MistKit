@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Represent `FieldValue.bytes` as `Data` instead of a base64 `String` (#467)
+* Verify downloaded asset bytes against `fileChecksum`, and add `Asset.download(using:)` that refuses unverified data (#466)
 
 ## 1.0.0-beta.4
 

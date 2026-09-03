@@ -358,6 +358,8 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
   - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
   - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/CloudKitService/CloudKitService+AssetUpload.swift`
 
+**Asset download checksum (issue #466):** `Asset.matches(data:)` SHA-256-hashes plaintext bytes (`swift-crypto`) and compares to `fileChecksum` as base64 of the digest first (same convention as `HashFunction.cloudKitBodyHash`), then as hex (case-insensitive). Missing `fileChecksum` is `false`. `wrappingKey` / CDN encryption is out of scope. `Asset.download(using:)` (`#if !os(WASI)`, macOS 12 / iOS 15+) GETs `downloadURL` via `URLSession` (default `.shared`, same CDN-vs-API pool split as uploads) and **never** returns unverified bytes: missing/invalid URL → `CloudKitError.missingAssetDownloadURL`, non-2xx → `httpError`, missing checksum → `missingAssetChecksum`, digest mismatch → `assetChecksumMismatch`. Tests: `AssetChecksumTests`, `AssetDownloadTests`.
+
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
 - Handle connection pooling separately for different hosts
