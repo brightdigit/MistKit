@@ -186,4 +186,25 @@ extension FieldValue {
     )
     try failure.reportAndThrow()
   }
+
+  /// Decode a wire base64 string into `Data`, throwing
+  /// ``ConversionError/typeValueMismatch`` when the payload is not valid base64.
+  ///
+  /// `value` is the unwrapped string from ``requireString``, not the `oneOf`
+  /// wrapper, so callers can recover the raw payload from the error.
+  internal static func dataFromBase64(
+    _ string: String,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Data {
+    guard let data = Data(base64Encoded: string) else {
+      let failure = ConversionError.typeValueMismatch(
+        fieldName: fieldName,
+        declaredType: declaredType,
+        value: string
+      )
+      try failure.reportAndThrow()
+    }
+    return data
+  }
 }

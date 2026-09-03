@@ -1,3 +1,7 @@
+## Unreleased
+
+* Represent `FieldValue.bytes` as `Data` instead of a base64 `String` (#467)
+
 ## 1.0.0-beta.4
 
 ### Field Values

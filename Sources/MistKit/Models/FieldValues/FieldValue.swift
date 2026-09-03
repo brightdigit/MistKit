@@ -34,7 +34,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case string(String)
   case int64(Int)
   case double(Double)
-  case bytes(String)  // Base64-encoded string
+  case bytes(Data)  // Binary data; base64-encoded on the wire
   case date(Date)  // Date/time value
   case location(Location)
   case reference(Reference)

@@ -51,7 +51,7 @@ extension Components.Schemas.ListValuePayload {
       return .DoubleValue(value)
     }
     if case .bytes(let value) = fieldValue {
-      return .BytesValue(value)
+      return .BytesValue(value.base64EncodedString())
     }
     if case .date(let value) = fieldValue {
       return .DateValue(value.timeIntervalSince1970 * 1_000)

@@ -49,7 +49,7 @@ extension FieldValue {
     listItem: Components.Schemas.ListValuePayload,
     fieldName: String
   ) throws(ConversionError) {
-    if let simpleValue = Self.makeSimpleListItem(from: listItem) {
+    if let simpleValue = try Self.makeSimpleListItem(from: listItem, fieldName: fieldName) {
       self = simpleValue
     } else if let complexValue = try Self.makeComplexListItem(from: listItem, fieldName: fieldName)
     {
@@ -85,7 +85,9 @@ extension FieldValue {
     case .DoubleValue(let doubleValue):
       self = .double(doubleValue)
     case .BytesValue(let bytesValue):
-      self = .bytes(bytesValue)
+      self = .bytes(
+        try Self.dataFromBase64(bytesValue, fieldName: fieldName, declaredType: "BYTES")
+      )
     default:
       let failure = ConversionError.unmappableNestedListItem(
         fieldName: fieldName,
@@ -96,8 +98,9 @@ extension FieldValue {
   }
 
   private static func makeSimpleListItem(
-    from listItem: Components.Schemas.ListValuePayload
-  ) -> FieldValue? {
+    from listItem: Components.Schemas.ListValuePayload,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
     if case .StringValue(let strVal) = listItem {
       return .string(strVal)
     }
@@ -108,7 +111,7 @@ extension FieldValue {
       return .double(dblVal)
     }
     if case .BytesValue(let bytesVal) = listItem {
-      return .bytes(bytesVal)
+      return .bytes(try dataFromBase64(bytesVal, fieldName: fieldName, declaredType: "BYTES"))
     }
     if case .DateValue(let dateVal) = listItem {
       return .date(Date(timeIntervalSince1970: dateVal / 1_000))

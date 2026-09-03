@@ -43,8 +43,9 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A field value's structure matched no known `FieldValue` case.
   case unmappableFieldValue(fieldName: String, value: String, type: String?)
   /// A response declared a scalar `type` that the field's value cannot satisfy
-  /// (e.g. a `TIMESTAMP` tag over a string value). Such a response is internally
-  /// inconsistent and cannot be faithfully represented.
+  /// (e.g. a `TIMESTAMP` tag over a string value, or a `BYTES` tag over a string
+  /// that is not valid base64). Such a response is internally inconsistent and
+  /// cannot be faithfully represented.
   case typeValueMismatch(fieldName: String, declaredType: String, value: String)
   /// A list element matched no known `FieldValue` case.
   case unmappableListItem(fieldName: String, item: String)
