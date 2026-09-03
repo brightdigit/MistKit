@@ -91,11 +91,12 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let fieldValue = FieldValue.bytes("base64encodedstring")
+      let payload = Data("hello".utf8)
+      let fieldValue = FieldValue.bytes(payload)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .BytesValue(let value) = components.value {
-        #expect(value == "base64encodedstring")
+        #expect(value == payload.base64EncodedString())
       } else {
         Issue.record("Expected bytesValue")
       }
