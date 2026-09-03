@@ -99,6 +99,8 @@ extension Components.Schemas.ListValuePayload {
       action = .DELETE_SELF
     case .some(.none):
       action = .NONE
+    case .some(.validate):
+      action = .VALIDATE
     case nil:
       action = nil
     }

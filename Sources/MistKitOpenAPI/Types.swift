@@ -1653,14 +1653,17 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/recordName`.
             public var recordName: Swift.String
-            /// Action to perform on the referenced record
+            /// Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             @frozen public enum actionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case NONE = "NONE"
                 case DELETE_SELF = "DELETE_SELF"
+                case VALIDATE = "VALIDATE"
             }
-            /// Action to perform on the referenced record
+            /// Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             public var action: Components.Schemas.ReferenceValue.actionPayload?
@@ -1668,7 +1671,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - recordName: The record name being referenced
-            ///   - action: Action to perform on the referenced record
+            ///   - action: Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
             public init(
                 recordName: Swift.String,
                 action: Components.Schemas.ReferenceValue.actionPayload? = nil
