@@ -343,7 +343,7 @@ let providers: [ConfigurationProvider] = [
 
 - **Official Package**: [apple/swift-configuration](https://github.com/apple/swift-configuration)
 - **Package Index**: [Swift Configuration 1.0.0 Documentation](https://swiftpackageindex.com/apple/swift-configuration/1.0.0/documentation/configuration)
-- **Local Reference**: [.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md](../.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md)
+- **Local Reference**: [.claude/docs/swift-configuration.md](../.claude/docs/swift-configuration.md)
 - **MistDemo Implementation**: `Examples/MistDemo/Sources/MistDemo/Configuration/MistDemoConfig.swift`
 - **ConfigKeyKit Strategy**: [configkeykit-strategy.md](./configkeykit-strategy.md)
 
