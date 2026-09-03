@@ -707,3 +707,15 @@ For detailed guides on advanced topics, see:
   - Critical issues solved and lessons learned
   - Common pitfalls to avoid
   - Lessons for building future CloudKit demos
+
+- **[.claude/data-sources-api-research.md](.claude/data-sources-api-research.md)** - External data source research
+  - xcodereleases.com API structure
+  - swiftversion.net scraping approach
+  - MistKit API patterns used by the sync tool
+
+- **[.claude/firmware-wiki.md](.claude/firmware-wiki.md)** - IPSW/OTA firmware reference (TheAppleWiki)
+  - Firmware file formats and contents
+  - Background for IPSWFetcher and MESUFetcher
+
+- **[.claude/mobileasset-wiki.md](.claude/mobileasset-wiki.md)** - MobileAsset framework reference (TheAppleWiki)
+  - Asset catalog structure behind MESU endpoints
