@@ -467,36 +467,22 @@ Key endpoints documented in the OpenAPI spec:
 
 ## Reference Documentation
 
-Apple's official CloudKit documentation is available in `.claude/docs/` for offline reference during development:
+Offline copies of external documentation live in `.claude/docs/`. **See
+[`.claude/docs/README.md`](.claude/docs/README.md) — it is the single router for
+that directory**, listing every doc with its size and when to consult it.
 
-### When to Consult Each Document
+Highlights: `webservices.md` is the authoritative CloudKit REST reference;
+`swift-openapi-generator.md` and `swift-openapi-runtime.md` cover the generated
+client in `Sources/MistKitOpenAPI/`; `QUICK_REFERENCE.md` is the fast lookup for
+endpoint shapes, field types, and error codes.
 
-**webservices.md** (289 KB) - CloudKit Web Services REST API
-- **Primary use**: Implementing REST API endpoints
-- **Contains**: Authentication, request formats, all endpoints, data types, error codes
-- **Consult when**: Writing API client code, handling authentication, debugging responses
-
-**cloudkitjs.md** (188 KB) - CloudKit JS Framework
-- **Primary use**: Understanding CloudKit concepts and operation flows
-- **Contains**: Container/database patterns, operations, response objects, error handling
-- **Consult when**: Designing Swift types, implementing queries, working with subscriptions
-
-**testing-enablinganddisabling.md** (126 KB) - Swift Testing Framework
-- **Primary use**: Writing modern Swift tests
-- **Contains**: `@Test` macros, async testing, parameterization, migration from XCTest
-- **Consult when**: Writing or organizing tests, testing async code
-
-**swift-openapi-generator.md** (235 KB) - Swift OpenAPI Generator Documentation
-- **Primary use**: Understanding code generation configuration and features
-- **Contains**: Generator configuration, type overrides, middleware system, transport protocols, API stability
-- **Consult when**: Configuring openapi-generator-config.yaml, implementing middleware, troubleshooting generated code
-
-See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
+Do not duplicate the per-document breakdown here — it drifts. Add new docs to
+the router instead.
 
 ### MistDemo Documentation
 
 - **Swift Configuration Reference** (`.claude/docs/mistdemo/swift-configuration-reference.md`) - Guide for using Swift Configuration in MistDemo
-- **Official Swift Configuration Docs** (`.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md`) - Full API reference
+- **Official Swift Configuration Docs** (`.claude/docs/swift-configuration.md`) - Full API reference
 
 ### CloudKit Schema Language
 
