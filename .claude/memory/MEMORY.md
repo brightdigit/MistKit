@@ -36,6 +36,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [macOS APNs entitlement key](project_macos_aps_entitlement_key.md) — macOS needs `com.apple.developer.aps-environment`; iOS uses `aps-environment`. codesign silently strips the wrong-platform key.
 - [RecordResult pattern throughout API](feedback_record_result_pattern_throughout.md) — Surface per-item modify failures with the RecordResult success-or-failure pattern everywhere (subscriptions, zones…), not just records
 - [Subrepo-local fixes belong in the subrepo](feedback_subrepo_fixes_belong_in_subrepo.md) — Changes isolated to an Example subrepo (e.g. CelestraCloud copyright headers) go in that subrepo's own repo, not a parent MistKit branch
+- [Subrepo directive is about local hygiene only](feedback_subrepo_directive_scope.md) — cross-cutting changes originating in the parent DO belong on a parent branch; don't over-apply the subrepo rule
 - [beta.4 worktree layout](project_beta4_worktree_layout.md) — Remaining v1.0.0-beta.4 issues are developed in parallel worktrees under MistKit.git/wt-<branch>, PR'd to the v1.0.0-beta.4 base
 - [#419 already fixed in beta.3](project_419_fixed_in_beta3.md) — MistDemoApp view inits shipped in 5a58120; verified building on macOS Swift 6.3.2, do not re-implement
 - [Never git stash in this multi-worktree repo](feedback_never_git_stash_multiworktree.md) — The stash stack is shared across worktrees; a pop in one can bury a sibling branch's WIP. Commit instead.
@@ -43,6 +44,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
 - [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; retain release branches; notes are a flat bullet list for new entries
 - [Use git trees, not git worktree](feedback_use_git_trees_not_git_worktree.md) — Manage worktrees with `git trees add/rm/list/clean`; `add` pushes to origin unless `--no-push`
+- [git trees add bases new worktrees on main](reference_git_trees_add_bases_on_main.md) — not on the invoking worktree's branch; reset onto the intended base, then first push needs --force-with-lease
 - [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — MistDemo/Bushel/Celestra/MKC are tools-version 6.4; examples.yml + MistDemo.yml use 6.4 nightly / Xcode 27
 - [ConfigKey bases must be dash-case](reference_configkey_cli_flag_dash_case.md) — snake_case silently breaks CLI flags and secret redaction; ENV works either way, so it hides the bug
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
