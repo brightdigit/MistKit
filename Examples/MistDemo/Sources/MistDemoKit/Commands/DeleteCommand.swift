@@ -93,7 +93,7 @@ public struct DeleteCommand: MistDemoCommand, OutputFormatting {
 
       try await client.deleteRecord(
         recordType: config.recordType,
-        recordName: config.recordName,
+        recordName: RecordName(config.recordName),
         recordChangeTag: effectiveChangeTag,
         database: config.base.database
       )

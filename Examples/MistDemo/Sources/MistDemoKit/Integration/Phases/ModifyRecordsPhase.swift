@@ -49,7 +49,7 @@ internal struct ModifyRecordsPhase: IntegrationPhase {
       RecordOperation(
         operationType: .forceReplace,
         recordType: MistDemoConfig.recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: [
           "title": .string("Updated Record \(offset + 1)")
         ]

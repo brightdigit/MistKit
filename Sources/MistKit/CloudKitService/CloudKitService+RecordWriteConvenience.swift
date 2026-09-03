@@ -51,7 +51,7 @@ extension CloudKitService {
   /// ```
   public func createRecord(
     recordType: String,
-    recordName: String? = nil,
+    recordName: RecordName? = nil,
     fields: [String: FieldValue],
     zoneID: ZoneID? = nil,
     database: Database
@@ -95,7 +95,7 @@ extension CloudKitService {
   /// ```
   public func updateRecord(
     recordType: String,
-    recordName: String,
+    recordName: RecordName,
     fields: [String: FieldValue],
     recordChangeTag: String? = nil,
     zoneID: ZoneID? = nil,
@@ -128,7 +128,7 @@ extension CloudKitService {
   /// - Throws: CloudKitError if the operation fails
   public func deleteRecord(
     recordType: String,
-    recordName: String,
+    recordName: RecordName,
     recordChangeTag: String? = nil,
     zoneID: ZoneID? = nil,
     database: Database

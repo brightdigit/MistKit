@@ -12,6 +12,7 @@
 * Add records/resolve and records/accept share operations (#41, #42) by @leogdion in https://github.com/brightdigit/MistKit/pull/428
 
 ### API Cleanup
+* Add `RecordName` value type for record identifiers (#465)
 * Remove deprecated API, model server error codes, refactor FieldValue conversion, add cloud toolchain (#424, #421, #378, #358, #295) by @leogdion in https://github.com/brightdigit/MistKit/pull/424
 
 ### MistDemo & Tooling

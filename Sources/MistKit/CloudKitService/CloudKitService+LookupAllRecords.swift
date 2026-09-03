@@ -49,7 +49,7 @@ extension CloudKitService {
   ///   `NOT_FOUND`) for one CloudKit could not return.
   /// - Throws: `CloudKitError` if any batch fails.
   public func lookupAllRecords(
-    recordNames: [String],
+    recordNames: [RecordName],
     desiredKeys: [String]? = nil,
     database: Database,
     batchSize: Int = CloudKitService.maxRecordsPerRequest

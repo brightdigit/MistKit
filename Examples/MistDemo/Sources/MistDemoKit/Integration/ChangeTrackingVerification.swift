@@ -57,7 +57,7 @@ internal enum ChangeTrackingVerification {
       RecordOperation(
         operationType: .forceUpdate,
         recordType: MistDemoConfig.recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: [
           "title": .string("Zone changes \(index + 1)"),
           "index": .int64(index + 1),
@@ -120,7 +120,7 @@ internal enum ChangeTrackingVerification {
     in changes: [ZoneRecordChanges]
   ) -> Set<String> {
     Set(
-      changes.flatMap(\.records).map(\.recordName)
+      changes.flatMap(\.records).map(\.recordName.rawValue)
     )
   }
 

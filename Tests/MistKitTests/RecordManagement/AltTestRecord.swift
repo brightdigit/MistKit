@@ -35,7 +35,7 @@ internal import Foundation
 internal struct AltTestRecord: CloudKitRecord {
   internal static var cloudKitRecordType: String { "AltTestRecord" }
 
-  internal var recordName: String
+  internal var recordName: RecordName
   internal var title: String
 
   internal static func from(recordInfo: RecordInfo) -> AltTestRecord? {

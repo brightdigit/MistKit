@@ -48,14 +48,14 @@ extension CloudKitService {
   ///   top-level ``CloudKitError/badRequest(reason:)``, so there are no
   ///   per-item failures to inspect.
   public func rereferenceAssets(
-    _ fields: [(recordName: String, fieldName: String)],
+    _ fields: [(recordName: RecordName, fieldName: String)],
     zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> [Asset] {
     do {
       let assetRequests = fields.map { field in
         Operations.rereferenceAssets.Input.Body.jsonPayload.assetsPayloadPayload(
-          recordName: field.recordName,
+          recordName: field.recordName.rawValue,
           fieldName: field.fieldName
         )
       }
@@ -111,9 +111,9 @@ extension CloudKitService {
   ///   record is not found or carries no `recordType`; or a record failure if the
   ///   target lookup or update failed.
   public func rereferenceAsset(
-    fromRecord sourceRecordName: String,
+    fromRecord sourceRecordName: RecordName,
     field assetField: String,
-    toRecord targetRecordName: String,
+    toRecord targetRecordName: RecordName,
     field targetField: String? = nil,
     zoneID: ZoneID? = nil,
     database: Database
@@ -168,9 +168,9 @@ extension CloudKitService {
   ///   `assets/rereference` returned no descriptor for the source field; or a
   ///   record failure if the target update failed.
   public func rereferenceAsset(
-    fromRecord sourceRecordName: String,
+    fromRecord sourceRecordName: RecordName,
     field assetField: String,
-    toRecord targetRecordName: String,
+    toRecord targetRecordName: RecordName,
     recordType: String,
     recordChangeTag: String?,
     field targetField: String? = nil,

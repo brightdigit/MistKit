@@ -57,7 +57,7 @@ extension CloudKitService {
   /// - Returns: A ``RecordResult`` per requested record — `.success` for a found
   ///   record, `.failure` (e.g. `NOT_FOUND`) for one CloudKit could not return.
   public func lookupRecords(
-    recordNames: [String],
+    recordNames: [RecordName],
     desiredKeys: [String]? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordResult] {
@@ -74,7 +74,7 @@ extension CloudKitService {
             .init(
               records: recordNames.map { recordName in
                 .init(
-                  recordName: recordName,
+                  recordName: recordName.rawValue,
                   desiredKeys: desiredKeys
                 )
               }

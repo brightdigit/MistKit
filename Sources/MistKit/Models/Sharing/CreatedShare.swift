@@ -52,7 +52,7 @@ public struct CreatedShare: Sendable {
   /// The root record that was shared.
   public let rootRecord: RecordInfo
   /// The record name of the created `cloudkit.share` record.
-  public let shareRecordName: String
+  public let shareRecordName: RecordName
 
   /// Initialize a created-share result.
   /// - Parameters:
@@ -66,7 +66,7 @@ public struct CreatedShare: Sendable {
     shareURL: URL,
     share: ShareInfo,
     rootRecord: RecordInfo,
-    shareRecordName: String
+    shareRecordName: RecordName
   ) {
     self.shortGUID = shortGUID
     self.shareURL = shareURL

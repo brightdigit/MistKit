@@ -103,7 +103,7 @@ extension Components.Schemas.ListValuePayload {
       action = nil
     }
     return Components.Schemas.ReferenceValue(
-      recordName: reference.recordName,
+      recordName: reference.recordName.rawValue,
       action: action
     )
   }

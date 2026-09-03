@@ -108,7 +108,7 @@ extension OutputFormatting {
       for fieldName in sortedFieldNames {
         switch fieldName {
         case MistDemoConstants.FieldNames.recordName:
-          values.append(csvEscaper.escape(record.recordName))
+          values.append(csvEscaper.escape(record.recordName.rawValue))
         case MistDemoConstants.FieldNames.recordType:
           values.append(csvEscaper.escape(record.recordType ?? ""))
         case MistDemoConstants.FieldNames.recordChangeTag:
@@ -137,7 +137,7 @@ extension OutputFormatting {
     if records.count == 1 {
       let record = records[0]
       print("record:")
-      let name = yamlEscaper.escape(record.recordName)
+      let name = yamlEscaper.escape(record.recordName.rawValue)
       print("  \(recordNameKey): \(name)")
       let rtype = yamlEscaper.escape(record.recordType ?? "")
       print("  \(recordTypeKey): \(rtype)")
@@ -155,7 +155,7 @@ extension OutputFormatting {
     } else {
       print("records:")
       for record in records {
-        let name = yamlEscaper.escape(record.recordName)
+        let name = yamlEscaper.escape(record.recordName.rawValue)
         print("  - \(recordNameKey): \(name)")
         let rtype = yamlEscaper.escape(record.recordType ?? "")
         print("    \(recordTypeKey): \(rtype)")

@@ -45,7 +45,7 @@ public struct ArticleOperationBuilder: Sendable {
     articles.map { article in
       RecordOperation.create(
         recordType: "Article",
-        recordName: UUID().uuidString,
+        recordName: RecordName(UUID().uuidString),
         fields: article.toFieldsDict()
       )
     }
@@ -68,7 +68,7 @@ public struct ArticleOperationBuilder: Sendable {
 
       return RecordOperation.update(
         recordType: "Article",
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: article.toFieldsDict(),
         recordChangeTag: article.recordChangeTag
       )

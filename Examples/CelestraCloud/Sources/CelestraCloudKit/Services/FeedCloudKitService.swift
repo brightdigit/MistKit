@@ -53,7 +53,7 @@ public struct FeedCloudKitService: Sendable {
 
     let operation = RecordOperation.create(
       recordType: "Feed",
-      recordName: UUID().uuidString,
+      recordName: RecordName(UUID().uuidString),
       fields: feed.toFieldsDict()
     )
     let results = try await recordOperator.modifyRecords([operation])
@@ -74,7 +74,7 @@ public struct FeedCloudKitService: Sendable {
 
     let operation = RecordOperation.update(
       recordType: "Feed",
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: feed.toFieldsDict(),
       recordChangeTag: feed.recordChangeTag
     )

@@ -54,7 +54,7 @@ internal struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
       RecordOperation(
         operationType: .forceDelete,
         recordType: MistDemoConfig.recordType,
-        recordName: recordName
+        recordName: RecordName(recordName)
       )
     }
 

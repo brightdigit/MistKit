@@ -91,9 +91,9 @@ public struct RereferenceAssetCommand: MistDemoCommand, OutputFormatting {
     do {
       let service = try MistKitClientFactory.create(for: config.base)
       let record = try await service.rereferenceAsset(
-        fromRecord: sourceRecord,
+        fromRecord: RecordName(sourceRecord),
         field: assetField,
-        toRecord: targetRecord,
+        toRecord: RecordName(targetRecord),
         field: config.targetAssetField,
         database: config.base.database
       )

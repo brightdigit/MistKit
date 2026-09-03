@@ -51,7 +51,7 @@ internal enum FieldValueFormatter {
     case .location(let location):
       return "(\(location.latitude), \(location.longitude))"
     case .reference(let reference):
-      return reference.recordName
+      return reference.recordName.rawValue
     case .asset(let asset):
       return asset.downloadURL ?? "no URL"
     case .list(let values):

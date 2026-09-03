@@ -144,11 +144,11 @@ internal struct DemoErrorsRunner {
     do {
       let created = try await service.createRecord(
         recordType: Self.conflictRecordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: ["title": .string("original")],
         database: config.database
       )
-      createdRecordName = created.recordName
+      createdRecordName = created.recordName.rawValue
       staleTag = created.recordChangeTag
     } catch {
       print("❌ Setup create failed: \(error)")
@@ -159,7 +159,7 @@ internal struct DemoErrorsRunner {
     do {
       _ = try await service.updateRecord(
         recordType: Self.conflictRecordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: ["title": .string("first-update")],
         recordChangeTag: staleTag,
         database: config.database
@@ -173,7 +173,7 @@ internal struct DemoErrorsRunner {
     do {
       _ = try await service.updateRecord(
         recordType: Self.conflictRecordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: ["title": .string("second-update-stale")],
         recordChangeTag: staleTag,
         database: config.database
@@ -201,7 +201,7 @@ internal struct DemoErrorsRunner {
     do {
       try await service.deleteRecord(
         recordType: Self.conflictRecordType,
-        recordName: createdRecordName,
+        recordName: RecordName(createdRecordName),
         database: config.database
       )
       print("   ✅ Deleted.")

@@ -82,13 +82,13 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
         // 2. Mint + register a courier token, then trigger a matching change.
         let courierURL = try await mintCourierToken(context: context)
         let record = try await trigger(suffix: suffix, context: context)
-        createdRecordName = record.recordName
+        createdRecordName = record.recordName.rawValue
 
         // 3. Await our subscription's push (bounded, soft — see helper).
         await awaitPush(
           courierURL: courierURL,
           subscriptionID: subscriptionID,
-          expectedRecordName: record.recordName
+          expectedRecordName: record.recordName.rawValue
         )
       } catch {
         await cleanup(
@@ -141,7 +141,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
     private func trigger(suffix: String, context: PhaseContext) async throws -> RecordInfo {
       let record = try await context.service.createRecord(
         recordType: MistDemoConfig.recordType,
-        recordName: "mistkit-notif-rec-\(suffix)",
+        recordName: RecordName("mistkit-notif-rec-\(suffix)"),
         fields: ["title": .string("notification probe \(suffix)")],
         database: context.database
       )
@@ -180,7 +180,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
           "   ✅ Received push for '\(subscriptionID)' — "
             + "record \(notification.recordName ?? "?"), reason \(reason)"
         )
-        if notification.recordName != expectedRecordName {
+        if notification.recordName?.rawValue != expectedRecordName {
           print(
             "   ⚠️  Notification record '\(notification.recordName ?? "nil")' "
               + "≠ created '\(expectedRecordName)'."
@@ -206,7 +206,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
     if let recordName {
       try? await context.service.deleteRecord(
         recordType: MistDemoConfig.recordType,
-        recordName: recordName,
+        recordName: RecordName(rawValue: recordName),
         database: context.database
       )
     }

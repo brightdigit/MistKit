@@ -100,7 +100,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       desiredKeys: [],
       database: .public(.prefers(.serverToServer))
     )
-    let recordNames = Set(records.map(\.recordName))
+    let recordNames = Set(records.map(\.recordName.rawValue))
 
     Self.logger.debug("Found \(recordNames.count) existing \(recordType) records")
     return recordNames

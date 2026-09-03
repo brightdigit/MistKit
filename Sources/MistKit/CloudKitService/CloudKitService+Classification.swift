@@ -49,7 +49,7 @@ extension CloudKitService {
   /// Used as the first step of the pre-fetch + classify pattern for tracking
   /// creates vs updates in batch modify operations. Internally this calls
   /// `queryRecords(_:limit:database:)` and projects the results down to a
-  /// `Set<String>` of record names.
+  /// `Set<RecordName>` of record names.
   ///
   /// - Important: This issues a single `queryRecords` call. CloudKit caps a
   ///   single response at 200 records, so for larger record types you must
@@ -71,7 +71,7 @@ extension CloudKitService {
     limit: Int? = nil,
     zoneID: ZoneID? = nil,
     database: Database
-  ) async throws(CloudKitError) -> Set<String> {
+  ) async throws(CloudKitError) -> Set<RecordName> {
     let result: QueryResult = try await queryRecords(
       Query(recordType: recordType),
       limit: limit ?? Self.maxRecordsPerRequest,

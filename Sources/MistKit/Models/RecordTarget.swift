@@ -45,7 +45,7 @@ extension OperationFailure where Target == RecordTarget {
   ///
   /// A named alias for ``OperationFailure/identifier`` scoped to the
   /// record target, matching CloudKit's `recordName` wire field.
-  public var recordName: String { identifier }
+  public var recordName: RecordName { RecordName(rawValue: identifier) }
 
   internal init(from schema: Components.Schemas.RecordOperationFailure) {
     self.init(identifier: schema.value2.recordName, common: schema.value1)

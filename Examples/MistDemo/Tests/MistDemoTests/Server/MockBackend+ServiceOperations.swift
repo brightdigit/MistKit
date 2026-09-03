@@ -151,7 +151,7 @@
           receipt: "stub-receipt",
           downloadURL: nil
         ),
-        recordName: assignedName,
+        recordName: RecordName(assignedName),
         fieldName: fieldName
       )
     }

@@ -85,7 +85,7 @@ public struct LookupAllRecordsCommand: MistDemoCommand, OutputFormatting {
     FileHandle.standardError.write(Data(note.utf8))
 
     let results = try await client.lookupAllRecords(
-      recordNames: config.recordNames,
+      recordNames: config.recordNames.map(RecordName.init(rawValue:)),
       desiredKeys: config.fields,
       database: config.base.database,
       batchSize: config.batchSize

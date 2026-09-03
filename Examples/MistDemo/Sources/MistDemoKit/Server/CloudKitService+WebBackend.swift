@@ -61,7 +61,7 @@ extension CloudKitService: WebBackend {
   ) async throws -> RecordInfo {
     try await createRecord(
       recordType: recordType,
-      recordName: recordName,
+      recordName: recordName.map(RecordName.init(rawValue:)),
       fields: fields,
       zoneID: zone?.zoneID,
       database: database
@@ -78,7 +78,7 @@ extension CloudKitService: WebBackend {
   ) async throws -> RecordInfo {
     try await updateRecord(
       recordType: recordType,
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: fields,
       recordChangeTag: recordChangeTag,
       zoneID: zone?.zoneID,
@@ -95,7 +95,7 @@ extension CloudKitService: WebBackend {
   ) async throws {
     try await deleteRecord(
       recordType: recordType,
-      recordName: recordName,
+      recordName: RecordName(recordName),
       recordChangeTag: recordChangeTag,
       zoneID: zone?.zoneID,
       database: database
@@ -176,9 +176,9 @@ extension CloudKitService: WebBackend {
     database: MistKit.Database
   ) async throws -> RecordInfo {
     try await rereferenceAsset(
-      fromRecord: sourceRecordName,
+      fromRecord: RecordName(sourceRecordName),
       field: assetField,
-      toRecord: targetRecordName,
+      toRecord: RecordName(targetRecordName),
       field: targetAssetField,
       database: database
     )
@@ -196,7 +196,7 @@ extension CloudKitService: WebBackend {
       data: data,
       recordType: recordType,
       fieldName: fieldName,
-      recordName: recordName,
+      recordName: recordName.map(RecordName.init(rawValue:)),
       zoneID: zone?.zoneID,
       database: database
     )

@@ -35,6 +35,10 @@ public import MistKit
 // MARK: - CloudKitRecord Conformance
 
 extension XcodeVersionRecord: @retroactive CloudKitRecord {
+  @_implements(CloudKitRecord, recordName)
+  public var cloudKitRecordName: RecordName {
+    RecordName(rawValue: recordName)
+  }
   public static var cloudKitRecordType: String { "XcodeVersion" }
 
   public static func from(recordInfo: RecordInfo) -> Self? {
@@ -52,8 +56,9 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
       downloadURL: recordInfo.fields["downloadURL"]?.urlValue,
       fileSize: recordInfo.fields["fileSize"]?.intValue,
       isPrerelease: recordInfo.fields["isPrerelease"]?.boolValue ?? false,
-      minimumMacOS: recordInfo.fields["minimumMacOS"]?.referenceValue?.recordName,
-      includedSwiftVersion: recordInfo.fields["includedSwiftVersion"]?.referenceValue?.recordName,
+      minimumMacOS: recordInfo.fields["minimumMacOS"]?.referenceValue?.recordName.rawValue,
+      includedSwiftVersion: recordInfo.fields["includedSwiftVersion"]?.referenceValue?.recordName
+        .rawValue,
       sdkVersions: recordInfo.fields["sdkVersions"]?.stringValue,
       notes: recordInfo.fields["notes"]?.stringValue
     )
@@ -93,7 +98,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
     if let minimumMacOS {
       fields["minimumMacOS"] = .reference(
         Reference(
-          recordName: minimumMacOS,
+          recordName: RecordName(minimumMacOS),
           action: nil
         )
       )
@@ -102,7 +107,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
     if let includedSwiftVersion {
       fields["includedSwiftVersion"] = .reference(
         Reference(
-          recordName: includedSwiftVersion,
+          recordName: RecordName(includedSwiftVersion),
           action: nil
         )
       )

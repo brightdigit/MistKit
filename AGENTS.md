@@ -257,6 +257,7 @@ The `users/lookup/email` and `users/lookup/id` primitives (`lookupUsersByEmail` 
 In MistDemo, integration runs targeting these endpoints use `PhaseContext.userContextService` (a public+web-auth `CloudKitService`) which is built from `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` regardless of the primary `--database` selection. The `DatabaseConfiguration` / `AuthenticationCredentials` types in `Examples/MistDemo/Sources/MistDemoKit/Configuration/` enforce valid database+auth combinations at construction time.
 
 **Result Types (Sources/MistKit/Models/ and Sources/MistKit/Models/Zones/):**
+- `RecordName` — string-backed struct for a record's identity within a zone (UUID or custom string). Encodes as a JSON string. Not a `typealias` (that would not distinguish record IDs from owner/zone names) and not an enum (the set of names is open). Distinct from `UserRecordName`.
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
 - `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool` *(deprecated `zones/changes`; `syncToken` rides the wire as `metaSyncToken` — see #430 above)*

@@ -62,7 +62,7 @@ extension CloudKitService {
   /// - Throws: ``CloudKitError``.
   public func createShare(
     rootRecordType: String,
-    rootRecordName: String? = nil,
+    rootRecordName: RecordName? = nil,
     rootFields: [String: FieldValue] = [:],
     zoneID: ZoneID,
     publicPermission: SharePermission = .none,
@@ -73,7 +73,7 @@ extension CloudKitService {
       // Pre-assign the root name so the share step can target it even if the
       // caller omitted `rootRecordName`.
       let resolvedRootName =
-        rootRecordName ?? "mistkit-share-root-\(UUID().uuidString.lowercased())"
+        rootRecordName ?? RecordName(rawValue: "mistkit-share-root-\(UUID().uuidString.lowercased())")
       let (rootRecord, rootChangeTag) = try await createShareRoot(
         recordType: rootRecordType,
         recordName: resolvedRootName,
@@ -100,7 +100,7 @@ extension CloudKitService {
 
   private func createShareRoot(
     recordType: String,
-    recordName: String,
+    recordName: RecordName,
     fields: [String: FieldValue],
     zoneID: ZoneID,
     database: Database
@@ -178,7 +178,7 @@ extension CloudKitService {
       shareURL: CreatedShare.shareURL(forShortGUID: share.shortGUID),
       share: share,
       rootRecord: rootRecord,
-      shareRecordName: shareRecordName
+      shareRecordName: RecordName(rawValue: shareRecordName)
     )
   }
 }

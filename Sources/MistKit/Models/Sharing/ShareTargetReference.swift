@@ -33,7 +33,7 @@ internal import MistKitOpenAPI
 /// record (CloudKit's `forRecord` key).
 public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
   /// The record name of the shared root record.
-  public let recordName: String
+  public let recordName: RecordName
   /// Optional change tag for optimistic concurrency when creating the share.
   public let recordChangeTag: String?
 
@@ -41,7 +41,7 @@ public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
   /// - Parameters:
   ///   - recordName: The record name of the shared root record.
   ///   - recordChangeTag: Optional change tag for the root record.
-  public init(recordName: String, recordChangeTag: String? = nil) {
+  public init(recordName: RecordName, recordChangeTag: String? = nil) {
     self.recordName = recordName
     self.recordChangeTag = recordChangeTag
   }
@@ -50,7 +50,7 @@ public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
 extension Components.Schemas.ShareTargetReference {
   internal init(from reference: ShareTargetReference) {
     self.init(
-      recordName: reference.recordName,
+      recordName: reference.recordName.rawValue,
       recordChangeTag: reference.recordChangeTag
     )
   }

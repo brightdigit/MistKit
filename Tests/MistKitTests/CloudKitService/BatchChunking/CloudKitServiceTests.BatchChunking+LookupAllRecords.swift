@@ -57,7 +57,7 @@ extension CloudKitServiceTests.BatchChunking {
       let names = (0..<5).map { "rec-\($0)" }
 
       let results = try await service.lookupAllRecords(
-        recordNames: names,
+        recordNames: names.map(RecordName.init(rawValue:)),
         database: .private
       )
 
@@ -83,7 +83,7 @@ extension CloudKitServiceTests.BatchChunking {
       let names = (0..<450).map { "rec-\($0)" }
 
       let results = try await service.lookupAllRecords(
-        recordNames: names,
+        recordNames: names.map(RecordName.init(rawValue:)),
         database: .private
       )
 
@@ -110,7 +110,7 @@ extension CloudKitServiceTests.BatchChunking {
       let names = (0..<5).map { "rec-\($0)" }
 
       _ = try await service.lookupAllRecords(
-        recordNames: names,
+        recordNames: names.map(RecordName.init(rawValue:)),
         database: .private,
         batchSize: 2
       )
@@ -132,7 +132,7 @@ extension CloudKitServiceTests.BatchChunking {
       let names = (0..<3).map { "rec-\($0)" }
 
       _ = try await service.lookupAllRecords(
-        recordNames: names,
+        recordNames: names.map(RecordName.init(rawValue:)),
         database: .private,
         batchSize: 0
       )
@@ -154,7 +154,7 @@ extension CloudKitServiceTests.BatchChunking {
       let names = (0..<250).map { "rec-\($0)" }
 
       _ = try await service.lookupAllRecords(
-        recordNames: names,
+        recordNames: names.map(RecordName.init(rawValue:)),
         database: .private,
         batchSize: 9_999
       )
@@ -206,7 +206,7 @@ extension CloudKitServiceTests.BatchChunking {
 
       await #expect(throws: CloudKitError.self) {
         _ = try await service.lookupAllRecords(
-          recordNames: names,
+          recordNames: names.map(RecordName.init(rawValue:)),
           database: .private
         )
       }

@@ -39,7 +39,7 @@ extension CloudKitService {
     database: MistKit.Database
   ) async throws -> [RecordInfo] {
     let results = try await lookupRecords(
-      recordNames: recordNames,
+      recordNames: recordNames.map(RecordName.init(rawValue:)),
       desiredKeys: nil,
       database: database
     )

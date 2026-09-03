@@ -35,7 +35,7 @@ internal import Foundation
 internal struct TestRecord: CloudKitRecord {
   internal static var cloudKitRecordType: String { "TestRecord" }
 
-  internal var recordName: String
+  internal var recordName: RecordName
   internal var name: String
   internal var count: Int
   internal var isActive: Bool

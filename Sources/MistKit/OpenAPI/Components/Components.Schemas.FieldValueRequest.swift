@@ -105,7 +105,7 @@ extension Components.Schemas.FieldValueRequest {
       action = nil
     }
     let referenceValue = Components.Schemas.ReferenceValue(
-      recordName: reference.recordName,
+      recordName: reference.recordName.rawValue,
       action: action
     )
     self.init(value: .ReferenceValue(referenceValue))

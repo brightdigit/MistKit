@@ -50,7 +50,7 @@ internal struct QueryRecordsPhase: IntegrationPhase {
       )
       print("✅ Queried \(records.count) record(s) of type '\(MistDemoConfig.recordType)'")
       if context.verbose {
-        let ours = records.filter { input.names.contains($0.recordName) }
+        let ours = records.filter { input.names.contains($0.recordName.rawValue) }
         print("   Found \(ours.count) of our \(input.names.count) test records")
       }
     } catch {

@@ -58,7 +58,7 @@ extension Article: CloudKitConvertible {
     let tags = record.stringArray(forKey: "tags")
 
     self.init(
-      recordName: record.recordName,
+      recordName: record.recordName.rawValue,
       recordChangeTag: record.recordChangeTag,
       feedRecordName: feedRecordName,
       guid: guid,

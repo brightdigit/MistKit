@@ -41,7 +41,7 @@ internal struct BatchSyncResultTests {
     type: String = "Article"
   ) -> RecordInfo {
     RecordInfo(
-      recordName: name,
+      recordName: RecordName(name),
       recordType: type,
       recordChangeTag: nil,
       fields: [:]

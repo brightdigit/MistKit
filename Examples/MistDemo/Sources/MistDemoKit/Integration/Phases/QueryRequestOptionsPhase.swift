@@ -63,7 +63,7 @@ internal struct QueryRequestOptionsPhase: IntegrationPhase {
       )
       print("✅ Queried \(result.records.count) record(s) with request options")
 
-      let ours = result.records.filter { input.names.contains($0.recordName) }
+      let ours = result.records.filter { input.names.contains($0.recordName.rawValue) }
       guard let sample = ours.first else {
         print("   ⚠️  None of our test records came back — skipping desiredKeys assertion")
         return NoState()

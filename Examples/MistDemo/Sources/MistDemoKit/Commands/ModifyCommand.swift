@@ -75,7 +75,7 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
       ModifyResultRow(
         operation: "applied",
         recordType: record.recordType,
-        recordName: record.recordName,
+        recordName: record.recordName.rawValue,
         recordChangeTag: record.recordChangeTag
       )
     }

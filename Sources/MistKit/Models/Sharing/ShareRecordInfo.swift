@@ -53,7 +53,7 @@ public struct ShareRecordInfo: Codable, Sendable {
   /// The zone holding the shared record.
   public let zoneID: ZoneID?
   /// The name of the root record that was shared.
-  public let rootRecordName: String?
+  public let rootRecordName: RecordName?
   /// The shared root record, when ``ShortGUIDDictionary/shouldFetchRootRecord``
   /// asked for it.
   public let rootRecord: RecordInfo?
@@ -90,7 +90,7 @@ public struct ShareRecordInfo: Codable, Sendable {
     } else {
       self.zoneID = nil
     }
-    self.rootRecordName = schema.rootRecordName
+    self.rootRecordName = schema.rootRecordName.map(RecordName.init(rawValue:))
     if let rootRecord = schema.rootRecord {
       self.rootRecord = try RecordInfo(from: rootRecord)
     } else {
@@ -139,7 +139,7 @@ public struct ShareRecordInfo: Codable, Sendable {
     databaseScope: ShareDatabaseScope? = nil,
     environment: Environment? = nil,
     zoneID: ZoneID? = nil,
-    rootRecordName: String? = nil,
+    rootRecordName: RecordName? = nil,
     rootRecord: RecordInfo? = nil,
     share: RecordInfo? = nil,
     shareInfo: ShareInfo? = nil,

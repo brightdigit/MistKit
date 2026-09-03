@@ -42,7 +42,7 @@ internal import MistKitOpenAPI
 /// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
   /// The record name
-  public let recordName: String
+  public let recordName: RecordName
   /// The record type, or `nil` for tombstones and other typeless responses
   public let recordType: String?
   /// The record change tag for optimistic locking
@@ -61,7 +61,7 @@ public struct RecordInfo: Codable, Sendable {
     guard let recordName = record.recordName else {
       try ConversionError.recordMissingRecordName.reportAndThrow()
     }
-    self.recordName = recordName
+    self.recordName = RecordName(rawValue: recordName)
     self.recordType = record.recordType
     self.recordChangeTag = record.recordChangeTag
     if let created = record.created {
@@ -102,7 +102,7 @@ public struct RecordInfo: Codable, Sendable {
   ///   - modified: Optional timestamp when the record was last modified
   ///   - deleted: Whether the record has been deleted
   public init(
-    recordName: String,
+    recordName: RecordName,
     recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],

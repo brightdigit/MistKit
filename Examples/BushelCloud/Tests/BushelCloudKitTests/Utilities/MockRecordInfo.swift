@@ -44,7 +44,7 @@ public enum MockRecordInfo: Sendable {
     fields: [String: FieldValue]
   ) -> RecordInfo {
     RecordInfo(
-      recordName: recordName,
+      recordName: RecordName(recordName),
       recordType: recordType,
       recordChangeTag: nil,
       fields: fields

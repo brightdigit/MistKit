@@ -231,16 +231,16 @@ public struct SyncEngine: Sendable {
 
       // Classify operations for each type
       let swiftClassification = OperationClassification(
-        proposedRecordNames: fetchResult.swiftVersions.map(\.recordName),
-        existingRecordNames: swiftNames
+        proposedRecordNames: fetchResult.swiftVersions.map { RecordName($0.recordName) },
+        existingRecordNames: Set(swiftNames.map(RecordName.init(rawValue:)))
       )
       let restoreClassification = OperationClassification(
-        proposedRecordNames: fetchResult.restoreImages.map(\.recordName),
-        existingRecordNames: restoreNames
+        proposedRecordNames: fetchResult.restoreImages.map { RecordName($0.recordName) },
+        existingRecordNames: Set(restoreNames.map(RecordName.init(rawValue:)))
       )
       let xcodeClassification = OperationClassification(
-        proposedRecordNames: fetchResult.xcodeVersions.map(\.recordName),
-        existingRecordNames: xcodeNames
+        proposedRecordNames: fetchResult.xcodeVersions.map { RecordName($0.recordName) },
+        existingRecordNames: Set(xcodeNames.map(RecordName.init(rawValue:)))
       )
 
       Self.logger.debug(
@@ -252,15 +252,24 @@ public struct SyncEngine: Sendable {
       // XcodeVersion last (references the other two)
       let swiftResult = try await syncRecords(
         fetchResult.swiftVersions,
-        classification: swiftClassification
+        classification: swiftClassification,
+        recordType: SwiftVersionRecord.cloudKitRecordType,
+        name: \.recordName,
+        fields: { $0.toCloudKitFields() }
       )
       let restoreResult = try await syncRecords(
         fetchResult.restoreImages,
-        classification: restoreClassification
+        classification: restoreClassification,
+        recordType: RestoreImageRecord.cloudKitRecordType,
+        name: \.recordName,
+        fields: { $0.toCloudKitFields() }
       )
       let xcodeResult = try await syncRecords(
         fetchResult.xcodeVersions,
-        classification: xcodeClassification
+        classification: xcodeClassification,
+        recordType: XcodeVersionRecord.cloudKitRecordType,
+        name: \.recordName,
+        fields: { $0.toCloudKitFields() }
       )
 
       print("\n" + String(repeating: "=", count: 60))
@@ -305,9 +314,12 @@ public struct SyncEngine: Sendable {
   ///   - records: Records to sync
   ///   - classification: Classification of operations as creates vs updates
   /// - Returns: Sync result for this record type
-  private func syncRecords<T: CloudKitRecord>(
+  private func syncRecords<T>(
     _ records: [T],
-    classification: OperationClassification
+    classification: OperationClassification,
+    recordType: String,
+    name: KeyPath<T, String>,
+    fields: (T) -> [String: FieldValue]
   ) async throws -> TypeSyncResult {
     guard !records.isEmpty else {
       return TypeSyncResult(created: 0, updated: 0, failed: 0, failedRecordNames: [])
@@ -316,15 +328,15 @@ public struct SyncEngine: Sendable {
     let operations = records.map { record in
       RecordOperation(
         operationType: .forceReplace,
-        recordType: T.cloudKitRecordType,
-        recordName: record.recordName,
-        fields: record.toCloudKitFields()
+        recordType: recordType,
+        recordName: RecordName(record[keyPath: name]),
+        fields: fields(record)
       )
     }
 
     return try await cloudKitService.executeBatchOperations(
       operations,
-      recordType: T.cloudKitRecordType,
+      recordType: recordType,
       classification: classification
     )
   }

@@ -60,7 +60,7 @@ public struct TableFormatter: OutputFormatter {
     let escaper = TableEscaper()
     var output = ""
 
-    output += "Record Name: \(escaper.escape(record.recordName))\n"
+    output += "Record Name: \(escaper.escape(record.recordName.rawValue))\n"
     output += "Record Type: \(escaper.escape(record.recordType ?? ""))\n"
 
     if !record.fields.isEmpty {

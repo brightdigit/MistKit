@@ -48,7 +48,7 @@ internal enum ExportCommand {
     let fields: [String: String]
 
     init(from recordInfo: RecordInfo) {
-      self.recordName = recordInfo.recordName
+      self.recordName = recordInfo.recordName.rawValue
       self.recordType = recordInfo.recordType
       self.fields = recordInfo.fields.mapValues { fieldValue in
         String(describing: fieldValue)

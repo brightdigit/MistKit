@@ -77,7 +77,7 @@ extension CloudKitService {
     data: Data,
     recordType: String,
     fieldName: String,
-    recordName: String? = nil,
+    recordName: RecordName? = nil,
     zoneID: ZoneID? = nil,
     using uploader: AssetUploader? = nil,
     database: Database
@@ -127,7 +127,7 @@ extension CloudKitService {
   public func requestAssetUploadURL(
     recordType: String,
     fieldName: String,
-    recordName: String? = nil,
+    recordName: RecordName? = nil,
     zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> AssetUploadToken {
@@ -135,7 +135,7 @@ extension CloudKitService {
       let tokenRequest =
         Operations.uploadAssets.Input.Body
         .jsonPayload.tokensPayloadPayload(
-          recordName: recordName,
+          recordName: recordName?.rawValue,
           recordType: recordType,
           fieldName: fieldName
         )

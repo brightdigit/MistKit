@@ -60,7 +60,7 @@ internal struct CreateRecordsPhase: IntegrationPhase {
       let recordName = "mistkit-test-\(UUID().uuidString.lowercased())"
       let record = try await context.service.createRecord(
         recordType: MistDemoConfig.recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: [
           "title": .string("Test Record \(recordIndex)"),
           "index": .int64(recordIndex),
@@ -69,7 +69,7 @@ internal struct CreateRecordsPhase: IntegrationPhase {
         ],
         database: context.database
       )
-      createdRecordNames.append(record.recordName)
+      createdRecordNames.append(record.recordName.rawValue)
       if context.verbose {
         print("   ✅ Created: \(record.recordName)")
       }

@@ -69,7 +69,7 @@ internal struct IncrementalSyncPhase: IntegrationPhase {
       }
 
       let changedRecords = incrementalResult.records.filter {
-        input.recordNames.contains($0.recordName)
+        input.recordNames.contains($0.recordName.rawValue)
       }
       print("   Found \(changedRecords.count) of our modified records")
 
