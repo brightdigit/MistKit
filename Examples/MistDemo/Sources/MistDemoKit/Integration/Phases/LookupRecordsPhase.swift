@@ -75,7 +75,7 @@ internal struct LookupRecordsPhase: IntegrationPhase {
     }
 
     let results = try await context.service.lookupRecords(
-      recordNames: lookupNames,
+      recordNames: lookupNames.map(RecordName.init(rawValue:)),
       database: context.database
     )
     let records = results.compactMap { result in

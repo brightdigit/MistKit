@@ -74,7 +74,7 @@ public protocol CloudKitRecord: Codable, Sendable {
   ///
   /// This is typically computed from the model's primary key or unique identifier.
   /// For example: "RestoreImage-23C71" or "XcodeVersion-15.2"
-  var recordName: String { get }
+  var recordName: RecordName { get }
 
   /// Parse a CloudKit record into a model instance
   ///

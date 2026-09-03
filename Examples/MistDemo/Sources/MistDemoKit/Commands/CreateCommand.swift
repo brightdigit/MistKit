@@ -83,7 +83,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
       // NOTE: Zone support requires enhancements to CloudKitService.createRecord method
       let recordInfo = try await client.createRecord(
         recordType: config.recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: cloudKitFields,
         // Zone: config.zone - to be added when CloudKitService supports it
         database: config.base.database

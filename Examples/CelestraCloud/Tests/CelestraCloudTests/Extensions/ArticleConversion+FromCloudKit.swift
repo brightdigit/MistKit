@@ -161,7 +161,7 @@ extension ArticleConversion {
 
       // Create a record
       let record = RecordInfo(
-        recordName: originalArticle.recordName ?? "roundtrip-article",
+        recordName: RecordName(originalArticle.recordName ?? "roundtrip-article"),
         recordType: "Article",
         recordChangeTag: originalArticle.recordChangeTag,
         fields: fields

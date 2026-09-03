@@ -109,7 +109,7 @@ public struct DemoInFilterCommand: MistDemoCommand {
         ],
         database: config.database
       )
-      createdNames.append(record.recordName)
+      createdNames.append(record.recordName.rawValue)
       print("  Created \(record.recordName) (index=\(idx))")
     }
     return createdNames
@@ -127,7 +127,7 @@ public struct DemoInFilterCommand: MistDemoCommand {
       database: config.database
     ).records
     let visible = allRecords.filter {
-      createdNames.contains($0.recordName)
+      createdNames.contains($0.recordName.rawValue)
     }
     print("  Visible: \(visible.count)")
     if visible.count < 3 {
@@ -145,7 +145,7 @@ public struct DemoInFilterCommand: MistDemoCommand {
     ).records
 
     let matching = results.filter {
-      createdNames.contains($0.recordName)
+      createdNames.contains($0.recordName.rawValue)
     }
     print("Matching demo records: \(matching.count) (expected 2)")
 
@@ -166,7 +166,7 @@ public struct DemoInFilterCommand: MistDemoCommand {
       let operation = RecordOperation(
         operationType: .forceDelete,
         recordType: recordType,
-        recordName: name
+        recordName: RecordName(name)
       )
       _ = try await client.modifyRecords(
         [operation],

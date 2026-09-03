@@ -36,12 +36,12 @@ public struct Reference: Codable, Equatable, Sendable {
   }
 
   /// The record name being referenced
-  public let recordName: String
+  public let recordName: RecordName
   /// The action to take (DELETE_SELF, NONE, or nil)
   public let action: Action?
 
   /// Initialize a reference value
-  public init(recordName: String, action: Action? = nil) {
+  public init(recordName: RecordName, action: Action? = nil) {
     self.recordName = recordName
     self.action = action
   }

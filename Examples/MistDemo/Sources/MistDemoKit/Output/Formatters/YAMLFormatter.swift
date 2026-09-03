@@ -60,7 +60,7 @@ public struct YAMLFormatter: OutputFormatter {
   private func formatRecord(_ record: RecordInfo, escaper: YAMLEscaper) -> String {
     var output = ""
 
-    output += "recordName: \(escaper.escape(record.recordName))\n"
+    output += "recordName: \(escaper.escape(record.recordName.rawValue))\n"
     output += "recordType: \(escaper.escape(record.recordType ?? ""))\n"
 
     if !record.fields.isEmpty {

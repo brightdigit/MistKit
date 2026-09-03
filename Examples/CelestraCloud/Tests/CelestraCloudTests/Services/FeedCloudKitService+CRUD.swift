@@ -44,7 +44,7 @@ extension FeedCloudKitService {
       fields: [String: FieldValue] = [:]
     ) -> RecordInfo {
       RecordInfo(
-        recordName: recordName,
+        recordName: RecordName(recordName),
         recordType: "Feed",
         recordChangeTag: "tag-123",
         fields: fields

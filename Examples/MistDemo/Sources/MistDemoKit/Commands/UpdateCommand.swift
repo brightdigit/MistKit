@@ -106,7 +106,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
 
       let recordInfo = try await client.updateRecord(
         recordType: config.recordType,
-        recordName: config.recordName,
+        recordName: RecordName(config.recordName),
         fields: cloudKitFields,
         recordChangeTag: effectiveChangeTag,
         database: config.base.database

@@ -98,7 +98,7 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
     do {
       let created = try await context.service.createShare(
         rootRecordType: MistDemoConfig.recordType,
-        rootRecordName: rootRecordName,
+        rootRecordName: RecordName(rootRecordName),
         rootFields: [
           "title": .string("Share roundtrip"),
           "index": .int64(0),
@@ -164,7 +164,7 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
         sharer: context.service,
         database: context.database,
         zoneID: zoneID,
-        rootRecordName: rootRecordName,
+        rootRecordName: RecordName(rootRecordName),
         shareRecordName: nil,
         verbose: context.verbose
       )
@@ -178,8 +178,8 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
     sharer: CloudKitService,
     database: MistKit.Database,
     zoneID: ZoneID,
-    rootRecordName: String,
-    shareRecordName: String?,
+    rootRecordName: RecordName,
+    shareRecordName: RecordName?,
     verbose: Bool
   ) async throws {
     var ops = [

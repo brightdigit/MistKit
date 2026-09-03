@@ -64,7 +64,7 @@ public struct CSVFormatter: OutputFormatter {
     output += "Field,Value\n"
 
     // Basic fields
-    output += "recordName,\(escaper.escape(record.recordName))\n"
+    output += "recordName,\(escaper.escape(record.recordName.rawValue))\n"
     output += "recordType,\(escaper.escape(record.recordType ?? ""))\n"
 
     // Custom fields

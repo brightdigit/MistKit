@@ -42,7 +42,7 @@ extension CloudKitService {
 
     let operation = RecordOperation.create(
       recordType: "Feed",
-      recordName: UUID().uuidString,
+      recordName: RecordName(UUID().uuidString),
       fields: feed.toFieldsDict()
     )
     let results = try await self.modifyRecords([operation])
@@ -58,7 +58,7 @@ extension CloudKitService {
 
     let operation = RecordOperation.update(
       recordType: "Feed",
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: feed.toFieldsDict(),
       recordChangeTag: feed.recordChangeTag
     )

@@ -80,7 +80,7 @@ public struct ModifyOperationInput: Codable, Sendable {
     case .create:
       return RecordOperation.create(
         recordType: recordType,
-        recordName: recordName,
+        recordName: recordName.map(RecordName.init(rawValue:)),
         fields: cloudKitFields
       )
     case .update:
@@ -92,7 +92,7 @@ public struct ModifyOperationInput: Codable, Sendable {
       }
       return RecordOperation.update(
         recordType: recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         fields: cloudKitFields,
         recordChangeTag: recordChangeTag
       )
@@ -105,7 +105,7 @@ public struct ModifyOperationInput: Codable, Sendable {
       }
       return RecordOperation.delete(
         recordType: recordType,
-        recordName: recordName,
+        recordName: RecordName(recordName),
         recordChangeTag: recordChangeTag
       )
     }

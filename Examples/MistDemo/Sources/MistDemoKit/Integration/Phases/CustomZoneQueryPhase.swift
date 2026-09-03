@@ -80,7 +80,7 @@ internal struct CustomZoneQueryPhase: IntegrationPhase {
           RecordOperation(
             operationType: .forceUpdate,
             recordType: MistDemoConfig.recordType,
-            recordName: recordName1,
+            recordName: RecordName(recordName1),
             fields: [
               "title": .string("Zone query 1"),
               "index": .int64(1),
@@ -89,7 +89,7 @@ internal struct CustomZoneQueryPhase: IntegrationPhase {
           RecordOperation(
             operationType: .forceUpdate,
             recordType: MistDemoConfig.recordType,
-            recordName: recordName2,
+            recordName: RecordName(recordName2),
             fields: [
               "title": .string("Zone query 2"),
               "index": .int64(2),
@@ -144,7 +144,7 @@ internal struct CustomZoneQueryPhase: IntegrationPhase {
           zoneID: .defaultZone,
           database: context.database
         )
-        let defaultNames = Set(defaultResult.records.map(\.recordName))
+        let defaultNames = Set(defaultResult.records.map(\.recordName.rawValue))
         let leaked = expectedNames.intersection(defaultNames)
         guard leaked.isEmpty else {
           try await cleanup(zoneName: zoneName, context: context)
@@ -230,7 +230,7 @@ internal struct CustomZoneQueryPhase: IntegrationPhase {
         zoneID: zoneID,
         database: context.database
       )
-      lastFound = Set(result.records.map(\.recordName))
+      lastFound = Set(result.records.map(\.recordName.rawValue))
       if expectedNames.isSubset(of: lastFound) {
         return lastFound
       }

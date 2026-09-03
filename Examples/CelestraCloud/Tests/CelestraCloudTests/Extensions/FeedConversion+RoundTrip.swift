@@ -73,7 +73,7 @@ extension FeedConversion {
 
       // Create a record
       let record = RecordInfo(
-        recordName: originalFeed.recordName ?? "round-trip",
+        recordName: RecordName(originalFeed.recordName ?? "round-trip"),
         recordType: "Feed",
         recordChangeTag: originalFeed.recordChangeTag,
         fields: fields

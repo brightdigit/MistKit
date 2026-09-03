@@ -35,6 +35,10 @@ public import MistKit
 // MARK: - CloudKitRecord Conformance
 
 extension RestoreImageRecord: @retroactive CloudKitRecord {
+  @_implements(CloudKitRecord, recordName)
+  public var cloudKitRecordName: RecordName {
+    RecordName(rawValue: recordName)
+  }
   public static var cloudKitRecordType: String { "RestoreImage" }
 
   public static func from(recordInfo: RecordInfo) -> Self? {

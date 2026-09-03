@@ -166,7 +166,7 @@ internal actor MockCloudKitService: RecordManaging {
 
   private func createRecordInfo(from operation: RecordOperation) -> RecordInfo {
     RecordInfo(
-      recordName: operation.recordName ?? UUID().uuidString,
+      recordName: operation.recordName ?? RecordName(UUID().uuidString),
       recordType: operation.recordType,
       recordChangeTag: UUID().uuidString,
       fields: operation.fields

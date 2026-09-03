@@ -77,7 +77,7 @@ extension FieldValue {
       Issue.record("Expected .reference, got \(self)")
       return
     }
-    #expect(ref.recordName == expectedRecordName)
+    #expect(ref.recordName.rawValue == expectedRecordName)
   }
 
   /// Asserts that this FieldValue is a date (does not validate the exact value)

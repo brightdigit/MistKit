@@ -38,13 +38,13 @@ public struct AssetUploadReceipt: Codable, Sendable {
   public let asset: Asset
 
   /// The record name this asset is associated with
-  public let recordName: String
+  public let recordName: RecordName
 
   /// The field name this asset should be assigned to
   public let fieldName: String
 
   /// Initialize an asset upload receipt
-  public init(asset: Asset, recordName: String, fieldName: String) {
+  public init(asset: Asset, recordName: RecordName, fieldName: String) {
     self.asset = asset
     self.recordName = recordName
     self.fieldName = fieldName

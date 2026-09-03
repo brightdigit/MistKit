@@ -47,7 +47,7 @@
       return shortGUIDs.map { guid in
         ShareRecordInfo(
           shortGUID: ShortGUIDDictionary(value: guid),
-          rootRecordName: "stub-root-\(guid)",
+          rootRecordName: RecordName("stub-root-\(guid)"),
           participantPermission: .readWrite,
           participantStatus: .accepted
         )
@@ -68,7 +68,7 @@
       return shortGUIDs.map { guid in
         ShareRecordInfo(
           shortGUID: ShortGUIDDictionary(value: guid),
-          rootRecordName: "stub-root-\(guid)",
+          rootRecordName: RecordName("stub-root-\(guid)"),
           participantPermission: .readWrite,
           participantStatus: .accepted
         )

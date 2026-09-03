@@ -61,7 +61,7 @@ extension Components.Schemas.RecordOperation {
     self.init(
       operationType: apiOperationType,
       record: .init(
-        recordName: recordOperation.recordName,
+        recordName: recordOperation.recordName?.rawValue,
         recordType: recordOperation.recordType,
         recordChangeTag: recordOperation.recordChangeTag,
         fields: .init(additionalProperties: apiFields),

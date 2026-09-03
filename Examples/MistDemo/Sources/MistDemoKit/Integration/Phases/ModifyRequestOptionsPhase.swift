@@ -61,7 +61,7 @@ internal struct ModifyRequestOptionsPhase: IntegrationPhase {
     let operation = RecordOperation(
       operationType: .forceUpdate,
       recordType: MistDemoConfig.recordType,
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: ["title": .string("Request-options update")]
     )
 

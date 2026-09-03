@@ -57,7 +57,7 @@ internal struct InitialSyncPhase: IntegrationPhase {
         print("   More coming: \(initialResult.moreComing)")
       }
 
-      let ourRecords = initialResult.records.filter { input.names.contains($0.recordName) }
+      let ourRecords = initialResult.records.filter { input.names.contains($0.recordName.rawValue) }
       print("   Found \(ourRecords.count) of our test records")
 
       if ourRecords.count != input.names.count && context.verbose {

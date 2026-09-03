@@ -93,7 +93,7 @@ internal struct RereferenceAssetPhase: IntegrationPhase {
     let targetRecordName = "mistkit-test-\(UUID().uuidString.lowercased())"
     _ = try await context.service.createRecord(
       recordType: MistDemoConfig.recordType,
-      recordName: targetRecordName,
+      recordName: RecordName(targetRecordName),
       fields: [
         "title": .string("Rereference Target"),
         "index": .int64(0),
@@ -107,9 +107,9 @@ internal struct RereferenceAssetPhase: IntegrationPhase {
     }
 
     let updated = try await context.service.rereferenceAsset(
-      fromRecord: sourceRecordName,
+      fromRecord: RecordName(sourceRecordName),
       field: "image",
-      toRecord: targetRecordName,
+      toRecord: RecordName(targetRecordName),
       field: "image",
       database: context.database
     )

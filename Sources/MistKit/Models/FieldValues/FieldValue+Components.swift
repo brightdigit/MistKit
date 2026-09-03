@@ -95,7 +95,7 @@ extension FieldValue {
   internal init(
     referenceValue: Components.Schemas.ReferenceValue
   ) {
-    let recordName = referenceValue.recordName
+    let recordName = RecordName(rawValue: referenceValue.recordName)
     let action: Reference.Action?
     switch referenceValue.action {
     case .DELETE_SELF:

@@ -79,11 +79,11 @@ internal struct SharedZoneRoundtripPhase: IntegrationPhase {
       print("   Sharee: \(shareeIdentity.userRecordName)")
     }
 
-    var shareRecordName: String?
+    var shareRecordName: RecordName?
     do {
       let created = try await context.service.createShare(
         rootRecordType: MistDemoConfig.recordType,
-        rootRecordName: rootRecordName,
+        rootRecordName: RecordName(rootRecordName),
         rootFields: [
           "title": .string("Shared zone root"),
           "index": .int64(0),
@@ -181,7 +181,7 @@ internal struct SharedZoneRoundtripPhase: IntegrationPhase {
         operation: "fetchRecordZoneChanges (shared)"
       )
       let changeNames = ChangeTrackingVerification.recordNames(in: changeResult.changes)
-      if !changeNames.contains(sharedRootName) {
+      if !changeNames.contains(sharedRootName.rawValue) {
         throw IntegrationTestError.verificationFailed(
           "shared changes/zone missing root \(sharedRootName); found \(changeNames.sorted())"
         )
@@ -232,7 +232,7 @@ internal struct SharedZoneRoundtripPhase: IntegrationPhase {
         sharer: context.service,
         database: context.database,
         zoneID: privateZoneID,
-        rootRecordName: rootRecordName,
+        rootRecordName: RecordName(rootRecordName),
         shareRecordName: shareRecordName,
         extraRecordNames: [],
         verbose: context.verbose,
@@ -248,8 +248,8 @@ internal struct SharedZoneRoundtripPhase: IntegrationPhase {
     sharer: CloudKitService,
     database: MistKit.Database,
     zoneID: ZoneID,
-    rootRecordName: String,
-    shareRecordName: String?,
+    rootRecordName: RecordName,
+    shareRecordName: RecordName?,
     extraRecordNames: [String],
     verbose: Bool,
     skipCleanup: Bool
@@ -271,7 +271,7 @@ internal struct SharedZoneRoundtripPhase: IntegrationPhase {
         RecordOperation(
           operationType: .forceDelete,
           recordType: MistDemoConfig.recordType,
-          recordName: name
+          recordName: RecordName(name)
         )
       )
     }

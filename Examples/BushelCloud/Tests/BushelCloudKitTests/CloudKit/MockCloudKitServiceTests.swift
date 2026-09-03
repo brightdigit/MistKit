@@ -55,7 +55,7 @@ internal struct MockCloudKitServiceTests {
     let operation = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
-      recordName: "RestoreImage-\(record.buildNumber)",
+      recordName: RecordName("RestoreImage-\(record.buildNumber)"),
       fields: record.toCloudKitFields()
     )
 
@@ -76,7 +76,7 @@ internal struct MockCloudKitServiceTests {
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: initialRecord.toCloudKitFields()
     )
     try await service.executeBatchOperations([createOp])
@@ -100,7 +100,7 @@ internal struct MockCloudKitServiceTests {
     let replaceOp = RecordOperation(
       operationType: .forceReplace,
       recordType: "RestoreImage",
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: updatedRecord.toCloudKitFields()
     )
     try await service.executeBatchOperations([replaceOp])
@@ -127,7 +127,7 @@ internal struct MockCloudKitServiceTests {
     let createOp = RecordOperation(
       operationType: .create,
       recordType: "RestoreImage",
-      recordName: recordName,
+      recordName: RecordName(recordName),
       fields: record.toCloudKitFields()
     )
     try await service.executeBatchOperations([createOp])
@@ -136,7 +136,7 @@ internal struct MockCloudKitServiceTests {
     let deleteOp = RecordOperation(
       operationType: .delete,
       recordType: "RestoreImage",
-      recordName: recordName
+      recordName: RecordName(recordName)
     )
     try await service.executeBatchOperations([deleteOp])
 

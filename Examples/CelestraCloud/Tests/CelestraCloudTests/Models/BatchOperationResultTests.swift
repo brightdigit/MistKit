@@ -193,7 +193,7 @@ internal struct BatchOperationResultTests {
   private func createTestRecords(count: Int) -> [RecordInfo] {
     (0..<count).map { index in
       RecordInfo(
-        recordName: "record-\(index)",
+        recordName: RecordName("record-\(index)"),
         recordType: "Article",
         recordChangeTag: "tag-\(index)",
         fields: [

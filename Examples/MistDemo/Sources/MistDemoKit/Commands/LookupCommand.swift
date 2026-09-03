@@ -77,7 +77,7 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
       let client = try MistKitClientFactory.create(for: config.base)
 
       let results = try await client.lookupRecords(
-        recordNames: config.recordNames,
+        recordNames: config.recordNames.map(RecordName.init(rawValue:)),
         desiredKeys: config.fields,
         database: config.base.database
       )
@@ -88,7 +88,7 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
       }
 
       // Report missing names to stderr so a JSON/CSV/etc. stdout stream stays parseable
-      let foundNames = Set(records.map(\.recordName))
+      let foundNames = Set(records.map(\.recordName.rawValue))
       let missing = config.recordNames.filter { !foundNames.contains($0) }
       if !missing.isEmpty {
         let line =

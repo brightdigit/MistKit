@@ -35,6 +35,10 @@ public import MistKit
 // MARK: - CloudKitRecord Conformance
 
 extension SwiftVersionRecord: @retroactive CloudKitRecord {
+  @_implements(CloudKitRecord, recordName)
+  public var cloudKitRecordName: RecordName {
+    RecordName(rawValue: recordName)
+  }
   public static var cloudKitRecordType: String { "SwiftVersion" }
 
   public static func from(recordInfo: RecordInfo) -> Self? {

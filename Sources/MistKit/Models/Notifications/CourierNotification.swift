@@ -61,7 +61,7 @@ public struct CourierNotification: Sendable {
   /// `ck.qry.sid` — the subscription that fired.
   public let subscriptionID: String?
   /// `ck.qry.rid` — the record that changed.
-  public let recordName: String?
+  public let recordName: RecordName?
   /// `ck.qry.zid` — the zone the record lives in.
   public let zoneID: String?
   /// `ck.qry.fo` — why the subscription fired.
@@ -79,7 +79,7 @@ public struct CourierNotification: Sendable {
     self.notificationID = cloudKit?.nid
     self.containerIdentifier = cloudKit?.cid
     self.subscriptionID = query?.sid
-    self.recordName = query?.rid
+    self.recordName = query?.rid.map(RecordName.init(rawValue:))
     self.zoneID = query?.zid
     self.reason = query?.firesOn.flatMap(Reason.init(rawValue:))
     self.databaseScope = query?.dbs

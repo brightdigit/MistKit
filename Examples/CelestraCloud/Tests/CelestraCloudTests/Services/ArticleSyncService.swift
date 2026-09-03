@@ -64,7 +64,7 @@ extension ArticleSyncService {
       fields: [String: FieldValue] = [:]
     ) -> RecordInfo {
       RecordInfo(
-        recordName: recordName,
+        recordName: RecordName(recordName),
         recordType: "Article",
         recordChangeTag: "tag-123",
         fields: fields

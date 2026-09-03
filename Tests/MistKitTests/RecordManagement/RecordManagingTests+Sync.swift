@@ -41,7 +41,7 @@ extension RecordManagingTests {
 
       let records: [TestRecord] = (0..<50).map { index in
         TestRecord(
-          recordName: "test-\(index)",
+          recordName: RecordName("test-\(index)"),
           name: "Record \(index)",
           count: index,
           isActive: true,
@@ -70,7 +70,7 @@ extension RecordManagingTests {
       // Create 450 records to test batching (should be split into 200, 200, 50)
       let records: [TestRecord] = (0..<450).map { index in
         TestRecord(
-          recordName: "test-\(index)",
+          recordName: RecordName("test-\(index)"),
           name: "Record \(index)",
           count: index,
           isActive: true,
@@ -143,7 +143,7 @@ extension RecordManagingTests {
 
       let records: [TestRecord] = (0..<200).map { index in
         TestRecord(
-          recordName: "test-\(index)",
+          recordName: RecordName("test-\(index)"),
           name: "Record \(index)",
           count: index,
           isActive: true,
@@ -167,7 +167,7 @@ extension RecordManagingTests {
 
       let records: [TestRecord] = (0..<201).map { index in
         TestRecord(
-          recordName: "test-\(index)",
+          recordName: RecordName("test-\(index)"),
           name: "Record \(index)",
           count: index,
           isActive: true,

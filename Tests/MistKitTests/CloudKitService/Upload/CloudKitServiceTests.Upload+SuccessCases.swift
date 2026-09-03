@@ -52,7 +52,7 @@ extension CloudKitServiceTests.Upload {
         database: .public(.prefers(.serverToServer))
       )
 
-      #expect(result.recordName.isEmpty == false, "Result should have a record name")
+      #expect(result.recordName.rawValue.isEmpty == false, "Result should have a record name")
       #expect(result.fieldName == "file", "Result should have the field name from mock response")
       #expect(result.asset.receipt != nil, "Asset should have a receipt from CloudKit")
     }

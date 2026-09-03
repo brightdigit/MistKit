@@ -35,6 +35,10 @@ public import MistKit
 // MARK: - CloudKitRecord Conformance
 
 extension DataSourceMetadata: CloudKitRecord {
+  @_implements(CloudKitRecord, recordName)
+  public var cloudKitRecordName: RecordName {
+    RecordName(rawValue: recordName)
+  }
   public static var cloudKitRecordType: String { "DataSourceMetadata" }
 
   public static func from(recordInfo: RecordInfo) -> Self? {

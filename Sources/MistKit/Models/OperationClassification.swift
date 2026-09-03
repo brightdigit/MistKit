@@ -56,10 +56,10 @@ internal import Foundation
 /// ```
 public struct OperationClassification: Sendable, Equatable {
   /// Record names that are expected to be created (not present in CloudKit).
-  public let creates: Set<String>
+  public let creates: Set<RecordName>
 
   /// Record names that are expected to be updated (already present in CloudKit).
-  public let updates: Set<String>
+  public let updates: Set<RecordName>
 
   /// Build a classification by comparing proposed record names against existing ones.
   ///
@@ -72,11 +72,11 @@ public struct OperationClassification: Sendable, Equatable {
   ///   - existingRecordNames: Record names already present in CloudKit
   ///     (typically obtained via `fetchExistingRecordNames(recordType:)`).
   public init(
-    proposedRecordNames: [String],
-    existingRecordNames: Set<String>
+    proposedRecordNames: [RecordName],
+    existingRecordNames: Set<RecordName>
   ) {
-    var creates = Set<String>()
-    var updates = Set<String>()
+    var creates = Set<RecordName>()
+    var updates = Set<RecordName>()
 
     for recordName in proposedRecordNames {
       if existingRecordNames.contains(recordName) {
@@ -101,7 +101,7 @@ public struct OperationClassification: Sendable, Equatable {
   ///   - existingRecordNames: Record names already present in CloudKit.
   public init(
     operations: [RecordOperation],
-    existingRecordNames: Set<String>
+    existingRecordNames: Set<RecordName>
   ) {
     let proposedNames = operations.compactMap(\.recordName)
     self.init(
@@ -113,7 +113,7 @@ public struct OperationClassification: Sendable, Equatable {
   /// Direct initializer for tests and manual construction.
   ///
   /// Prefer the comparison-based initializers in production code.
-  internal init(creates: Set<String>, updates: Set<String>) {
+  internal init(creates: Set<RecordName>, updates: Set<RecordName>) {
     self.creates = creates
     self.updates = updates
   }

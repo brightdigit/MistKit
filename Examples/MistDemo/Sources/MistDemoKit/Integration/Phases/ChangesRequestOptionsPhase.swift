@@ -88,7 +88,7 @@ internal struct ChangesRequestOptionsPhase: IntegrationPhase {
       RecordOperation(
         operationType: .forceUpdate,
         recordType: MistDemoConfig.recordType,
-        recordName: "mistkit-test-\(UUID().uuidString.lowercased())",
+        recordName: RecordName("mistkit-test-\(UUID().uuidString.lowercased())"),
         fields: [
           "title": .string("Changes options \(index)"),
           "index": .int64(index),
