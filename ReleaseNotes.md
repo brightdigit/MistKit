@@ -1,5 +1,8 @@
 ## 1.0.0-beta.4
 
+### Field Values
+* Add VALIDATE to `Reference.Action` for CloudKit Web Services reference dictionaries (#464)
+
 ### Change Tracking
 * Add changes/database and changes/zone endpoints; deprecate zones/changes (#401, #47, #46) by @leogdion in https://github.com/brightdigit/MistKit/pull/429
 * modifyZones per-zone failures (#431) + zones/changes metaSyncToken (#430) by @leogdion in https://github.com/brightdigit/MistKit/pull/443

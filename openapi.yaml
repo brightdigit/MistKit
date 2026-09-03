@@ -1644,8 +1644,14 @@ components:
           description: The record name being referenced
         action:
           type: string
-          enum: [NONE, DELETE_SELF]
-          description: Action to perform on the referenced record
+          enum: [NONE, DELETE_SELF, VALIDATE]
+          description: >
+            Action to perform on the referenced record. NONE performs no action;
+            DELETE_SELF deletes this record when the referenced record is deleted;
+            VALIDATE verifies the target record exists before creating the
+            reference (create fails if missing). VALIDATE is a CloudKit Web
+            Services value; native CKRecord.ReferenceAction has only none and
+            deleteSelf.
 
     AssetValue:
       type: object

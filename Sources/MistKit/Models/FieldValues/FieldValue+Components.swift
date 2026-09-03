@@ -102,6 +102,8 @@ extension FieldValue {
       action = .deleteSelf
     case .NONE:
       action = Reference.Action.none
+    case .VALIDATE:
+      action = .validate
     case nil:
       action = nil
     }
