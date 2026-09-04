@@ -553,12 +553,22 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46) ✅
 - [x] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47) ✅
 - [x] [Clarify change-tracking endpoint coverage](https://github.com/brightdigit/MistKit/issues/401) ✅ *(deprecates `zones/changes` in favor of `changes/database`)*
+- [x] [Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146) ✅
+
+### v1.0.0-beta.5
+
+- [x] [Zone payloads: `deleted`, `zoneType`, and `ownerRecordName` decoding](https://github.com/brightdigit/MistKit/issues/444) ✅
+- [x] [Zone-aware writes (CRUD + assets)](https://github.com/brightdigit/MistKit/issues/454) ✅
+- [x] [Consume web auth token rotation (`X-Apple-CloudKit-Web-Auth-Token`)](https://github.com/brightdigit/MistKit/issues/462) ✅
+- [x] [Verify downloaded asset bytes against `Asset.fileChecksum`](https://github.com/brightdigit/MistKit/issues/466) ✅
+- [x] [Change `FieldValue.bytes` from `String` to `Data`](https://github.com/brightdigit/MistKit/issues/467) ✅
+- [x] [Add `VALIDATE` to `Reference.Action`](https://github.com/brightdigit/MistKit/issues/464) ✅
+- [x] [MistDemo web UI: `zoneName`/`zoneOwner` inputs on the query panel](https://github.com/brightdigit/MistKit/issues/438) ✅
 
 ### Backlog / Post-beta
 
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-- [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
 
 ### v1.0.0
 
