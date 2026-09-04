@@ -1,0 +1,42 @@
+name: Release Check
+
+# Verifies a release tag; deliberately does NOT create the GitHub release.
+# Publishing stays a human step (Scripts/release.sh publish) so that
+# `git push --tags` is not the point of no return.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]*'
+
+concurrency:
+  group: release-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # MistKit branches are v-prefixed; MistKit tags are not. A v-prefixed tag is
+  # always a mistake, and catching it here makes the convention self-enforcing.
+  reject-v-prefix:
+    name: Reject v-prefixed tag
+    if: startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail
+        run: |
+          echo "::error::MistKit tags do not use a 'v' prefix."
+          echo "Branches are v-prefixed (v${GITHUB_REF_NAME#v}); tags are not (${GITHUB_REF_NAME#v})."
+          echo "Delete this tag: git push origin --delete ${GITHUB_REF_NAME}"
+          exit 1
+
+  verify:
+    name: Verify release tag
+    if: ${{ !startsWith(github.ref_name, 'v') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Full history so the tag/main ancestry check can resolve.
+          fetch-depth: 0
+
+      - name: Verify tag
+        run: ./Scripts/release.sh verify-tag "${GITHUB_REF_NAME}"

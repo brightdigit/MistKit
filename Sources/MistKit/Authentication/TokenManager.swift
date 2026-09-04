@@ -46,4 +46,8 @@ public protocol TokenManager: Sendable {
   /// Returns the authenticator that should be used for the next request,
   /// or `nil` if no credentials are available.
   func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)?
+
+  /// Adopts a rotated web auth token from the `X-Apple-CloudKit-Web-Auth-Token`
+  /// response header.
+  func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError)
 }

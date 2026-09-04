@@ -59,7 +59,7 @@ extension CloudKitServiceTests.CreateZone {
       }
       let service = try CloudKitServiceTests.ModifyZones.makeService(zones: [
         [
-          "zoneID": ["zoneName": "Articles", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "Articles", "ownerRecordName": "_defaultOwner"],
           "serverErrorCode": "EXISTS",
           "reason": "Zone already exists",
         ]
@@ -68,7 +68,7 @@ extension CloudKitServiceTests.CreateZone {
       do {
         _ = try await service.createZone(zoneName: "Articles", database: .private)
         Issue.record("expected .zoneOperationFailed")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return

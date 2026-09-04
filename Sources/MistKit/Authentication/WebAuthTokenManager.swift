@@ -31,9 +31,9 @@ internal import Foundation
 
 /// Token manager for web authentication with API token + web auth token.
 /// Provides user-specific access to CloudKit Web Services.
-public final class WebAuthTokenManager: TokenManager, Sendable {
+public actor WebAuthTokenManager: TokenManager {
   internal let apiToken: String
-  internal let webAuthToken: String
+  internal var webAuthToken: String
 
   // MARK: - TokenManager Protocol
 
@@ -65,5 +65,11 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   /// Returns the web-auth authenticator, after validation.
   public func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: webAuthToken)
+  }
+
+  /// Adopts a rotated web auth token from a CloudKit response header.
+  public func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError) {
+    _ = try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: token)
+    self.webAuthToken = token
   }
 }

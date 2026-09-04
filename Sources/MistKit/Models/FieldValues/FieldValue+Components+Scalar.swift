@@ -49,13 +49,17 @@ extension FieldValue {
 
     /// The `FieldValue` first-match-wins inference produces for this payload. Lossy for the
     /// ambiguous scalars: a base64 BYTES reads back as `.string`, and a whole-number
-    /// TIMESTAMP reads back as `.int64`.
+    /// TIMESTAMP reads back as `.int64`. `BytesValue` stays a wire `String`; decode to
+    /// `Data` here, falling back to `.string` if the payload is not valid base64.
     fileprivate var inferred: FieldValue {
       switch self {
       case .string(let strVal):
         return .string(strVal)
       case .bytes(let bytesVal):
-        return .bytes(bytesVal)
+        if let data = Data(base64Encoded: bytesVal) {
+          return .bytes(data)
+        }
+        return .string(bytesVal)
       case .int64(let intVal):
         return .int64(Int(intVal))
       case .double(let dblVal):
@@ -84,7 +88,9 @@ extension FieldValue {
     /// `BytesValue` both arrive as JSON strings.
     fileprivate var text: String? {
       switch self {
-      case .string(let strVal), .bytes(let strVal):
+      case .string(let strVal):
+        return strVal
+      case .bytes(let strVal):
         return strVal
       case .int64, .double, .date:
         return nil
@@ -160,7 +166,8 @@ extension FieldValue {
       _ = try requireNumeric(value, fieldName: fieldName, declaredType: declared)
       return nil
     case .text(.bytes):
-      return .bytes(try requireString(value, fieldName: fieldName, declaredType: declared))
+      let string = try requireString(value, fieldName: fieldName, declaredType: declared)
+      return .bytes(try dataFromBase64(string, fieldName: fieldName, declaredType: declared))
     case .text(.string):
       // Validate the category, then defer to inference, which already produces `.string`.
       _ = try requireString(value, fieldName: fieldName, declaredType: declared)

@@ -116,16 +116,30 @@ internal struct FieldValueConvenienceTests {
     #expect(FieldValue.int64(1_704_067_200).dateValue == nil)
   }
 
-  @Test("bytesValue extracts String from .bytes case")
+  @Test("bytesValue extracts base64 String from .bytes case")
   internal func bytesValueExtraction() {
-    let base64 = "SGVsbG8gV29ybGQ="
-    let value = FieldValue.bytes(base64)
-    #expect(value.bytesValue == base64)
+    let data = Data("Hello World".utf8)
+    let value = FieldValue.bytes(data)
+    #expect(value.bytesValue == data.base64EncodedString())
   }
 
   @Test("bytesValue returns nil for non-bytes cases")
   internal func bytesValueReturnsNilForWrongType() {
     #expect(FieldValue.string("test").bytesValue == nil)
+  }
+
+  @Test("dataValue extracts Data from .bytes case")
+  internal func dataValueExtraction() {
+    let data = Data("Hello World".utf8)
+    let value = FieldValue.bytes(data)
+    #expect(value.dataValue == data)
+  }
+
+  @Test("dataValue returns nil for non-bytes cases including .string")
+  internal func dataValueReturnsNilForWrongType() {
+    #expect(FieldValue.string("test").dataValue == nil)
+    #expect(FieldValue.string("SGVsbG8gV29ybGQ=").dataValue == nil)
+    #expect(FieldValue.string("Chen").dataValue == nil)
   }
 
   @Test("locationValue extracts Location from .location case")

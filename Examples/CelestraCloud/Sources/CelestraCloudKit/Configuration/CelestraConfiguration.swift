@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+public import MistKitConfiguration
 
 /// Root configuration for Celestra application
 public struct CelestraConfiguration: Sendable {

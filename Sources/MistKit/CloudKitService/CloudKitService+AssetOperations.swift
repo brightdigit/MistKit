@@ -54,6 +54,8 @@ extension CloudKitService {
   ///   - recordType: The type of record that will use this asset
   ///   - fieldName: The name of the asset field
   ///   - recordName: Optional unique record name
+  ///   - zoneID: Optional zone ID (defaults to default zone). Must match the
+  ///     zone used on the subsequent create/update that attaches the asset.
   ///   - uploader: Optional custom upload handler
   ///   - database: The CloudKit database scope to upload to (`.public`, `.private`, `.shared`)
   /// - Returns: AssetUploadReceipt containing the upload result
@@ -76,6 +78,7 @@ extension CloudKitService {
     recordType: String,
     fieldName: String,
     recordName: String? = nil,
+    zoneID: ZoneID? = nil,
     using uploader: AssetUploader? = nil,
     database: Database
   ) async throws(CloudKitError) -> AssetUploadReceipt {
@@ -84,6 +87,7 @@ extension CloudKitService {
         recordType: recordType,
         fieldName: fieldName,
         recordName: recordName,
+        zoneID: zoneID,
         database: database
       )
 

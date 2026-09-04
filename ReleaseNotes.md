@@ -1,3 +1,17 @@
+## Unreleased
+
+* Represent `FieldValue.bytes` as `Data` instead of a base64 `String` (#467)
+* Verify downloaded asset bytes against `fileChecksum`, and add `Asset.download(using:)` that refuses unverified data (#466)
+* Add `VALIDATE` to `Reference.Action` for CloudKit Web Services reference dictionaries (#464)
+* Consume rotated web auth tokens from the `X-Apple-CloudKit-Web-Auth-Token` response header via a new `TokenManager.didReceiveRotatedWebAuthToken(_:)` requirement, defaulted to a no-op so existing conformances keep compiling (#462, #463)
+* Model the zone payload fields confirmed live in #444: `ZoneInfo.zoneType` (a closed `ZoneType` enum that throws `ConversionError.unrecognizedZoneType` on unknown wire values) and `ZoneInfo.deleted`, so change feeds surface tombstones (#444)
+* Fix `ownerRecordName` never decoding on zone payloads — `ZoneID` read the wire key as `ownerName`, so shared-zone owners were always `nil` (#444)
+* Add an optional `zoneID:` parameter to `createRecord`, `updateRecord`, `deleteRecord`, and `uploadAssets`, so writes and asset uploads can target custom and shared zones (#454)
+* Add `CloudKitError.missingAssetDownloadURL`, `.missingAssetChecksum`, and `.assetChecksumMismatch` for the asset download path (#466)
+* Extract the shared CloudKit credential configuration glue into a separate `MistKitConfiguration` package and converge the examples on typed configuration keys (#455)
+* MistDemo: expose `zoneName`/`zoneOwner` on the web query panel and add zone-aware writes plus a live shared-zone round-trip phase (#438, #453, #454)
+* Add a repeatable release runbook, and address code review fixes, coverage, and lint tooling (#460, #461)
+
 ## 1.0.0-beta.4
 
 ### Change Tracking

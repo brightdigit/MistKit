@@ -45,7 +45,12 @@ extension OperationResult where Success == ZoneInfo, Target == ZoneTarget {
     case .ZoneFetchFailure(let failure):
       self = .failure(try ZoneOperationFailure(from: failure))
     case .DatabaseChangedZone(let zone):
-      self = .success(try ZoneInfo(fromZoneID: zone.zoneID))
+      self = .success(
+        try ZoneInfo(
+          fromZoneID: zone.zoneID,
+          deleted: zone.deleted
+        )
+      )
     }
   }
 

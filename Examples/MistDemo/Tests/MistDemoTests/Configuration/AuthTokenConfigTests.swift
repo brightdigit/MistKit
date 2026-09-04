@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Configuration
 internal import Foundation
 internal import MistKit
@@ -36,18 +38,10 @@ internal import Testing
 
 @Suite("AuthTokenConfig Tests")
 internal struct AuthTokenConfigTests {
-  private static func key(_ path: String) -> AbsoluteConfigKey {
-    AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
-  }
-
   private static func configuration(
-    values: [String: ConfigValue]
+    values: [(key: any ConfigurationKey, value: String)]
   ) -> MistDemoConfiguration {
-    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
-    for (path, value) in values {
-      mapped[key(path)] = value
-    }
-    return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
+    MistDemoConfiguration.forTesting(values)
   }
 
   @Test("Memberwise init applies defaults for port, host, openBrowser, container")
@@ -87,9 +81,9 @@ internal struct AuthTokenConfigTests {
 
   @Test("Configuration init throws missingRequired when api.token is absent")
   internal func missingApiTokenThrows() async {
-    let configuration = Self.configuration(values: [:])
+    let configuration = Self.configuration(values: [])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }
@@ -97,10 +91,10 @@ internal struct AuthTokenConfigTests {
   @Test("Configuration init throws missingRequired when api.token is empty")
   internal func emptyApiTokenThrows() async {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "")
+      (MistDemoKeys.Auth.apiToken, "")
     ])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }
@@ -108,7 +102,7 @@ internal struct AuthTokenConfigTests {
   @Test("Configuration init applies all defaults when only api.token is set")
   internal func parsedDefaults() async throws {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "tok-xyz")
+      (MistDemoKeys.Auth.apiToken, "tok-xyz")
     ])
 
     let config = try await AuthTokenConfig(configuration: configuration)
@@ -125,13 +119,13 @@ internal struct AuthTokenConfigTests {
   @Test("Configuration init honors every override key")
   internal func parsedOverrides() async throws {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "tok-xyz"),
-      "container.identifier": .init(stringLiteral: "iCloud.custom.id"),
-      "environment": .init(stringLiteral: "production"),
-      "port": .init(integerLiteral: 9_090),
-      "host": .init(stringLiteral: "192.168.1.10"),
-      "no.browser": .init(booleanLiteral: true),
-      "reset.auth": .init(booleanLiteral: true),
+      (MistDemoKeys.Auth.apiToken, "tok-xyz"),
+      (MistDemoKeys.cloudKit.containerID, "iCloud.custom.id"),
+      (MistDemoKeys.cloudKit.environment, "production"),
+      (MistDemoKeys.Server.port, String(9_090)),
+      (MistDemoKeys.Server.host, "192.168.1.10"),
+      (MistDemoKeys.Server.noBrowser, String(true)),
+      (MistDemoKeys.Auth.resetAuth, String(true)),
     ])
 
     let config = try await AuthTokenConfig(configuration: configuration)
@@ -148,9 +142,9 @@ internal struct AuthTokenConfigTests {
   @Test("--no-browser wins when both browser flags are set")
   internal func noBrowserWinsOverBrowser() async throws {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "tok-xyz"),
-      "browser": .init(booleanLiteral: true),
-      "no.browser": .init(booleanLiteral: true),
+      (MistDemoKeys.Auth.apiToken, "tok-xyz"),
+      (MistDemoKeys.Server.browser, String(true)),
+      (MistDemoKeys.Server.noBrowser, String(true)),
     ])
 
     let config = try await AuthTokenConfig(configuration: configuration)
@@ -161,11 +155,11 @@ internal struct AuthTokenConfigTests {
   @Test("Configuration init throws on invalid environment")
   internal func invalidEnvironmentThrows() async {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "tok-xyz"),
-      "environment": .init(stringLiteral: "staging"),
+      (MistDemoKeys.Auth.apiToken, "tok-xyz"),
+      (MistDemoKeys.cloudKit.environment, "staging"),
     ])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }

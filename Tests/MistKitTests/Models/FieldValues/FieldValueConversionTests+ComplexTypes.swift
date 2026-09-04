@@ -120,6 +120,24 @@ extension FieldValueConversionTests {
       }
     }
 
+    @Test("Convert reference FieldValue with VALIDATE action to Components.FieldValue")
+    internal func convertReferenceWithValidateAction() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      let reference = Reference(recordName: "test-record-validate", action: .validate)
+      let fieldValue = FieldValue.reference(reference)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
+
+      if case .ReferenceValue(let value) = components.value {
+        #expect(value.recordName == "test-record-validate")
+        #expect(value.action == .VALIDATE)
+      } else {
+        Issue.record("Expected referenceValue")
+      }
+    }
+
     @Test("Convert asset FieldValue with all fields to Components.FieldValue")
     internal func convertAssetWithAllFields() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {

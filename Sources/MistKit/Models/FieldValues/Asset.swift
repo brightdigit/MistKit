@@ -29,7 +29,14 @@
 
 /// Asset dictionary as defined in CloudKit Web Services
 public struct Asset: Codable, Equatable, Sendable {
-  /// The file checksum
+  /// Opaque, server-minted checksum identifying the stored file.
+  ///
+  /// Apple documents this only as a signature and specifies no algorithm. It is
+  /// produced by the CDN upload receipt, not computed by the client, and is not
+  /// a digest of the plaintext bytes — observed values are a `0x01` version
+  /// byte plus a 20-byte digest, and it doubles as the content address in
+  /// ``downloadURL``. Treat it as an identity/caching token; it cannot be
+  /// recomputed to validate downloaded bytes. Use ``size`` for that.
   public let fileChecksum: String?
   /// The file size in bytes
   public let size: Int64?

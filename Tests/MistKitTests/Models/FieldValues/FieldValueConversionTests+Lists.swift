@@ -98,5 +98,62 @@ extension FieldValueConversionTests {
         Issue.record("Expected ListValue")
       }
     }
+
+    @Test("BYTES list element that is not valid base64 throws typeValueMismatch")
+    internal func malformedBytesListElementThrows() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(
+            throws: ConversionError.typeValueMismatch(
+              fieldName: "field",
+              declaredType: "BYTES",
+              value: "not!valid!"
+            )
+          ) {
+            _ = try FieldValue(listItem: .BytesValue("not!valid!"), fieldName: "field")
+          }
+        }
+      )
+    }
+
+    @Test("Nested BYTES list element that is not valid base64 throws typeValueMismatch")
+    internal func malformedBytesNestedListElementThrows() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(
+            throws: ConversionError.typeValueMismatch(
+              fieldName: "field",
+              declaredType: "BYTES",
+              value: "not!valid!"
+            )
+          ) {
+            _ = try FieldValue(
+              nestedListValue: [.BytesValue("not!valid!")],
+              fieldName: "field"
+            )
+          }
+        }
+      )
+    }
+
+    @Test("BYTES list element with valid base64 reads as .bytes Data")
+    internal func validBytesListElement() throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      let value = try FieldValue(listItem: .BytesValue("aGVsbG8="), fieldName: "field")
+      #expect(value == .bytes(Data("hello".utf8)))
+    }
   }
 }

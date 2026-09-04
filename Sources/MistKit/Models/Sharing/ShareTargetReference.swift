@@ -45,11 +45,6 @@ public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
     self.recordName = recordName
     self.recordChangeTag = recordChangeTag
   }
-
-  internal init(from schema: Components.Schemas.ShareTargetReference) {
-    self.recordName = schema.recordName
-    self.recordChangeTag = schema.recordChangeTag
-  }
 }
 
 extension Components.Schemas.ShareTargetReference {

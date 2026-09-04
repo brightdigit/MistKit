@@ -71,17 +71,13 @@ public struct LookupZonesConfig: Sendable, ConfigurationParseable {
     }
 
     let zoneNamesString =
-      configuration.string(
-        forKey: "zone.names",
-        default: "_defaultZone"
-      ) ?? "_defaultZone"
+      configuration.read(MistDemoKeys.Query.zoneNames)
     let zoneNames = zoneNamesString.split(separator: ",").map {
       $0.trimmingCharacters(in: .whitespaces)
     }
 
     let outputString =
-      configuration.string(forKey: "output.format", default: "table")
-      ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

@@ -53,8 +53,8 @@ extension CloudKitServiceTests.LookupZones {
     let responseJSON = """
       {
         "zones": [
-          { "zoneID": { "zoneName": "valid-zone", "ownerName": "_defaultOwner" } },
-          { "zoneID": { "ownerName": "_defaultOwner" } }
+          { "zoneID": { "zoneName": "valid-zone", "ownerRecordName": "_defaultOwner" } },
+          { "zoneID": { "ownerRecordName": "_defaultOwner" } }
         ]
       }
       """
@@ -90,7 +90,7 @@ extension ResponseConfig {
       zones.append([
         "zoneID": [
           "zoneName": "test-zone-\(index)",
-          "ownerName": "_defaultOwner",
+          "ownerRecordName": "_defaultOwner",
         ]
       ])
     }

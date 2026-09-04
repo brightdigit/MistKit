@@ -111,7 +111,7 @@ extension CloudKitServiceTests.ServerErrorCodes {
           database: .public(.prefers(.serverToServer))
         )
         Issue.record("expected queryRecords to throw")
-      } catch let error as CloudKitError {
+      } catch {
         #expect(
           error.serverErrorCode == nil,
           "an unmodelled code must not be mistaken for a modelled one"

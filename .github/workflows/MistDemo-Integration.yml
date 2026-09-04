@@ -19,9 +19,12 @@
 # after rotating, then re-run via workflow_dispatch.
 #
 # Two-job design:
-#   1) `build` runs in `swift:6.3-noble`, installs the Swift Static
-#      Linux SDK (musl), and produces a self-contained statically
-#      linked mistdemo binary.
+#   1) `build` runs in `swiftlang/swift:nightly-6.4.x-noble` (MistDemo
+#      declares swift-tools-version: 6.4; no 6.4 RELEASE image yet),
+#      installs the matching 6.4.x-branch Static Linux SDK (musl), and
+#      produces a self-contained statically linked mistdemo binary.
+#      Bump container + SDK URL/checksum together; switch to a 6.4
+#      RELEASE pin when Apple ships one.
 #   2) `integration` runs on plain `ubuntu-24.04` (no Swift toolchain,
 #      no LD_LIBRARY_PATH needed) and executes the live CloudKit
 #      phases against the static binary.
@@ -46,9 +49,9 @@ jobs:
   build:
     name: Build static mistdemo
     runs-on: ubuntu-24.04
-    # Pin to an exact Swift patch — the Static Linux SDK URL + checksum
-    # below are tied to this same version. Bump together.
-    container: swift:6.3.2-noble
+    # Pin nightly container + 6.4.x-branch Static Linux SDK together.
+    # Snapshot URL/checksum match SyndiKit-style 6.4.x-branch SDK pins.
+    container: swiftlang/swift:nightly-6.4.x-noble
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     timeout-minutes: 45
     defaults:
@@ -61,8 +64,8 @@ jobs:
         run: |
           set -euo pipefail
           swift sdk install \
-            https://download.swift.org/swift-6.3.2-release/static-sdk/swift-6.3.2-RELEASE/swift-6.3.2-RELEASE_static-linux-0.1.0.artifactbundle.tar.gz \
-            --checksum 3fd798bef6f4408f1ea5a6f94ce4d4052830c4326ab85ebc04f983f01b3da407
+            https://download.swift.org/swift-6.4.x-branch/static-sdk/swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-09-01-a/swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-09-01-a_static-linux-0.1.0.artifactbundle.tar.gz \
+            --checksum 68a0c0345f715c4272eda1ef79d53e86c0b19a5600bc678ef48a641b22538f85
           swift sdk list
 
       - name: swift build --swift-sdk x86_64-swift-linux-musl -c release
@@ -73,7 +76,19 @@ jobs:
         working-directory: Examples/MistDemo
         run: |
           set -euo pipefail
-          BIN=.build/x86_64-swift-linux-musl/release/mistdemo
+          # Ask SwiftPM where it put the binary rather than hardcoding the
+          # layout - the cross-compiled output directory is toolchain
+          # dependent and has moved between releases.
+          BIN_DIR=$(swift build -c release --swift-sdk x86_64-swift-linux-musl --show-bin-path)
+          BIN="$BIN_DIR/mistdemo"
+          if [ ! -f "$BIN" ]; then
+            echo "::error::mistdemo not found at $BIN"
+            echo "Contents of $BIN_DIR:"
+            ls -la "$BIN_DIR" || true
+            echo "Executables under .build:"
+            find .build -type f -name mistdemo || true
+            exit 1
+          fi
           ls -lh "$BIN"
           # A statically linked binary either reports "not a dynamic
           # executable" (musl) or "statically linked" (glibc). Anything
@@ -84,11 +99,15 @@ jobs:
             echo "::error::Binary has dynamic dependencies; static link failed"
             exit 1
           fi
+          # Stage at a fixed path so the upload step does not have to know
+          # the toolchain-specific build layout.
+          mkdir -p "$RUNNER_TEMP/artifact"
+          cp "$BIN" "$RUNNER_TEMP/artifact/mistdemo"
 
       - uses: actions/upload-artifact@v4
         with:
           name: mistdemo
-          path: Examples/MistDemo/.build/x86_64-swift-linux-musl/release/mistdemo
+          path: ${{ runner.temp }}/artifact/mistdemo
           retention-days: 1
           # Single executable; default zip compression is fine.
 

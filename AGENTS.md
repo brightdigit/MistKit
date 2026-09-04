@@ -135,12 +135,12 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 
 **Request type tagging (issue #375):** Most request values omit `type` and let CloudKit infer it from the value structure. Three scalar types are ambiguous on the wire and **must** carry an explicit `type`, otherwise CloudKit infers the wrong type and rejects the write with `BAD_REQUEST`:
 - `TIMESTAMP` (`.date`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
-- `BYTES` (`.bytes`) — a base64 string, otherwise read as `STRING`
+- `BYTES` (`.bytes`) — domain `Data`, encoded as a base64 string on the wire, otherwise read as `STRING`
 - `DOUBLE` (`.double`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
 
 Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
 
-**Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case. `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`).
+**Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case (decoded with `Data(base64Encoded:)`; malformed tagged base64 throws `ConversionError.typeValueMismatch` with the unwrapped string). `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`). Do **not** infer `.bytes` from untagged base64 — ordinary strings such as `"Chen"` decode as valid base64. Domain `.bytes` is `Data`; `bytesValue` re-encodes to base64 and `dataValue` matches `.bytes` only (no `.string` fallback). The generated `BytesValue` in `Sources/MistKitOpenAPI/` stays `String`.
 
 When a scalar `type` *contradicts* the value's category — a numeric type (`TIMESTAMP`/`DOUBLE`/`INT64`) over a non-number, or a string type (`STRING`/`BYTES`) over a non-string — the response is internally inconsistent and the conversion **throws** `ConversionError.typeValueMismatch` (via `requireNumeric`/`requireString`) rather than coercing to the value's shape. This matches the codebase's existing fail-loud `unmappableFieldValue` philosophy.
 
@@ -358,6 +358,10 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
   - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
   - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/CloudKitService/CloudKitService+AssetUpload.swift`
 
+**Asset download — `fileChecksum` is NOT verifiable client-side (issues #466, #473):** `Asset.download(using:)` (`#if !os(WASI)`, macOS 12 / iOS 15+) GETs `downloadURL` via `URLSession` (default `.shared`, same CDN-vs-API pool split as uploads) and returns the bytes unverified: missing/invalid URL → `CloudKitError.missingAssetDownloadURL`, non-2xx → `httpError`. Check `Asset.size` if you need a guard against a truncated download.
+
+#466 originally asked for the bytes to be verified against `fileChecksum`, and #473 implemented that as SHA-256-of-plaintext compared as base64 then hex. **That is not what `fileChecksum` is, and the goal is not achievable.** Verified against a live container (`iCloud.com.brightdigit.MistDemo`/`development`): the value decodes to 21 bytes — a `0x01` version prefix plus a 20-byte digest — so it can never equal a 32-byte SHA-256, and `Asset.download` therefore threw on *every* genuine CloudKit asset (the MistDemo Integration job caught this; unit tests did not, because they built fixtures with the same formula they asserted against). It is minted server-side — MistKit reads it verbatim out of the CDN upload receipt (`CloudKitService+AssetUpload.swift`), the receipt embeds a fragment of it, and Apple's archived reference labels the field only `[SIGNATURE]` with no algorithm. It is deterministic and content-addressed (identical bytes → identical checksum; it doubles as the content address in `downloadURL` and is what `rereferenceAssets` echoes back), so treat it as an identity/caching token. ~1,500 candidate constructions over three byte-exact samples produced zero matches — full write-up in `.claude/docs/research/asset-filechecksum.md`. `Asset.matches(data:)`, `CloudKitError.assetChecksumMismatch`, `missingAssetChecksum` and `AssetChecksumTests` were **removed** rather than deprecated; do not reintroduce plaintext-digest verification. `referenceChecksum`/`wrappingKey` never appear in live responses (encrypted assets are unexercised) and are equally unusable for this. Tests: `AssetDownloadTests`.
+
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
 - Handle connection pooling separately for different hosts
@@ -467,36 +471,22 @@ Key endpoints documented in the OpenAPI spec:
 
 ## Reference Documentation
 
-Apple's official CloudKit documentation is available in `.claude/docs/` for offline reference during development:
+Offline copies of external documentation live in `.claude/docs/`. **See
+[`.claude/docs/README.md`](.claude/docs/README.md) — it is the single router for
+that directory**, listing every doc with its size and when to consult it.
 
-### When to Consult Each Document
+Highlights: `webservices.md` is the authoritative CloudKit REST reference;
+`swift-openapi-generator.md` and `swift-openapi-runtime.md` cover the generated
+client in `Sources/MistKitOpenAPI/`; `QUICK_REFERENCE.md` is the fast lookup for
+endpoint shapes, field types, and error codes.
 
-**webservices.md** (289 KB) - CloudKit Web Services REST API
-- **Primary use**: Implementing REST API endpoints
-- **Contains**: Authentication, request formats, all endpoints, data types, error codes
-- **Consult when**: Writing API client code, handling authentication, debugging responses
-
-**cloudkitjs.md** (188 KB) - CloudKit JS Framework
-- **Primary use**: Understanding CloudKit concepts and operation flows
-- **Contains**: Container/database patterns, operations, response objects, error handling
-- **Consult when**: Designing Swift types, implementing queries, working with subscriptions
-
-**testing-enablinganddisabling.md** (126 KB) - Swift Testing Framework
-- **Primary use**: Writing modern Swift tests
-- **Contains**: `@Test` macros, async testing, parameterization, migration from XCTest
-- **Consult when**: Writing or organizing tests, testing async code
-
-**swift-openapi-generator.md** (235 KB) - Swift OpenAPI Generator Documentation
-- **Primary use**: Understanding code generation configuration and features
-- **Contains**: Generator configuration, type overrides, middleware system, transport protocols, API stability
-- **Consult when**: Configuring openapi-generator-config.yaml, implementing middleware, troubleshooting generated code
-
-See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
+Do not duplicate the per-document breakdown here — it drifts. Add new docs to
+the router instead.
 
 ### MistDemo Documentation
 
 - **Swift Configuration Reference** (`.claude/docs/mistdemo/swift-configuration-reference.md`) - Guide for using Swift Configuration in MistDemo
-- **Official Swift Configuration Docs** (`.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md`) - Full API reference
+- **Official Swift Configuration Docs** (`.claude/docs/swift-configuration.md`) - Full API reference
 
 ### CloudKit Schema Language
 
@@ -553,6 +543,45 @@ The convention is not lint-enforced (SwiftLint has no rule for import visibility
 - We are using explicit ACLs in the Swift code
 - type order is based on the default in swiftlint: https://realm.github.io/SwiftLint/type_contents_order.html
 - Anything inside [CONTENT] [/CONTENT] is written by me
+
+## Release Process
+
+Full runbook: `.claude/skills/release/SKILL.md` (invoke as `/release`). Mechanical
+checks live in `Scripts/release.sh`; `make release-preflight` / `release-check` wrap
+the common ones.
+
+**Naming — the one rule to internalize:**
+
+```text
+release branch  v1.0.0-beta.5   ← with v
+release tag      1.0.0-beta.5   ← without v
+```
+
+Tags are lightweight and unprefixed; branches are prefixed. `setup-mistkit` resolves
+`MISTKIT_BRANCH` via `git ls-remote`, which matches **tags as well as branches**, so
+pinning the wrong kind of ref succeeds silently and greens example CI without ever
+compiling the code under release. The requirement inverts at release time: before the
+merge the pin must be the **branch**, after publishing it must be the **tag**. Assert
+with `./Scripts/release.sh pins --expect-branch v1.0.0-beta.5` before the merge and
+`./Scripts/release.sh pins --expect-tag 1.0.0-beta.5` after publishing.
+
+**Three standing guardrails:**
+
+1. **Never tag without notes.** `./Scripts/release.sh verify-tag <tag> --at HEAD` must
+   pass before `git tag`. Both 1.0.0-beta.3 and 1.0.0-beta.4 were tagged with no
+   `ReleaseNotes.md` section of their own; the `Release Check` workflow re-asserts this
+   after any tag push.
+2. **Archive before merging under squash.** Under squash-merge, squashed commits can
+   become unreachable from `main` — the pre-merge archive tag is the preservation
+   mechanism. Release branches themselves are retained after publication.
+3. **Release notes are a flat bullet list for new entries.** No `###` category
+   subsections; sections from beta.1–beta.4 predate this and are left as they are.
+
+The release PR is the documented merge-commit case (feature PRs are always rebase or
+squash), but confirm the shape with the human before merging.
+
+Worktrees are managed with `git trees` (`add` / `rm` / `list` / `clean`), never raw
+`git worktree`.
 
 ## Memory & Corrections Convention
 

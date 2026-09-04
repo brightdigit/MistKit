@@ -82,7 +82,7 @@ public struct ModifySubscriptionsConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let firesOnString = configuration.string(forKey: "fires-on") ?? "create,update,delete"
+    let firesOnString = configuration.read(MistDemoKeys.Subscription.firesOn)
     let firesOn =
       firesOnString
       .split(separator: ",")
@@ -90,17 +90,14 @@ public struct ModifySubscriptionsConfig: Sendable, ConfigurationParseable {
       .filter { !$0.isEmpty }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
       base: baseConfig,
-      operation: configuration.string(forKey: "operation", default: "create") ?? "create",
-      subscriptionID: configuration.string(forKey: "subscription-id"),
-      recordType: configuration.string(forKey: "record-type"),
+      operation: configuration.read(MistDemoKeys.Subscription.operation),
+      subscriptionID: configuration.read(MistDemoKeys.Subscription.subscriptionID),
+      recordType: configuration.read(MistDemoKeys.Record.optionalRecordType),
       firesOn: firesOn,
       output: output
     )

@@ -45,7 +45,7 @@ internal enum FieldValueFormatter {
     case .double(let double):
       return "\(double)"
     case .bytes(let bytes):
-      return bytes
+      return bytes.base64EncodedString()
     case .date(let date):
       return formatDate(date)
     case .location(let location):
@@ -73,7 +73,7 @@ internal enum FieldValueFormatter {
     case .double(let double):
       return "\(double)"
     case .bytes(let bytes):
-      return "bytes(\(bytes.count) chars, base64: \(bytes))"
+      return "bytes(\(bytes.count) bytes, base64: \(bytes.base64EncodedString()))"
     case .date(let date):
       return "date(\(formatDate(date)))"
     case .location(let location):

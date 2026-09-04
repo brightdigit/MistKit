@@ -1,5 +1,9 @@
 # Configuration Management
 
+> **Source of truth:** configuration keys now live as typed values in
+> `Examples/MistDemo/Sources/MistDemoKit/Configuration/Keys/` (`MistDemoKeys`).
+> The five CloudKit credential keys share their names with `MistKitConfiguration`,
+> BushelCloud and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
 MistDemo supports flexible configuration through files, profiles, environment variables, and command-line arguments using Apple's Swift Configuration package.
 
 ## Configuration Sources
@@ -102,12 +106,12 @@ profiles:
 
 **Note**: Swift Configuration automatically transforms keys:
 - Dots (`.`) become underscores (`_`) for environment variables
-- Example: `container.identifier` → `CONTAINER_IDENTIFIER` environment variable
-- When CommandLineArgumentsProvider is added: dots become hyphens for CLI args (`container.identifier` → `--container-identifier`)
+- Example: `cloudkit.container-id` → `CLOUDKIT_CONTAINER_ID` environment variable
+- CLI args: dots and dashes both become hyphens (`cloudkit.container-id` → `--cloudkit-container-id`)
 
 | Key | Type | Environment Variable (Auto-transformed) | Default | Description |
 |-----|------|---------------------|---------|-------------|
-| `container.identifier` | String | `CONTAINER_IDENTIFIER` | `iCloud.com.brightdigit.MistDemo` | Container identifier |
+| `cloudkit.container-id` | String | `CLOUDKIT_CONTAINER_ID` | `iCloud.com.brightdigit.MistDemo` | Container identifier |
 | `api.token` | String | `API_TOKEN` | Empty string | API token (secret) |
 | `environment` | String | `ENVIRONMENT` | `development` | CloudKit environment |
 | `database` | String | `DATABASE` | Varies by auth method | Database type |

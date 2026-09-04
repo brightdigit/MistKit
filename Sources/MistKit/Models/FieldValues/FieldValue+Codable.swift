@@ -113,8 +113,10 @@ extension FieldValue {
   ///   `false` when `self` is a complex case that this method did not handle.
   private func encodeScalar(to container: inout any SingleValueEncodingContainer) throws -> Bool {
     switch self {
-    case .string(let val), .bytes(let val):
+    case .string(let val):
       try container.encode(val)
+    case .bytes(let val):
+      try container.encode(val.base64EncodedString())
     case .int64(let val):
       try container.encode(val)
     case .double(let val):

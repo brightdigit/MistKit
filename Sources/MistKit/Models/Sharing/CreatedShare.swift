@@ -36,10 +36,12 @@ public import Foundation
 /// rather than on ``RecordInfo``, which models a plain record.
 public struct CreatedShare: Sendable {
   // swift-format-ignore: NeverForceUnwrap
+  // swiftlint:disable force_unwrapping
   /// Base URL for iCloud share invite links (`https://www.icloud.com/share`).
   ///
   /// Append a ``ShortGUID`` path component to build a full invite URL.
   public static let shareURLBase = URL(string: "https://www.icloud.com/share")!
+  // swiftlint:enable force_unwrapping
 
   /// The short GUID CloudKit assigned to the share (and shared root).
   public let shortGUID: ShortGUID
