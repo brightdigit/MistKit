@@ -76,7 +76,19 @@ jobs:
         working-directory: Examples/MistDemo
         run: |
           set -euo pipefail
-          BIN=.build/x86_64-swift-linux-musl/release/mistdemo
+          # Ask SwiftPM where it put the binary rather than hardcoding the
+          # layout - the cross-compiled output directory is toolchain
+          # dependent and has moved between releases.
+          BIN_DIR=$(swift build -c release --swift-sdk x86_64-swift-linux-musl --show-bin-path)
+          BIN="$BIN_DIR/mistdemo"
+          if [ ! -f "$BIN" ]; then
+            echo "::error::mistdemo not found at $BIN"
+            echo "Contents of $BIN_DIR:"
+            ls -la "$BIN_DIR" || true
+            echo "Executables under .build:"
+            find .build -type f -name mistdemo || true
+            exit 1
+          fi
           ls -lh "$BIN"
           # A statically linked binary either reports "not a dynamic
           # executable" (musl) or "statically linked" (glibc). Anything
@@ -87,11 +99,15 @@ jobs:
             echo "::error::Binary has dynamic dependencies; static link failed"
             exit 1
           fi
+          # Stage at a fixed path so the upload step does not have to know
+          # the toolchain-specific build layout.
+          mkdir -p "$RUNNER_TEMP/artifact"
+          cp "$BIN" "$RUNNER_TEMP/artifact/mistdemo"
 
       - uses: actions/upload-artifact@v4
         with:
           name: mistdemo
-          path: Examples/MistDemo/.build/x86_64-swift-linux-musl/release/mistdemo
+          path: ${{ runner.temp }}/artifact/mistdemo
           retention-days: 1
           # Single executable; default zip compression is fine.
 
