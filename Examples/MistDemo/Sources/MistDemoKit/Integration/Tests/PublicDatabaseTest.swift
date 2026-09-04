@@ -57,6 +57,7 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
       LookupZonePhase(),
       UploadAssetPhase(),
       CreateRecordsPhase(),
+      DownloadAssetPhase(),
       RereferenceAssetPhase(),
       QueryRecordsPhase(),
       LookupRecordsPhase(),
