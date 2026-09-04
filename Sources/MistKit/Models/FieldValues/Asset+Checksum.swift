@@ -33,6 +33,13 @@ public import Foundation
 extension Asset {
   private static let hexDigits: [Character] = Array("0123456789abcdef")
 
+  private static func hexEncoded(_ data: Data) -> String {
+    data.reduce(into: "") { result, byte in
+      result.append(Self.hexDigits[Int(byte >> 4)])
+      result.append(Self.hexDigits[Int(byte & 0x0F)])
+    }
+  }
+
   /// Returns whether `data` is the plaintext file this asset describes.
   ///
   /// Hashes the raw plaintext bytes with SHA-256 and compares the digest to
@@ -56,12 +63,5 @@ extension Asset {
       return true
     }
     return fileChecksum.lowercased() == Self.hexEncoded(digest)
-  }
-
-  private static func hexEncoded(_ data: Data) -> String {
-    data.reduce(into: "") { result, byte in
-      result.append(Self.hexDigits[Int(byte >> 4)])
-      result.append(Self.hexDigits[Int(byte & 0x0F)])
-    }
   }
 }
