@@ -25,7 +25,8 @@ CloudKit is Apple's backend cloud database available to developers.
 > **[Beginner]** What is a record type / zone / subscription in plain terms?
 Record Field Types
 * String
-* Number
+* Double
+* Integer
 * Data
 * Date
 * CLLocation
@@ -46,9 +47,15 @@ Besides the databases, theres environments. Environments allow you to test and d
 
 > **[Beginner]** Do I really need a signed-in user for the *public* database?
 
+Yes you need a signed user to write but not to read.
+
 > **[Beginner]** When does data move between development and production?
 
+There's a promotion functionality in the dashboard
+
 > **[Beginner]** Is my container tied to one app, or can several apps share it?
+
+Yes
 
 ### Authenticaion
 
