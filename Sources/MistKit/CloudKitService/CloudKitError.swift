@@ -137,12 +137,6 @@ public enum CloudKitError: LocalizedError, Sendable {
   case invalidPrivateKey(path: String?, underlying: any Error)
   /// `Asset.download(using:)` had no usable `downloadURL`.
   case missingAssetDownloadURL
-  /// `Asset.download(using:)` requires `fileChecksum` and never returns bytes
-  /// that have not been verified against it.
-  case missingAssetChecksum
-  /// Downloaded asset bytes did not match `Asset.fileChecksum` (SHA-256 of the
-  /// plaintext, compared as base64 then as hex).
-  case assetChecksumMismatch
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   ///

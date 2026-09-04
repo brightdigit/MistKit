@@ -30,13 +30,17 @@
 internal import Foundation
 internal import MistKit
 
-/// Looks up a created record's `image` asset, downloads the CDN bytes, and
-/// verifies them against ``Asset/fileChecksum`` via ``Asset/download(using:)``.
+/// Looks up a created record's `image` asset and downloads the CDN bytes,
+/// checking the byte count against the asset's declared `size`.
+///
+/// Checksum verification is deliberately not requested: CloudKit's
+/// `fileChecksum` is an opaque server-minted value, not a digest of the
+/// plaintext, so it cannot be recomputed client-side.
 internal struct DownloadAssetPhase: IntegrationPhase {
   internal typealias Input = CreatedRecordNames
   internal typealias Output = NoState
 
-  internal static let title = "Download and verify asset"
+  internal static let title = "Download asset"
   internal static let emoji = "📥"
   internal static let apiName = "downloadAsset"
 
@@ -71,7 +75,12 @@ internal struct DownloadAssetPhase: IntegrationPhase {
     }
 
     let data = try await asset.download()
-    print("✅ Downloaded and verified \(data.count) bytes against fileChecksum")
+    if let declaredSize = asset.size, Int64(data.count) != declaredSize {
+      throw IntegrationTestError.verificationFailed(
+        "Downloaded \(data.count) bytes but the asset declares \(declaredSize)"
+      )
+    }
+    print("✅ Downloaded \(data.count) bytes")
 
     return NoState()
   }

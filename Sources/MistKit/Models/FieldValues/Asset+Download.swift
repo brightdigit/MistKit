@@ -46,20 +46,22 @@ public import Foundation
       }
     }
 
-    /// Downloads this asset's bytes and verifies them against ``fileChecksum``.
+    /// Downloads this asset's bytes.
     ///
-    /// Never returns unverified data. A missing ``fileChecksum`` is an error,
-    /// not a skip. CDN `wrappingKey` encryption is out of scope.
+    /// The bytes are **not** verified against ``fileChecksum``. That value is
+    /// an opaque, server-minted identifier read out of the CDN upload receipt
+    /// — Apple documents it only as a signature and specifies no algorithm, so
+    /// it cannot be recomputed from the plaintext. Check ``size`` if you need a
+    /// client-side guard against a truncated download. CDN `wrappingKey`
+    /// encryption is out of scope.
     ///
     /// - Parameter session: Session used for the GET. Defaults to `.shared`,
     ///   matching CDN asset uploads (a connection pool separate from the
     ///   CloudKit API transport).
-    /// - Returns: The response body after a successful checksum comparison.
+    /// - Returns: The response body.
     /// - Throws: ``CloudKitError/missingAssetDownloadURL`` when ``downloadURL``
     ///   is missing or not a valid URL; ``CloudKitError/httpError(statusCode:)``
-    ///   on a non-success HTTP status; ``CloudKitError/missingAssetChecksum``
-    ///   when ``fileChecksum`` is absent; ``CloudKitError/assetChecksumMismatch``
-    ///   when the body does not match.
+    ///   on a non-success HTTP status.
     public func download(using session: URLSession = .shared) async throws -> Data {
       try await download { url in
         try await session.data(from: url)
@@ -69,19 +71,16 @@ public import Foundation
     /// Testable download path that takes a fetch closure instead of a session.
     ///
     /// - Parameter fetching: Performs the GET for the resolved download URL.
-    /// - Returns: The response body after a successful checksum comparison.
+    /// - Returns: The response body.
     /// - Throws: ``CloudKitError/missingAssetDownloadURL`` when ``downloadURL``
     ///   is missing or not a valid URL; ``CloudKitError/httpError(statusCode:)``
-    ///   on a non-success HTTP status; ``CloudKitError/missingAssetChecksum``
-    ///   when ``fileChecksum`` is absent; ``CloudKitError/assetChecksumMismatch``
-    ///   when the body does not match; or any error thrown by `fetching`.
+    ///   on a non-success HTTP status; or any error thrown by `fetching`.
     internal func download(
       fetching: (URL) async throws -> (Data, URLResponse)
     ) async throws -> Data {
       let url = try resolvedDownloadURL()
       let (data, response) = try await fetching(url)
       try Self.requireSuccess(response)
-      try requireMatchingChecksum(data)
       return data
     }
 
@@ -93,15 +92,6 @@ public import Foundation
         throw CloudKitError.missingAssetDownloadURL
       }
       return url
-    }
-
-    private func requireMatchingChecksum(_ data: Data) throws {
-      guard fileChecksum != nil else {
-        throw CloudKitError.missingAssetChecksum
-      }
-      guard matches(data: data) else {
-        throw CloudKitError.assetChecksumMismatch
-      }
     }
   }
 #endif

@@ -87,7 +87,7 @@ extension CloudKitError {
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,
       .decodingError, .networkError, .unsupportedOperationType, .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey,
-      .missingAssetDownloadURL, .missingAssetChecksum, .assetChecksumMismatch:
+      .missingAssetDownloadURL:
       return nil
     }
   }

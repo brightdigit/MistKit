@@ -84,10 +84,6 @@ extension CloudKitError {
         "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
     case .missingAssetDownloadURL:
       return "Asset downloadURL is missing or is not a valid URL"
-    case .missingAssetChecksum:
-      return "Asset fileChecksum is missing; refusing to return unverified bytes"
-    case .assetChecksumMismatch:
-      return "Downloaded asset bytes did not match fileChecksum"
     case .accessDenied, .atomicFailure, .authenticationFailed, .authenticationRequired,
       .badRequest, .conflict, .exists, .internalServerError, .notFound, .quotaExceeded,
       .throttled, .tryAgainLater, .validatingReferenceError, .zoneNotFound,

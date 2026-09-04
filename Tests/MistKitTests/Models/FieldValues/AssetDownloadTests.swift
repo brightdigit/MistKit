@@ -40,7 +40,7 @@
   @Suite("Asset Download")
   internal struct AssetDownloadTests {
     private static let plaintext = Data("hello".utf8)
-    private static let sha256Base64 = "LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ="
+    private static let opaqueChecksum = "AUStEc+gPyq1KTFbGO3RbXVpusut"
     private static let downloadURLString = "https://cvws.icloud-content.com/asset.bin"
 
     private static func httpResponse(statusCode: Int, url: URL) throws -> HTTPURLResponse {
@@ -57,24 +57,11 @@
       return response
     }
 
-    @Test("download returns bytes when HTTP succeeds and the checksum matches")
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    internal func downloadReturnsVerifiedBytes() async throws {
-      let asset = Asset(
-        fileChecksum: Self.sha256Base64,
-        downloadURL: Self.downloadURLString
-      )
-      let data = try await asset.download { url in
-        (Self.plaintext, try Self.httpResponse(statusCode: 200, url: url))
-      }
-      #expect(data == Self.plaintext)
-    }
-
     @Test("download throws httpError on a non-success status")
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     internal func downloadThrowsOnHTTPFailure() async throws {
       let asset = Asset(
-        fileChecksum: Self.sha256Base64,
+        fileChecksum: Self.opaqueChecksum,
         downloadURL: Self.downloadURLString
       )
       let error = await #expect(throws: CloudKitError.self) {
@@ -89,43 +76,35 @@
       #expect(statusCode == 404)
     }
 
-    @Test("download throws assetChecksumMismatch and does not return the body")
+    @Test("download returns bytes without checking the opaque fileChecksum")
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    internal func downloadThrowsOnChecksumMismatch() async throws {
+    internal func downloadReturnsBytesWithoutChecksumCheck() async throws {
+      // A real server-minted fileChecksum: a version byte plus a 20-byte
+      // digest, not derivable from the plaintext. Downloads must not gate on it.
       let asset = Asset(
-        fileChecksum: Self.sha256Base64,
+        fileChecksum: "AUStEc+gPyq1KTFbGO3RbXVpusut",
         downloadURL: Self.downloadURLString
       )
-      let error = await #expect(throws: CloudKitError.self) {
-        _ = try await asset.download { url in
-          (Data("world".utf8), try Self.httpResponse(statusCode: 200, url: url))
-        }
+      let data = try await asset.download { url in
+        (Self.plaintext, try Self.httpResponse(statusCode: 200, url: url))
       }
-      guard case .assetChecksumMismatch = error else {
-        Issue.record("Expected assetChecksumMismatch, got \(error)")
-        return
-      }
+      #expect(data == Self.plaintext)
     }
 
-    @Test("download throws missingAssetChecksum instead of returning unverified bytes")
+    @Test("download returns bytes when the asset has no checksum")
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    internal func downloadThrowsWhenChecksumMissing() async throws {
+    internal func downloadReturnsBytesWhenChecksumMissing() async throws {
       let asset = Asset(downloadURL: Self.downloadURLString)
-      let error = await #expect(throws: CloudKitError.self) {
-        _ = try await asset.download { url in
-          (Self.plaintext, try Self.httpResponse(statusCode: 200, url: url))
-        }
+      let data = try await asset.download { url in
+        (Self.plaintext, try Self.httpResponse(statusCode: 200, url: url))
       }
-      guard case .missingAssetChecksum = error else {
-        Issue.record("Expected missingAssetChecksum, got \(error)")
-        return
-      }
+      #expect(data == Self.plaintext)
     }
 
     @Test("download throws missingAssetDownloadURL when the URL is absent")
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     internal func downloadThrowsWhenURLMissing() async throws {
-      let asset = Asset(fileChecksum: Self.sha256Base64)
+      let asset = Asset(fileChecksum: Self.opaqueChecksum)
       let error = await #expect(throws: CloudKitError.self) {
         _ = try await asset.download { _ in
           Issue.record("fetch should not run when downloadURL is missing")
@@ -142,7 +121,7 @@
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     internal func downloadThrowsWhenURLInvalid() async throws {
       let asset = Asset(
-        fileChecksum: Self.sha256Base64,
+        fileChecksum: Self.opaqueChecksum,
         downloadURL: "not a url"
       )
       let error = await #expect(throws: CloudKitError.self) {
