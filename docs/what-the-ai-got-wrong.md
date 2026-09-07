@@ -445,5 +445,6 @@ Measured, not hedged. Every number above should be read against these.
    because most "assistant bubbles" are tool calls, not prose.
 10. **Partly resolved since first draft.** Issue #192's root cause is **settled** — not from the
     conversation record (both corpora returned zero relevant hits) but from PR #205's diff. See the
-    case study above. The `users/caller` routing discrepancy and the never-confirmed `ASSETID`
-    tagging still need a live container, not an archive.
+    case study above. `users/caller` routing and `ASSETID` / `assets/rereference` tagging have
+    likewise been **live-verified via MistDemo** (web UI + `test-public` / `test-private`); they
+    no longer sit in the "needs a live container" bucket.

@@ -120,17 +120,19 @@ authenticators never mutate `body`; the signature exists for the one that must.
 
 ### The rotation gap
 
-`TokenManager.swift:35` advertises the manager as owning "loading, validating, **rotating**,
-persisting." Rotation is not implemented. `AuthenticationMiddleware.swift:53` returns `next(...)`
-without inspecting the response, and the string `X-Apple-CloudKit-Web-Auth-Token` appears
-**nowhere in `Sources/` or `Tests/`** — so the fresh token CloudKit returns on *every* response is
-discarded.
+Apple documents web auth tokens as single-use; the live server *"rotates but does not
+invalidate."* A 25-hour-old token returned 200; 8 sequential reuses and 6 concurrent shares all
+returned 200. MistKit historically depended on that undocumented leniency — if Apple ever
+enforces the written rule, every private-database client that ignored the response header would
+break immediately.
 
-Sharper still: five test files under `Tests/…/ConcurrentTokenRefresh/` test only that
-`currentAuthenticator()` was called again. A directory named for rotation testing that never tests
-rotation — a cautionary tale about naming tests after intent instead of behavior.
-
-MistKit currently works only because the live server is **more lenient than Apple's spec** (§4).
+That client-side gap is closed (#462 / #463). `AuthenticationMiddleware` now reads
+`X-Apple-CloudKit-Web-Auth-Token` from each response and hands it to
+`TokenManager.didReceiveRotatedWebAuthToken` (defaulted to a no-op so existing conformances keep
+compiling; `WebAuthTokenManager` and `AdaptiveTokenManager` adopt it). What remains is the
+**doc-vs-server** mismatch: Apple's written single-use rule still disagrees with observed
+leniency, so adopting the rotated token is defensive correctness rather than something the live
+service currently forces.
 
 ---
 
@@ -268,7 +270,7 @@ walkthrough, one line above *"getting any part wrong gives you a generic 401."*
 |---|---|---|
 | 1 | **`zones/changes` uses `metaSyncToken`, not `syncToken`.** The wrong key is *silently ignored* — page one replays forever, so pagination had **never** worked. Live proof: `syncToken` → 40 zones again; `metaSyncToken` → 0. Only this endpoint differs; its three siblings genuinely use `syncToken`. | `openapi.yaml:578-592`; #430 / PR #443 |
 | 2 | **APNs tokens live under `/device/`, not `/database/`.** The documented path answers only `OPTIONS`, returning `405` on POST, with no `{database}` segment. Auth was ruled out *by elimination* across four passing endpoints; the answer came from CloudKit JS's source. Nearly written off as "browser-only or dead." | `openapi.yaml:1206,1256`; #382 / PR #415 |
-| 3 | **`ownerRecordName` vs `ownerName` — zone owners never decoded.** Live `zones/list` returns `ownerRecordName`; the spec declared `ownerName`, so every zone read its owner back as `nil` — gutting the reason `ZoneID` replaced a bare `zoneName` for shared zones. | #444; request direction **still unproven** |
+| 3 | **`ownerRecordName` vs `ownerName` — zone owners never decoded.** Live `zones/list` returns `ownerRecordName`; the spec declared `ownerName`, so every zone read its owner back as `nil` — gutting the reason `ZoneID` replaced a bare `zoneName` for shared zones. | #444; response + shared-zone **request** `ownerName` live-verified via MistDemo |
 | 4 | **`cloudkit.share`, not `cloudKit.share`.** One letter's case. The error — *"Cannot share - no such record exists to share"* — blames the root record, not the type string. | `ShareInfo.swift:45-51`; #437 |
 | 5 | **`GET users/discover` is broken server-side at Apple** — 100% reproducible 500. Proving it was *Apple's* bug took a five-rung ladder: `OPTIONS` returns 200; a typo'd path returns a clean 404; POST reaches body validation; and Apple's own CloudKit JS fails identically from a browser. | `@available(*, unavailable)`; #28 |
 
@@ -311,21 +313,25 @@ CloudKit JS's source → live verification via `mistdemo test-private` phase 16.
 
 ## Still unresolved
 
-- **#462 (open)** — web auth token rotation contradicts Apple's written spec. Apple documents
-  single-use tokens; the live server *"rotates but does not invalidate."* A 25-hour-old token
-  returned 200; 8 sequential reuses and 6 concurrent shares all returned 200. **MistKit depends on
-  undocumented leniency** — if Apple ever enforces the documented rule it is an immediate hard
-  break for every private-database user.
-- **#28** — Apple-side 500; Feedback Assistant report drafted but never confirmed filed.
-- **`ownerName` on the request side** — the response direction is fixed; the request direction is
-  unproven, because all four probe variants returned `BAD_REQUEST` from a malformed body.
-- **`ASSETID` on re-referenced assets** — never live-confirmed, yet `openapi.yaml` was built on
-  the guess.
-- **`records/resolve` and `records/accept` shipped with no live call ever made.** Field names came
-  from type dictionaries. `acceptShares` is *mutating*, so a wrong field name could silently fail
-  to take effect rather than erroring.
-- **`users/caller` routing** — one observation had it succeed on private+web-auth; another saw
-  `421` against public. The spec description now hedges rather than asserting.
+Resolved since the first draft of this section (MistDemo is the live oracle — web UI +
+`test-public` / `test-private`):
+
+- **#462 / #463** — MistKit now consumes `X-Apple-CloudKit-Web-Auth-Token` via
+  `TokenManager.didReceiveRotatedWebAuthToken`. The Apple **doc-vs-server** single-use claim
+  remains (server still lenient); the client no longer discards the rotated token.
+- **`records/resolve` / `records/accept` / `createShare`** — live-verified via MistDemo share
+  phases (including mutating accept).
+- **`ASSETID` / `assets/rereference`** — live-verified via MistDemo rereference paths.
+- **`users/caller` routing** — live-verified via MistDemo (`fetchCaller` / user-context
+  phases). `openapi.yaml` prose may still hedge; prefer MistDemo over that lag.
+- **`ownerRecordName` / request `ownerName`** — response payloads and shared-zone request
+  `ZoneID.ownerName` round-trips live-verified via MistDemo zone / share phases.
+
+Still open (Apple-side or research gaps):
+
+- **#28** — Apple-side `GET users/discover` 500 remains; the MistKit issue is **CLOSED** as a
+  Feedback Assistant filing (Apple bug, not a MistKit fix). Endpoint stays
+  `@available(*, unavailable)`.
 - Whether a `database` subscriptionType exists; the full `zoneType` enum; and the fact that
   subscriptions cannot configure alert/badge/sound at all (no `NotificationInfo` schema).
 
