@@ -9,4 +9,4 @@ Do **not** re-flag covered behaviors as "unproven", "needs a live container", or
 
 Prose that still hedges those facts (some `openapi.yaml` descriptions; older archaeology `_raw/` "never live-confirmed" notes) is stale relative to MistDemo coverage — prefer MistDemo phases when they conflict.
 
-On the `447-iosdevuk-talk` branch, `docs/what-cloudkit-got-wrong.md` ("Still unresolved" + §1 rotation gap) and `docs/what-the-ai-got-wrong.md` (Limitations §10) were refreshed against this MistDemo coverage.
+On the `447-iosdevuk-talk` branch, `the `WhatCloudKitGotWrong` DocC article` ("Still unresolved" + §1 rotation gap) and `the `WhatTheAIGotWrong` DocC article` (Limitations §10) were refreshed against this MistDemo coverage.
