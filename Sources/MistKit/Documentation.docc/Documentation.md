@@ -8,7 +8,9 @@ A Swift package for server-side and command-line access to CloudKit Web Services
 
 MistKit wraps Apple's [CloudKit Web Services REST API](https://developer.apple.com/documentation/cloudkitwebservices) with a modern Swift surface so server-side code, CLIs, and platforms without the native CloudKit framework (Linux, WASI, Windows) can read and write the same containers as your Apple apps.
 
-The library is built on `swift-openapi-generator` against Apple's published OpenAPI specification, with a hand-written abstraction layer on top that exposes typed records, async iteration, structured errors, and three authentication schemes.
+The library is built on `swift-openapi-generator` against an OpenAPI document written for CloudKit Web Services, with a hand-written abstraction layer on top that exposes typed records, async iteration, structured errors, and three authentication schemes.
+
+New to server-side CloudKit? Start with <doc:CloudKitAsYourBackend>, the written form of the conference talk that explains why the library exists and how its pieces fit together.
 
 ## Quick start
 
@@ -65,7 +67,7 @@ The wrapper layer is described in <doc:AbstractionLayerArchitecture>. The code-g
 
 ## Platform support
 
-MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. Server-to-server signing depends on Crypto / swift-crypto, so it is unavailable on Windows and WASI — those targets must use API-token + web-auth credentials. URL-loading conveniences and asset upload use `URLSession`; on WASI builds you supply a `ClientTransport` explicitly via the generic initializer.
+MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. Server-to-server signing depends on Crypto / swift-crypto, so it is unavailable on Windows and WASI — those targets must use API-token + web-auth credentials. URL-loading conveniences and asset upload use `URLSession`; the public initializers are compiled only for non-WASI platforms, and a public transport-accepting initializer for WASI is not available yet (see <doc:ConfiguringMistKit>).
 
 > Tip: On native Apple platforms (macOS, iOS, tvOS, watchOS, visionOS) prefer the native [CloudKit framework](https://developer.apple.com/documentation/cloudkit). It integrates with the system account, handles push notifications and long-lived operations, and avoids the per-request signing overhead of the web-services API. MistKit is intended for environments where the native framework isn't available — server-side Swift, CLIs, Linux, and Windows.
 
@@ -159,6 +161,21 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 - <doc:OpenAPICodeGeneration>
 - <doc:GeneratedCodeWorkflow>
 - <doc:GeneratedCodeAnalysis>
+
+### Guides
+
+- <doc:CloudKitAsYourBackend>
+- <doc:DeployingMistKit>
+
+### Under the hood
+
+- <doc:RequestSigning>
+- <doc:FieldTypePolymorphism>
+
+### Background
+
+- <doc:WhatCloudKitGotWrong>
+- <doc:WhatTheAIGotWrong>
 
 ## See Also
 

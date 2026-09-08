@@ -70,7 +70,7 @@ Use ``CloudKitService/listZones(database:)`` to discover which zones a database 
 
 ## Creating
 
-Use ``CloudKitService/createRecord(recordType:recordName:fields:database:)`` for a single create. Fields are a `[String: FieldValue]` dictionary — every CloudKit scalar plus references, locations, assets, and lists are modeled in ``FieldValue``:
+Use ``CloudKitService/createRecord(recordType:recordName:fields:zoneID:database:)`` for a single create. Fields are a `[String: FieldValue]` dictionary — every CloudKit scalar plus references, locations, assets, and lists are modeled in ``FieldValue``:
 
 ```swift
 let article = try await service.createRecord(
@@ -89,7 +89,7 @@ Omit `recordName` to let CloudKit generate one; pass an explicit string when you
 
 ## Updating
 
-Use ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:database:)``. Pass `recordChangeTag` to opt into optimistic concurrency — CloudKit rejects the write if the record has been modified since you read it:
+Use ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:zoneID:database:)``. Pass `recordChangeTag` to opt into optimistic concurrency — CloudKit rejects the write if the record has been modified since you read it:
 
 ```swift
 let updated = try await service.updateRecord(
@@ -105,7 +105,7 @@ let updated = try await service.updateRecord(
 
 ## Deleting
 
-Use ``CloudKitService/deleteRecord(recordType:recordName:recordChangeTag:database:)``:
+Use ``CloudKitService/deleteRecord(recordType:recordName:recordChangeTag:zoneID:database:)``:
 
 ```swift
 try await service.deleteRecord(
@@ -119,7 +119,7 @@ Pass `recordChangeTag` to refuse the delete if the record changed since you read
 
 ## Batching
 
-When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:)``, ``RecordOperation/update(recordType:recordName:fields:recordChangeTag:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
+When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:)``, ``RecordOperation/update(recordType:recordName:fields:recordChangeTag:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
 
 ```swift
 let results = try await service.modifyRecords(
@@ -182,7 +182,7 @@ Pass `desiredKeys` to limit which fields come back — useful for list views tha
 
 ## Syncing via change tokens
 
-For incremental sync — pulling only what changed since the last fetch — use ``CloudKitService/fetchRecordChanges(zoneID:syncToken:resultsLimit:database:)`` (single page) or ``CloudKitService/fetchAllRecordChanges(recordType:syncToken:)`` (auto-paginated). The returned ``RecordChangesResult`` carries a fresh `syncToken` to persist for the next call:
+For incremental sync — pulling only what changed since the last fetch — use ``CloudKitService/fetchRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:database:)`` (single page) or ``CloudKitService/fetchAllRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:maxPages:database:)`` (auto-paginated). The returned ``RecordChangesResult`` carries a fresh `syncToken` to persist for the next call:
 
 ```swift
 var token: String? = loadStoredToken()
@@ -209,15 +209,15 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 ### Write operations
 
-- ``CloudKitService/createRecord(recordType:recordName:fields:database:)``
-- ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:database:)``
-- ``CloudKitService/deleteRecord(recordType:recordName:recordChangeTag:database:)``
-- ``CloudKitService/modifyRecords(_:atomic:database:)``
+- ``CloudKitService/createRecord(recordType:recordName:fields:zoneID:database:)``
+- ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:zoneID:database:)``
+- ``CloudKitService/deleteRecord(recordType:recordName:recordChangeTag:zoneID:database:)``
+- ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
 
 ### Sync
 
-- ``CloudKitService/fetchRecordChanges(zoneID:syncToken:resultsLimit:database:)``
-- ``CloudKitService/fetchAllRecordChanges(recordType:syncToken:)``
+- ``CloudKitService/fetchRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:database:)``
+- ``CloudKitService/fetchAllRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:maxPages:database:)``
 - ``RecordChangesResult``
 
 ### Building filters and sorts
@@ -228,8 +228,9 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 - ``RecordOperation``
 - ``RecordInfo``
 
-### See Also
+## See Also
 
+- <doc:FieldTypePolymorphism>
 - <doc:CloudKitLimitsAndPerformance>
 - <doc:HandlingErrors>
 - <doc:AuthenticationAndDatabases>

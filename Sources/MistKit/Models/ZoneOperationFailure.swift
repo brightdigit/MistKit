@@ -32,7 +32,7 @@
 /// CloudKit's `changes/database` and `changes/zone` operations return an entry
 /// per requested zone, each of which is either a success payload or a zone
 /// fetch error dictionary. This alias names the failure half; it is surfaced
-/// via ``ZoneChangeResult/failure(_:)`` / ``RecordZoneChangesResult`` rather
-/// than being thrown, so a partial failure never hides the zones that did
-/// succeed.
+/// via ``OperationResult/failure(_:)`` on a ``ZoneChangeResult`` /
+/// ``RecordZoneChangesResult`` rather than being thrown, so a partial failure
+/// never hides the zones that did succeed.
 public typealias ZoneOperationFailure = OperationFailure<ZoneTarget>

@@ -8,11 +8,11 @@ Running `./Scripts/generate-openapi.sh` emits two files:
 
 ```
 Sources/MistKitOpenAPI/
-├── Client.swift  (~3,600 lines)
-└── Types.swift   (~8,600 lines)
+├── Client.swift  (~5,000 lines)
+└── Types.swift   (~14,200 lines)
 ```
 
-Both are committed to the repository and module-`internal`. `CloudKitService` and the rest of the wrapper layer treat them as a typed JSON-over-HTTP transport — they don't show up in MistKit's public surface. For setup of the pipeline that produces these files, see <doc:OpenAPICodeGeneration>.
+Both are committed to the repository in their own target, `MistKitOpenAPI`, generated with `accessModifier: public` so the raw client is available as an escape hatch (`import MistKitOpenAPI`). The `MistKit` target does `internal import MistKitOpenAPI`, so `CloudKitService` and the rest of the wrapper treat the generated code as a typed JSON-over-HTTP transport and none of it leaks into MistKit's own public surface. For setup of the pipeline that produces these files, see <doc:OpenAPICodeGeneration>.
 
 ## File headers
 
@@ -37,7 +37,7 @@ Both files begin with:
 A `Sendable` protocol with one method per operation:
 
 ```swift
-internal protocol APIProtocol: Sendable {
+public protocol APIProtocol: Sendable {
   func queryRecords(_ input: Operations.queryRecords.Input)   async throws -> Operations.queryRecords.Output
   func modifyRecords(_ input: Operations.modifyRecords.Input) async throws -> Operations.modifyRecords.Output
   func lookupRecords(_ input: Operations.lookupRecords.Input) async throws -> Operations.lookupRecords.Output
@@ -74,10 +74,10 @@ Properties:
 The concrete implementation of `APIProtocol`:
 
 ```swift
-internal struct Client: APIProtocol {
+public struct Client: APIProtocol {
   private let client: UniversalClient
 
-  internal init(
+  public init(
     serverURL: URL,
     configuration: Configuration = .init(),
     transport: any ClientTransport,
@@ -100,7 +100,7 @@ The constructor takes a transport (URLSession or custom) and an ordered middlewa
 Each operation pairs a serializer (typed `Input` → `HTTPRequest`) with a deserializer (`HTTPResponse` → typed `Output`). For `queryRecords`:
 
 ```swift
-internal func queryRecords(_ input: Operations.queryRecords.Input) async throws -> Operations.queryRecords.Output {
+public func queryRecords(_ input: Operations.queryRecords.Input) async throws -> Operations.queryRecords.Output {
   try await client.send(
     input: input,
     forOperation: Operations.queryRecords.id,
@@ -158,7 +158,7 @@ Each branch of the response switch produces a distinct `Output` case. `.undocume
 
 ```swift
 extension APIProtocol {
-  internal func queryRecords(
+  public func queryRecords(
     path: Operations.queryRecords.Input.Path,
     headers: Operations.queryRecords.Input.Headers = .init(),
     body: Operations.queryRecords.Input.Body
@@ -173,9 +173,9 @@ MistKit's wrapper layer doesn't lean on these — it builds full `Input` values 
 ### Servers
 
 ```swift
-internal enum Servers {
-  internal enum Server1 {
-    internal static func url() throws -> Foundation.URL {
+public enum Servers {
+  public enum Server1 {
+    public static func url() throws -> Foundation.URL {
       try Foundation.URL(
         validatingOpenAPIServerURL: "https://api.apple-cloudkit.com",
         variables: []
@@ -196,11 +196,11 @@ Two top-level namespaces: `Components` (reusable schemas) and `Operations` (per-
 Every `#/components/schemas/...` entry becomes a `struct` with `Codable, Hashable, Sendable`:
 
 ```swift
-internal struct ZoneID: Codable, Hashable, Sendable {
-  internal var zoneName: Swift.String?
-  internal var ownerName: Swift.String?
-  internal init(zoneName: Swift.String? = nil, ownerName: Swift.String? = nil) { … }
-  internal enum CodingKeys: String, CodingKey { case zoneName, ownerName }
+public struct ZoneID: Codable, Hashable, Sendable {
+  public var zoneName: Swift.String?
+  public var ownerName: Swift.String?
+  public init(zoneName: Swift.String? = nil, ownerName: Swift.String? = nil) { … }
+  public enum CodingKeys: String, CodingKey { case zoneName, ownerName }
 }
 ```
 
@@ -215,7 +215,7 @@ Generated features per struct:
 String enums become Swift enums with the OpenAPI string as the raw value. CloudKit's filter comparators:
 
 ```swift
-internal enum comparatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
+public enum comparatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
   case EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS,
        NEAR, CONTAINS_ALL_TOKENS, IN, NOT_IN, CONTAINS_ANY_TOKENS,
        LIST_CONTAINS, NOT_LIST_CONTAINS,
@@ -228,34 +228,36 @@ This eliminates string typos at call sites.
 
 ### Field values: request vs response
 
-CloudKit's API is asymmetric — request bodies omit the `type` field, response bodies sometimes include it — so the OpenAPI schema models two separate types and the generator emits both:
+CloudKit's API is asymmetric — a request must tag only the scalars whose JSON shape is ambiguous, while a response usually carries `type` and accepts a different set of tags — so the OpenAPI schema models two separate types and the generator emits both:
 
-- `Components.Schemas.FieldValueRequest` — no `type` field.
-- `Components.Schemas.FieldValueResponse` — optional `type` field.
+- `Components.Schemas.FieldValueRequest` — optional `type` with a 17-value enum (scalars, complex types, and eight `*_LIST` element tags). MistKit tags `TIMESTAMP`, `BYTES`, and `DOUBLE` on every write; untagged, CloudKit infers the wrong type and rejects them.
+- `Components.Schemas.FieldValueResponse` — optional `type` with a 10-value enum (a single `LIST`).
 - `Components.Schemas.RecordRequest` — fields keyed to `FieldValueRequest`.
 - `Components.Schemas.RecordResponse` — fields keyed to `FieldValueResponse`.
 
 The compiler refuses to put a response value in a request. MistKit's wrapper hides the split behind a single domain ``FieldValue`` enum and converts at the boundary:
 
 - Outgoing: `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` converts ``FieldValue`` → `FieldValueRequest`.
-- Incoming: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` converts `FieldValueResponse` → ``FieldValue``.
+- Incoming: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` (and `+Scalar.swift`) converts `FieldValueResponse` → ``FieldValue``.
+
+The tagging rules, the undiscriminated `oneOf` decoding order, and the list asymmetry are explained in <doc:FieldTypePolymorphism>.
 
 ### Error responses
 
 CloudKit's HTTP error responses share one body schema regardless of status code. The OpenAPI spec models this as a single unified `Failure` response:
 
 ```swift
-internal struct Failure: Codable, Hashable, Sendable {
-  internal var uuid: Swift.String?
-  internal enum serverErrorCodePayload: String, Codable, Hashable, Sendable {
+public struct Failure: Codable, Hashable, Sendable {
+  public var uuid: Swift.String?
+  public enum serverErrorCodePayload: String, Codable, Hashable, Sendable {
     case ACCESS_DENIED, ATOMIC_ERROR, AUTHENTICATION_FAILED, AUTHENTICATION_REQUIRED,
          BAD_REQUEST, CONFLICT, EXISTS, INTERNAL_ERROR, NOT_FOUND,
          QUOTA_EXCEEDED, THROTTLED, TRY_AGAIN_LATER,
          VALIDATING_REFERENCE_ERROR, ZONE_NOT_FOUND
   }
-  internal var serverErrorCode: serverErrorCodePayload?
-  internal var reason: Swift.String?
-  internal var redirectURL: Swift.String?
+  public var serverErrorCode: serverErrorCodePayload?
+  public var reason: Swift.String?
+  public var redirectURL: Swift.String?
 }
 ```
 
@@ -264,16 +266,16 @@ The wrapper's `CloudKitResponseType` protocol (`Sources/MistKit/OpenAPI/CloudKit
 ### Parameters
 
 ```swift
-internal enum Parameters {
-  internal typealias version   = Swift.String
-  internal typealias container = Swift.String
+public enum Parameters {
+  public typealias version   = Swift.String
+  public typealias container = Swift.String
 
-  internal enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+  public enum environment: String, Codable, Hashable, Sendable, CaseIterable {
     case development
     case production
   }
 
-  internal enum database: String, Codable, Hashable, Sendable, CaseIterable {
+  public enum database: String, Codable, Hashable, Sendable, CaseIterable {
     case _public  = "public"   // `public` is a keyword — generator prefixes with `_`
     case _private = "private"
     case shared
@@ -288,37 +290,37 @@ MistKit's public ``Database`` enum is *not* the same type. The wrapper's ``Datab
 Each operation has an `Input` / `Output` tree:
 
 ```swift
-internal enum Operations {
-  internal enum queryRecords {
-    internal static let id: Swift.String = "queryRecords"
+public enum Operations {
+  public enum queryRecords {
+    public static let id: Swift.String = "queryRecords"
 
-    internal struct Input: Sendable, Hashable {
-      internal struct Path: Sendable, Hashable {
-        internal var version: Components.Parameters.version
-        internal var container: Components.Parameters.container
-        internal var environment: Components.Parameters.environment
-        internal var database: Components.Parameters.database
+    public struct Input: Sendable, Hashable {
+      public struct Path: Sendable, Hashable {
+        public var version: Components.Parameters.version
+        public var container: Components.Parameters.container
+        public var environment: Components.Parameters.environment
+        public var database: Components.Parameters.database
       }
-      internal struct Headers: Sendable, Hashable {
-        internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<
+      public struct Headers: Sendable, Hashable {
+        public var accept: [OpenAPIRuntime.AcceptHeaderContentType<
           Operations.queryRecords.AcceptableContentType
         >]
       }
-      internal enum Body: Sendable, Hashable {
+      public enum Body: Sendable, Hashable {
         case json(Components.Schemas.QueryRequest)
       }
-      internal var path: Path
-      internal var headers: Headers
-      internal var body: Body
+      public var path: Path
+      public var headers: Headers
+      public var body: Body
     }
 
-    internal enum Output: Sendable, Hashable {
-      internal struct Ok: Sendable, Hashable {
-        internal enum Body: Sendable, Hashable {
+    public enum Output: Sendable, Hashable {
+      public struct Ok: Sendable, Hashable {
+        public enum Body: Sendable, Hashable {
           case json(Components.Schemas.QueryResponse)
-          internal var json: Components.Schemas.QueryResponse { get throws { … } }
+          public var json: Components.Schemas.QueryResponse { get throws { … } }
         }
-        internal var body: Body
+        public var body: Body
       }
       case ok(Ok)
       case badRequest(Components.Responses.BadRequest)
@@ -391,15 +393,26 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     guard let authenticator = try await tokenManager.currentAuthenticator() else {
       throw TokenManagerError.invalidCredentials(.noCredentialsAvailable)
     }
+
     var modifiedRequest = request
     var modifiedBody = body
     try await authenticator.authenticate(request: &modifiedRequest, body: &modifiedBody)
-    return try await next(modifiedRequest, modifiedBody, baseURL)
+    let (response, responseBody) = try await next(modifiedRequest, modifiedBody, baseURL)
+    if let rotated = response.headerFields[.cloudKitWebAuthToken] {
+      do {
+        try await tokenManager.didReceiveRotatedWebAuthToken(rotated)
+      } catch {
+        let message = "Failed to consume rotated web auth token: \(error.localizedDescription)"
+        Logger(subsystem: .auth).warning("\(message)")
+        RotatedWebAuthTokenFailureReporter.assertionHandler(message)
+      }
+    }
+    return (response, responseBody)
   }
 }
 ```
 
-The middleware is intentionally tiny — adding a new authentication scheme means writing a new ``Authenticator``, not touching this file. Details in <doc:AuthenticationAndDatabases>.
+The middleware is intentionally tiny — adding a new authentication scheme means writing a new ``Authenticator``, not touching this file. The one thing it does on the way back is hand the rotated `X-Apple-CloudKit-Web-Auth-Token` to the token manager. Details in <doc:RequestSigning>.
 
 ### 3. FieldValue lives outside the generated layer
 
@@ -421,10 +434,11 @@ import struct Foundation.Date
 #endif
 ```
 
-The wrapper layer follows the same convention. WASI excludes `URLSessionTransport` entirely — non-WASI builds get URLSession-backed convenience initializers on ``CloudKitService``; WASI callers pass a `ClientTransport` explicitly to the generic initializer.
+The wrapper layer follows the same convention. WASI excludes `URLSessionTransport` entirely — the URLSession-backed public initializers on ``CloudKitService`` are compiled only for non-WASI platforms, and the transport-accepting initializer is internal today, so WASI has no public entry point yet (see <doc:ConfiguringMistKit>).
 
 ## See Also
 
+- <doc:FieldTypePolymorphism>
 - <doc:OpenAPICodeGeneration>
 - <doc:GeneratedCodeWorkflow>
 - <doc:AbstractionLayerArchitecture>

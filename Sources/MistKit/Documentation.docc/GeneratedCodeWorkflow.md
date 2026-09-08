@@ -183,30 +183,31 @@ unaffected.
 
 ## CI verification
 
-A typical CI job to verify generated code is up to date:
+`.github/workflows/check-generated-openapi.yml` runs on every push to `main` and every pull request. It regenerates inside a `swift:latest` container — using the generator fallback built from `Scripts/OpenAPITools`, so no mise is needed on the runner — and fails if the committed output differs:
 
 ```yaml
-- name: Setup tools
-  run: |
-    curl https://mise.run | sh
-    eval "$(~/.local/bin/mise activate bash)"
-    mise install
+jobs:
+  regenerate-and-diff:
+    name: Regenerate Sources/MistKitOpenAPI and diff
+    runs-on: ubuntu-latest
+    container:
+      image: swift:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
-- name: Regenerate
-  run: ./Scripts/generate-openapi.sh
+      - name: Regenerate OpenAPI code
+        run: ./Scripts/generate-openapi.sh
 
-- name: Fail if generated code drifts from spec
-  run: |
-    if ! git diff --exit-code Sources/MistKitOpenAPI/; then
-      echo "::error::Generated code is out of date. Run ./Scripts/generate-openapi.sh and commit."
-      exit 1
-    fi
-
-- name: Build + test
-  run: swift build && swift test
+      - name: Fail if the committed output does not match
+        run: |
+          if ! git diff --exit-code Sources/MistKitOpenAPI/; then
+            echo "::error::Sources/MistKitOpenAPI/ does not match the output of ./Scripts/generate-openapi.sh."
+            exit 1
+          fi
 ```
 
-This catches the "edited `openapi.yaml`, forgot to commit the regenerated files" mistake before it lands.
+This catches the "edited `openapi.yaml`, forgot to commit the regenerated files" mistake — and any hand edit to generated code — before it lands.
 
 ## Troubleshooting
 

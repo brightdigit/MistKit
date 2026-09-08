@@ -36,7 +36,8 @@ extension RecordOperation {
   ///
   /// Compare against ``CloudKitService/maxRecordDataBytes`` (1 MB) to
   /// pre-flight CloudKit's per-record data limit before calling
-  /// ``CloudKitService/modifyRecords(_:atomic:database:)``. Delete operations
+  /// ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``.
+  /// Delete operations
   /// carry a small envelope (record name, record type, empty fields) so they
   /// report a tiny but non-zero size.
   ///
