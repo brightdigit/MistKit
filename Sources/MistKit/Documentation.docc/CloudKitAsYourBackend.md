@@ -161,7 +161,7 @@ The two stories above generalize into four families:
 | **Web app ↔ Apple device bridge** | A browser portal for a CloudKit-backed app, a webhook handler (Stripe, GitHub, forms) that writes straight into a user's records |
 | **Data aggregation** | Anonymized telemetry read via `records/changes`, crowdsourced data cleaned and written back by a background steward |
 
-Apple's CloudKit framework only runs on Apple platforms. MistKit is the CloudKit framework for the places the CloudKit framework does not go — Linux, Windows, and anything else by wrapping the CloudKit Web Services — server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
+Apple's CloudKit framework only runs on Apple platforms. MistKit is the CloudKit framework for the places the CloudKit framework does not go — Linux, Windows, and anything else — by wrapping the CloudKit Web Services. Server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
 
 ## Building MistKit
 
@@ -246,7 +246,7 @@ Unit tests were not enough — the assistant would report success on code that f
 
 ## Authentication
 
-On a device, authentication is invisible: the user is signed in to iCloud and the framework does the rest. Outside the Apple ecosystem you either put a sign-in button on a web page or manage credentials yourself, and on a server you have to prove who you are with credentials you manage. Apple documents three methods; it is more honest to call it **two and a half**, because the first one is a prerequisite for the second rather than a peer.
+On a device, authentication is invisible: the user is signed in to iCloud and the framework does the rest. Outside the Apple ecosystem you either put a sign-in button on a web page or manage credentials yourself, and on a server you have to prove who you are with those credentials. Apple documents three methods; it is more honest to call it **two and a half**, because the first one is a prerequisite for the second rather than a peer.
 
 All of them start in the CloudKit Console under **Tokens & Keys** for your container.
 
