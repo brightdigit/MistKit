@@ -12,6 +12,26 @@ The talk was given in 2026 at Swift Craft and iOSDevUK (Aberystwyth). The abstra
 
 The sections below follow the slide order. Every code sample is taken from the current MistKit source or its example projects, so the article stays accurate as the library evolves. A complete list of the links shown during the talk is at the end, in <doc:CloudKitAsYourBackend#Links>.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [What is CloudKit](#what-is-cloudkit)
+- [What is CloudKit Web Services](#what-is-cloudkit-web-services)
+- [Why server-side CloudKit](#why-server-side-cloudkit)
+    - [Private database: Heartwitch](#private-database-heartwitch)
+    - [Public database: Bushel](#public-database-bushel)
+- [Building MistKit](#building-mistkit)
+- [Authentication](#authentication)
+    - [API token](#api-token)
+    - [Web auth token](#web-auth-token)
+    - [Server to server](#server-to-server)
+- [Field type polymorphism](#field-type-polymorphism)
+- [Error handling](#error-handling)
+- [Deployment](#deployment)
+- [What's next](#whats-next)
+- [Links](#links)
+- [Questions](#questions)
+
 ## What is CloudKit
 
 Travel back to WWDC 2014 — the year Swift was introduced — and you also find the introduction of CloudKit. The idea was simple: give iOS developers a backend for storage, logic, database, search, and notifications without running a server.
