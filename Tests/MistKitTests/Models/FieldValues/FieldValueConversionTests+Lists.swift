@@ -33,7 +33,7 @@ internal import Testing
 
 @testable import MistKit
 
-// swiftlint:disable file_length type_body_length
+// swiftlint:disable file_length type_body_length function_body_length closure_body_length
 extension FieldValueConversionTests {
   /// Homogeneous-list request/response conversions (issue #481).
   ///
@@ -41,9 +41,6 @@ extension FieldValueConversionTests {
   /// emit tip-over (see `.claude/memory/reference_windows_62_mistkittests_emit_abort.md`).
   @Suite("List Conversions", .disabled(if: Platform.isWindowsSwift62))
   internal struct Lists {
-    private static let windowsTipOverMessage =
-      "Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over)."
-
     private static func withSuppressedConversionAssert(
       _ body: () throws -> Void
     ) rethrows {
@@ -72,7 +69,7 @@ extension FieldValueConversionTests {
           Issue.record("Expected listValue")
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -93,7 +90,7 @@ extension FieldValueConversionTests {
           Issue.record("Expected listValue")
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -114,7 +111,7 @@ extension FieldValueConversionTests {
         }
         #expect(values.count == 2)
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -138,7 +135,7 @@ extension FieldValueConversionTests {
         }
         #expect(encoded == payload.base64EncodedString())
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -159,7 +156,7 @@ extension FieldValueConversionTests {
           Issue.record("Expected listValue")
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -186,7 +183,7 @@ extension FieldValueConversionTests {
         }
         #expect(values.count == 4)
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -210,7 +207,7 @@ extension FieldValueConversionTests {
         }
         #expect(value.fileChecksum == "c")
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -241,7 +238,7 @@ extension FieldValueConversionTests {
         #expect(milliseconds == 1_747_999_812_348)
         #expect(milliseconds == milliseconds.rounded())
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -279,7 +276,7 @@ extension FieldValueConversionTests {
         #expect(timestamp == 1_747_999_812_348)
         #expect(timestamp == timestamp.rounded())
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -300,7 +297,7 @@ extension FieldValueConversionTests {
         let value = try FieldValue(response, fieldName: "tags")
         #expect(value == .string(.list([])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -319,7 +316,7 @@ extension FieldValueConversionTests {
         let value = try FieldValue(response, fieldName: "tags")
         #expect(value == .string(.list(["a", "b"])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -337,7 +334,7 @@ extension FieldValueConversionTests {
         )
         #expect(value == .int64(.list([1, 2])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -355,7 +352,7 @@ extension FieldValueConversionTests {
         )
         #expect(value == .double(.list([1.5, 3.0])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -382,7 +379,7 @@ extension FieldValueConversionTests {
           }
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -404,7 +401,7 @@ extension FieldValueConversionTests {
         )
         #expect(value == .bytes(.list([hello, hello])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -435,7 +432,7 @@ extension FieldValueConversionTests {
             )
         )
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -477,7 +474,7 @@ extension FieldValueConversionTests {
         )
         #expect(assetValue.assetListValue?.first?.fileChecksum == "chk")
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -497,7 +494,7 @@ extension FieldValueConversionTests {
         )
         #expect(value == .string(.list([])))
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -567,7 +564,7 @@ extension FieldValueConversionTests {
           ).assetListValue?.first?.fileChecksum == "z"
         )
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -588,7 +585,7 @@ extension FieldValueConversionTests {
           }
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -610,7 +607,7 @@ extension FieldValueConversionTests {
           }
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -682,7 +679,7 @@ extension FieldValueConversionTests {
           }
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
 
@@ -711,9 +708,9 @@ extension FieldValueConversionTests {
           #expect(decoded == value)
         }
       #else
-        Issue.record(Self.windowsTipOverMessage)
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
       #endif
     }
   }
 }
-// swiftlint:enable file_length type_body_length
+// swiftlint:enable file_length type_body_length function_body_length closure_body_length
