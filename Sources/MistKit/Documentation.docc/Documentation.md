@@ -165,6 +165,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 ### Guides
 
 - <doc:CloudKitAsYourBackend>
+- <doc:iOSDevUKTalk>
 - <doc:DeployingMistKit>
 
 ### Under the hood
