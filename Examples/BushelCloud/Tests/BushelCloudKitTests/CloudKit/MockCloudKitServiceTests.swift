@@ -110,7 +110,7 @@ internal struct MockCloudKitServiceTests {
     #expect(storedRecords.count == 1)
 
     let storedFields = storedRecords[0].fields
-    if case .int64(let fileSize) = storedFields["fileSize"] {
+    if case .int64(.value(let fileSize)) = storedFields["fileSize"] {
       #expect(fileSize == 99_999)
     } else {
       Issue.record("fileSize field not found or wrong type")

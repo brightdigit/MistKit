@@ -41,7 +41,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: Int64(42), fieldType: .int64)
 
       #expect(fieldValue != nil)
-      if case .int64(let value) = fieldValue {
+      if case .int64(.value(let value)) = fieldValue {
         #expect(value == 42)
       } else {
         Issue.record("Expected .int64 case")
@@ -53,7 +53,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: 42 as Int, fieldType: .int64)
 
       #expect(fieldValue != nil)
-      if case .int64(let value) = fieldValue {
+      if case .int64(.value(let value)) = fieldValue {
         #expect(value == 42)
       } else {
         Issue.record("Expected .int64 case")
@@ -65,7 +65,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: Int64(-123), fieldType: .int64)
 
       #expect(fieldValue != nil)
-      if case .int64(let value) = fieldValue {
+      if case .int64(.value(let value)) = fieldValue {
         #expect(value == -123)
       } else {
         Issue.record("Expected .int64 case")
@@ -77,7 +77,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: Int64(0), fieldType: .int64)
 
       #expect(fieldValue != nil)
-      if case .int64(let value) = fieldValue {
+      if case .int64(.value(let value)) = fieldValue {
         #expect(value == 0)
       } else {
         Issue.record("Expected .int64 case")
@@ -95,7 +95,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: Int64.max, fieldType: .int64)
 
       #expect(fieldValue != nil)
-      if case .int64(let value) = fieldValue {
+      if case .int64(.value(let value)) = fieldValue {
         #expect(value == Int(Int64.max))
       } else {
         Issue.record("Expected .int64 case")

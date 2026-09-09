@@ -43,14 +43,16 @@ extension FieldValue {
     case numeric(NumericScalarTag)
     /// A tag that requires a string-backed value (`BYTES`, `STRING`).
     case text(TextScalarTag)
-    /// A tag that requires a structured value (`REFERENCE`, `ASSET`/`ASSETID`, `LOCATION`,
-    /// `LIST`).
+    /// A tag that requires a structured scalar value (`REFERENCE`, `ASSET`/`ASSETID`, `LOCATION`).
     case complex(ExpectedComplexValue)
+    /// A tag that requires a `ListValue` whose elements match the declared kind (`*_LIST`).
+    case list(ListElementKind)
 
     // Classify a declared response `type`.
     //
     // `ASSETID` shares `AssetValue` — and therefore the `.asset` classification — with
-    // `ASSET`; there is no distinct domain case for it.
+    // `ASSET`; there is no distinct domain case for it. List responses use the granular
+    // `*_LIST` family (issue #481); there is no flat `LIST` tag.
     // swiftlint:disable:next cyclomatic_complexity
     internal init(_ fieldType: Components.Schemas.FieldValueResponse._typePayload) {
       switch fieldType {
@@ -62,7 +64,14 @@ extension FieldValue {
       case .REFERENCE: self = .complex(.reference)
       case .ASSET, .ASSETID: self = .complex(.asset)
       case .LOCATION: self = .complex(.location)
-      case .LIST: self = .complex(.list)
+      case .STRING_LIST: self = .list(.string)
+      case .INT64_LIST: self = .list(.int64)
+      case .DOUBLE_LIST: self = .list(.double)
+      case .BYTES_LIST: self = .list(.bytes)
+      case .TIMESTAMP_LIST: self = .list(.date)
+      case .REFERENCE_LIST: self = .list(.reference)
+      case .LOCATION_LIST: self = .list(.location)
+      case .ASSET_LIST: self = .list(.asset)
       }
     }
   }
@@ -80,24 +89,36 @@ extension FieldValue {
     case string
   }
 
-  /// The decoded `value` case a complex/list `FieldValueResponse` `type` tag requires (#376).
+  /// The decoded `value` case a complex (non-list) `FieldValueResponse` `type` tag requires
+  /// (#376).
   internal enum ExpectedComplexValue: Hashable, Sendable {
     case reference
     case asset
     case location
-    case list
 
-    /// Whether `value`'s decoded `oneOf` case satisfies this declared complex/list tag.
+    /// Whether `value`'s decoded `oneOf` case satisfies this declared complex tag.
     internal func matches(
       _ value: Components.Schemas.FieldValueResponse.valuePayload
     ) -> Bool {
       switch (self, value) {
       case (.reference, .ReferenceValue), (.asset, .AssetValue),
-        (.location, .LocationValue), (.list, .ListValue):
+        (.location, .LocationValue):
         return true
       default:
         return false
       }
     }
+  }
+
+  /// The element kind a `*_LIST` response tag requires (issue #481).
+  internal enum ListElementKind: Hashable, Sendable {
+    case string
+    case int64
+    case double
+    case bytes
+    case date
+    case location
+    case reference
+    case asset
   }
 }

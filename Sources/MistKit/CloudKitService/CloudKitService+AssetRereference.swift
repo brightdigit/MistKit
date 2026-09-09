@@ -194,7 +194,7 @@ extension CloudKitService {
     return try await updateRecord(
       recordType: recordType,
       recordName: targetRecordName,
-      fields: [resolvedTargetField: .asset(asset)],
+      fields: [resolvedTargetField: .asset(.value(asset))],
       recordChangeTag: recordChangeTag,
       database: database
     )

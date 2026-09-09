@@ -41,7 +41,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: "anything" as String, fieldType: .asset)
 
       #expect(fieldValue != nil)
-      if case .asset(let asset) = fieldValue {
+      if case .asset(.value(let asset)) = fieldValue {
         #expect(asset.downloadURL == "anything")
       } else {
         Issue.record("Expected .asset case")

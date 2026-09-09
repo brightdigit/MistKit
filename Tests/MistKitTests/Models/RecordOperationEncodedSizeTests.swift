@@ -47,7 +47,7 @@ internal struct RecordOperationEncodedSizeTests {
   internal func createReturnsPositive() throws {
     let operation = RecordOperation.create(
       recordType: "Note",
-      fields: ["body": .string("hello")]
+      fields: ["body": .string(.value("hello"))]
     )
     #expect(try operation.encodedRecordSize() > 0)
   }
@@ -56,11 +56,11 @@ internal struct RecordOperationEncodedSizeTests {
   internal func sizeScalesWithContent() throws {
     let small = RecordOperation.create(
       recordType: "Note",
-      fields: ["body": .string("x")]
+      fields: ["body": .string(.value("x"))]
     )
     let large = RecordOperation.create(
       recordType: "Note",
-      fields: ["body": .string(String(repeating: "x", count: 10_000))]
+      fields: ["body": .string(.value(String(repeating: "x", count: 10_000)))]
     )
     let smallSize = try small.encodedRecordSize()
     let largeSize = try large.encodedRecordSize()
@@ -74,7 +74,7 @@ internal struct RecordOperationEncodedSizeTests {
   internal func boundaryComparisonCompiles() throws {
     let operation = RecordOperation.create(
       recordType: "Note",
-      fields: ["body": .string("ok")]
+      fields: ["body": .string(.value("ok"))]
     )
     let size = try operation.encodedRecordSize()
     #expect(size <= CloudKitService.maxRecordDataBytes)

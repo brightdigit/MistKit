@@ -29,15 +29,30 @@
 
 public import Foundation
 
-/// Represents a CloudKit field value as defined in the CloudKit Web Services API
+/// Represents a CloudKit field value as defined in the CloudKit Web Services API.
+///
+/// Each kind carries ``Arity`` so a field is either a single value or a homogeneous
+/// list of that kind. Heterogeneous and nested lists are unrepresentable — matching
+/// CloudKit's `LIST<primitive-type>` schema grammar (issue #481).
 public enum FieldValue: Codable, Equatable, Sendable {
-  case string(String)
-  case int64(Int)
-  case double(Double)
-  case bytes(Data)  // Binary data; base64-encoded on the wire
-  case date(Date)  // Date/time value
-  case location(Location)
-  case reference(Reference)
-  case asset(Asset)
-  case list([FieldValue])
+  case string(Arity<String>)
+  case int64(Arity<Int>)
+  case double(Arity<Double>)
+  case bytes(Arity<Data>)  // Binary data; base64-encoded on the wire
+  case date(Arity<Date>)  // Date/time value
+  case location(Arity<Location>)
+  case reference(Arity<Reference>)
+  case asset(Arity<Asset>)
+}
+
+extension FieldValue {
+  /// Whether a field holds one value or a homogeneous list of that kind.
+  ///
+  /// Empty lists use `.list([])` on the appropriate kind (e.g. `.string(.list([]))`);
+  /// there is no separate empty case — the element type is part of the domain value
+  /// even when the array is empty.
+  public enum Arity<T: Codable & Equatable & Sendable>: Codable, Equatable, Sendable {
+    case value(T)
+    case list([T])
+  }
 }

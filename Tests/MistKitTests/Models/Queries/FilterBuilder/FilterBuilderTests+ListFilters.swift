@@ -13,7 +13,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let values: [FieldValue] = [.string("active"), .string("pending")]
+      let values: [FieldValue] = [.string(.value("active")), .string(.value("pending"))]
       let filter = FilterBuilder.in("status", values)
       #expect(filter.comparator == .IN)
       #expect(filter.fieldName == "status")
@@ -26,7 +26,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let values: [FieldValue] = [.string("deleted"), .string("archived")]
+      let values: [FieldValue] = [.string(.value("deleted")), .string(.value("archived"))]
       let filter = FilterBuilder.notIn("status", values)
       #expect(filter.comparator == .NOT_IN)
       #expect(filter.fieldName == "status")
@@ -39,7 +39,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let values: [FieldValue] = [.int64(1), .int64(2), .int64(3)]
+      let values: [FieldValue] = [.int64(.value(1)), .int64(.value(2)), .int64(.value(3))]
       let filter = FilterBuilder.in("categoryId", values)
       #expect(filter.comparator == .IN)
       #expect(filter.fieldName == "categoryId")
@@ -52,7 +52,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.listContains("tags", .string("important"))
+      let filter = FilterBuilder.listContains("tags", .string(.value("important")))
       #expect(filter.comparator == .LIST_CONTAINS)
       #expect(filter.fieldName == "tags")
     }
@@ -63,7 +63,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.notListContains("tags", .string("spam"))
+      let filter = FilterBuilder.notListContains("tags", .string(.value("spam")))
       #expect(filter.comparator == .NOT_LIST_CONTAINS)
       #expect(filter.fieldName == "tags")
     }

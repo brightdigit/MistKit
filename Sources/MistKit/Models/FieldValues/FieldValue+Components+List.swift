@@ -30,111 +30,274 @@
 internal import Foundation
 internal import MistKitOpenAPI
 
-/// List-value conversions for `FieldValue` ← `Components.Schemas` response types.
+// swiftlint:disable file_length
+/// Homogeneous list-value conversions for `FieldValue` ← `Components.Schemas` response types.
 extension FieldValue {
-  /// Initialize from list field value
+  /// Initialize from a CloudKit list payload.
+  /// When `elementKind` is set (from a `*_LIST` response tag), every element must match that
+  /// kind or conversion throws ``ConversionError/typeValueMismatch``. When `elementKind` is
+  /// `nil` (untagged list), the kind is inferred from the first element and remaining elements
+  /// must match; an empty untagged list becomes `.string(.list([]))`.
   internal init(
     listValue: [Components.Schemas.ListValuePayload],
+    elementKind: ListElementKind?,
     fieldName: String
   ) throws(ConversionError) {
-    var convertedList: [FieldValue] = []
-    for item in listValue {
-      convertedList.append(try Self(listItem: item, fieldName: fieldName))
-    }
-    self = .list(convertedList)
-  }
-
-  /// Initialize from individual list item
-  internal init(
-    listItem: Components.Schemas.ListValuePayload,
-    fieldName: String
-  ) throws(ConversionError) {
-    if let simpleValue = try Self.makeSimpleListItem(from: listItem, fieldName: fieldName) {
-      self = simpleValue
-    } else if let complexValue = try Self.makeComplexListItem(from: listItem, fieldName: fieldName)
-    {
-      self = complexValue
+    let kind: ListElementKind
+    if let elementKind {
+      kind = elementKind
+    } else if let first = listValue.first {
+      kind = try Self.inferredListElementKind(from: first, fieldName: fieldName)
     } else {
-      let failure = ConversionError.unmappableListItem(fieldName: fieldName, item: "\(listItem)")
+      // Empty untagged list: domain needs an element kind; STRING_LIST is the live default
+      // for empty typed lists and matches `.string(.list([]))` (issue #481).
+      self = .string(.list([]))
+      return
+    }
+    self = try Self.makeHomogeneousList(
+      from: listValue,
+      kind: kind,
+      fieldName: fieldName
+    )
+  }
+
+  // Infer the list element kind from a single untagged payload (first-match wire shape).
+  // swiftlint:disable:next cyclomatic_complexity
+  private static func inferredListElementKind(
+    from item: Components.Schemas.ListValuePayload,
+    fieldName: String
+  ) throws(ConversionError) -> ListElementKind {
+    switch item {
+    case .StringValue:
+      return .string
+    case .Int64Value:
+      return .int64
+    case .DoubleValue:
+      return .double
+    case .BytesValue:
+      return .bytes
+    case .DateValue:
+      return .date
+    case .LocationValue:
+      return .location
+    case .ReferenceValue:
+      return .reference
+    case .AssetValue:
+      return .asset
+    case .ListValue:
+      let failure = ConversionError.unmappableListItem(fieldName: fieldName, item: "\(item)")
       try failure.reportAndThrow()
     }
   }
 
-  /// Initialize from nested list value (simplified for basic types)
-  internal init(
-    nestedListValue: [Components.Schemas.ListValuePayload],
+  // swiftlint:disable:next cyclomatic_complexity function_body_length
+  private static func makeHomogeneousList(
+    from listValue: [Components.Schemas.ListValuePayload],
+    kind: ListElementKind,
     fieldName: String
-  ) throws(ConversionError) {
-    var convertedNestedList: [FieldValue] = []
-    for item in nestedListValue {
-      convertedNestedList.append(try Self(basicListItem: item, fieldName: fieldName))
+  ) throws(ConversionError) -> FieldValue {
+    // Manual loops (not `map`) so typed throws stay `ConversionError`.
+    switch kind {
+    case .string:
+      var elements: [String] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireStringElement(item, fieldName: fieldName, declaredType: "STRING_LIST")
+        )
+      }
+      return .string(.list(elements))
+    case .int64:
+      var elements: [Int] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireInt64Element(item, fieldName: fieldName, declaredType: "INT64_LIST")
+        )
+      }
+      return .int64(.list(elements))
+    case .double:
+      var elements: [Double] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireDoubleElement(item, fieldName: fieldName, declaredType: "DOUBLE_LIST")
+        )
+      }
+      return .double(.list(elements))
+    case .bytes:
+      var elements: [Data] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireBytesElement(item, fieldName: fieldName, declaredType: "BYTES_LIST")
+        )
+      }
+      return .bytes(.list(elements))
+    case .date:
+      var elements: [Date] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireDateElement(item, fieldName: fieldName, declaredType: "TIMESTAMP_LIST")
+        )
+      }
+      return .date(.list(elements))
+    case .location:
+      var elements: [Location] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireLocationElement(item, fieldName: fieldName, declaredType: "LOCATION_LIST")
+        )
+      }
+      return .location(.list(elements))
+    case .reference:
+      var elements: [Reference] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireReferenceElement(item, fieldName: fieldName, declaredType: "REFERENCE_LIST")
+        )
+      }
+      return .reference(.list(elements))
+    case .asset:
+      var elements: [Asset] = []
+      elements.reserveCapacity(listValue.count)
+      for item in listValue {
+        elements.append(
+          try requireAssetElement(item, fieldName: fieldName, declaredType: "ASSET_LIST")
+        )
+      }
+      return .asset(.list(elements))
     }
-    self = .list(convertedNestedList)
   }
 
-  /// Initialize from basic list item types only
-  internal init(
-    basicListItem: Components.Schemas.ListValuePayload,
-    fieldName: String
-  ) throws(ConversionError) {
-    switch basicListItem {
-    case .StringValue(let stringValue):
-      self = .string(stringValue)
-    case .Int64Value(let intValue):
-      self = .int64(Int(intValue))
-    case .DoubleValue(let doubleValue):
-      self = .double(doubleValue)
-    case .BytesValue(let bytesValue):
-      self = .bytes(
-        try Self.dataFromBase64(bytesValue, fieldName: fieldName, declaredType: "BYTES")
-      )
+  private static func requireStringElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> String {
+    guard case .StringValue(let value) = item else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
+    }
+    return value
+  }
+
+  private static func requireInt64Element(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Int {
+    guard case .Int64Value(let value) = item else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
+    }
+    return Int(value)
+  }
+
+  private static func requireDoubleElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Double {
+    switch item {
+    case .DoubleValue(let value):
+      return value
+    case .Int64Value(let value):
+      return Double(value)
     default:
-      let failure = ConversionError.unmappableNestedListItem(
-        fieldName: fieldName,
-        item: "\(basicListItem)"
-      )
-      try failure.reportAndThrow()
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
   }
 
-  private static func makeSimpleListItem(
-    from listItem: Components.Schemas.ListValuePayload,
-    fieldName: String
-  ) throws(ConversionError) -> FieldValue? {
-    if case .StringValue(let strVal) = listItem {
-      return .string(strVal)
+  private static func requireBytesElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Data {
+    let string: String
+    switch item {
+    case .BytesValue(let value), .StringValue(let value):
+      string = value
+    default:
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    if case .Int64Value(let intVal) = listItem {
-      return .int64(Int(intVal))
-    }
-    if case .DoubleValue(let dblVal) = listItem {
-      return .double(dblVal)
-    }
-    if case .BytesValue(let bytesVal) = listItem {
-      return .bytes(try dataFromBase64(bytesVal, fieldName: fieldName, declaredType: "BYTES"))
-    }
-    if case .DateValue(let dateVal) = listItem {
-      return .date(Date(timeIntervalSince1970: dateVal / 1_000))
-    }
-    return nil
+    return try dataFromBase64(string, fieldName: fieldName, declaredType: declaredType)
   }
 
-  private static func makeComplexListItem(
-    from listItem: Components.Schemas.ListValuePayload,
-    fieldName: String
-  ) throws(ConversionError) -> FieldValue? {
-    if case .LocationValue(let locationValue) = listItem {
-      return Self(locationValue: locationValue)
+  private static func requireDateElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Date {
+    let milliseconds: Double
+    switch item {
+    case .DateValue(let value):
+      milliseconds = value
+    case .Int64Value(let value):
+      milliseconds = Double(value)
+    case .DoubleValue(let value):
+      milliseconds = value
+    default:
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    if case .ReferenceValue(let referenceValue) = listItem {
-      return Self(referenceValue: referenceValue)
+    return Date(timeIntervalSince1970: milliseconds / 1_000)
+  }
+
+  private static func requireLocationElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Location {
+    guard case .LocationValue(let locationValue) = item else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    if case .AssetValue(let assetValue) = listItem {
-      return Self(assetValue: assetValue)
+    guard case .location(.value(let location)) = FieldValue(locationValue: locationValue) else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    if case .ListValue(let nestedList) = listItem {
-      return try Self(nestedListValue: nestedList, fieldName: fieldName)
+    return location
+  }
+
+  private static func requireReferenceElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Reference {
+    guard case .ReferenceValue(let referenceValue) = item else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    return nil
+    guard case .reference(.value(let reference)) = FieldValue(referenceValue: referenceValue)
+    else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
+    }
+    return reference
+  }
+
+  private static func requireAssetElement(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Asset {
+    guard case .AssetValue(let assetValue) = item else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
+    }
+    guard case .asset(.value(let asset)) = FieldValue(assetValue: assetValue) else {
+      try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
+    }
+    return asset
+  }
+
+  private static func reportListElementMismatch(
+    _ item: Components.Schemas.ListValuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Never {
+    let failure = ConversionError.typeValueMismatch(
+      fieldName: fieldName,
+      declaredType: declaredType,
+      value: "\(item)"
+    )
+    try failure.reportAndThrow()
   }
 }
+// swiftlint:enable file_length

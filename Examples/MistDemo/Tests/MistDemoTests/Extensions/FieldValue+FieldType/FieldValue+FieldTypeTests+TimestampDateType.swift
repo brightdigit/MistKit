@@ -42,7 +42,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: date, fieldType: .timestamp)
 
       #expect(fieldValue != nil)
-      if case .date(let value) = fieldValue {
+      if case .date(.value(let value)) = fieldValue {
         #expect(value.timeIntervalSince1970 == 1_705_315_800)
       } else {
         Issue.record("Expected .date case")
@@ -55,7 +55,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: date, fieldType: .timestamp)
 
       #expect(fieldValue != nil)
-      if case .date(let value) = fieldValue {
+      if case .date(.value(let value)) = fieldValue {
         #expect(value.timeIntervalSince1970 == 0)
       } else {
         Issue.record("Expected .date case")
@@ -68,7 +68,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: date, fieldType: .timestamp)
 
       #expect(fieldValue != nil)
-      if case .date(let value) = fieldValue {
+      if case .date(.value(let value)) = fieldValue {
         #expect(value.timeIntervalSince1970 == date.timeIntervalSince1970)
       } else {
         Issue.record("Expected .date case")

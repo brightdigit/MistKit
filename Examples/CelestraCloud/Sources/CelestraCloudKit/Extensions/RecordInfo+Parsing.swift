@@ -47,7 +47,7 @@ extension RecordInfo {
     forKey key: String,
     recordType: String
   ) throws -> String {
-    guard case .string(let value) = fields[key], !value.isEmpty else {
+    guard case .string(.value(let value)) = fields[key], !value.isEmpty else {
       throw CloudKitConversionError.missingRequiredField(
         fieldName: key,
         recordType: recordType
@@ -61,7 +61,7 @@ extension RecordInfo {
   /// - Parameter key: The field key to extract.
   /// - Returns: The string value, or nil if the field is missing.
   public func optionalString(forKey key: String) -> String? {
-    guard case .string(let value) = fields[key] else {
+    guard case .string(.value(let value)) = fields[key] else {
       return nil
     }
     return value
@@ -74,7 +74,7 @@ extension RecordInfo {
   ///   - defaultValue: The default value if the field is missing.
   /// - Returns: The boolean value, or the default if the field is missing.
   public func bool(forKey key: String, default defaultValue: Bool = false) -> Bool {
-    guard case .int64(let value) = fields[key] else {
+    guard case .int64(.value(let value)) = fields[key] else {
       return defaultValue
     }
     return value != 0
@@ -87,7 +87,7 @@ extension RecordInfo {
   ///   - defaultValue: The default value if the field is missing.
   /// - Returns: The Int64 value, or the default if the field is missing.
   public func int64(forKey key: String, default defaultValue: Int64 = 0) -> Int64 {
-    guard case .int64(let value) = fields[key] else {
+    guard case .int64(.value(let value)) = fields[key] else {
       return defaultValue
     }
     return Int64(value)
@@ -100,7 +100,7 @@ extension RecordInfo {
   ///   - defaultValue: The default value if the field is missing.
   /// - Returns: The Int value, or the default if the field is missing.
   public func int(forKey key: String, default defaultValue: Int = 0) -> Int {
-    guard case .int64(let value) = fields[key] else {
+    guard case .int64(.value(let value)) = fields[key] else {
       return defaultValue
     }
     return Int(value)
@@ -111,7 +111,7 @@ extension RecordInfo {
   /// - Parameter key: The field key to extract.
   /// - Returns: The Date value, or nil if the field is missing.
   public func optionalDate(forKey key: String) -> Date? {
-    guard case .date(let value) = fields[key] else {
+    guard case .date(.value(let value)) = fields[key] else {
       return nil
     }
     return value
@@ -124,7 +124,7 @@ extension RecordInfo {
   ///   - defaultValue: The default value if the field is missing.
   /// - Returns: The Date value, or the default if the field is missing.
   public func date(forKey key: String, default defaultValue: Date) -> Date {
-    guard case .date(let value) = fields[key] else {
+    guard case .date(.value(let value)) = fields[key] else {
       return defaultValue
     }
     return value
@@ -135,7 +135,7 @@ extension RecordInfo {
   /// - Parameter key: The field key to extract.
   /// - Returns: The Double value, or nil if the field is missing.
   public func optionalDouble(forKey key: String) -> Double? {
-    guard case .double(let value) = fields[key] else {
+    guard case .double(.value(let value)) = fields[key] else {
       return nil
     }
     return value
@@ -146,7 +146,7 @@ extension RecordInfo {
   /// - Parameter key: The field key to extract.
   /// - Returns: The Int value, or nil if the field is missing.
   public func optionalInt(forKey key: String) -> Int? {
-    guard case .int64(let value) = fields[key] else {
+    guard case .int64(.value(let value)) = fields[key] else {
       return nil
     }
     return Int(value)
@@ -157,14 +157,9 @@ extension RecordInfo {
   /// - Parameter key: The field key to extract.
   /// - Returns: The array of strings, or an empty array if the field is missing.
   public func stringArray(forKey key: String) -> [String] {
-    guard case .list(let values) = fields[key] else {
+    guard case .string(.list(let values)) = fields[key] else {
       return []
     }
-    return values.compactMap { fieldValue in
-      guard case .string(let str) = fieldValue else {
-        return nil
-      }
-      return str
-    }
+    return values
   }
 }

@@ -45,7 +45,7 @@ internal struct RereferenceAssetPhase: IntegrationPhase {
   private static func verify(
     _ record: RecordInfo, expected: Asset, context: PhaseContext
   ) throws {
-    guard case .asset(let targetAsset) = record.fields["image"] else {
+    guard case .asset(.value(let targetAsset)) = record.fields["image"] else {
       throw IntegrationTestError.verificationFailed(
         "Target record '\(record.recordName)' has no 'image' asset after re-reference"
       )

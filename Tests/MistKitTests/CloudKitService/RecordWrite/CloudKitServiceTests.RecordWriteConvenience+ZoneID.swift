@@ -54,7 +54,7 @@ extension CloudKitServiceTests.RecordWriteConvenience {
         _ = try await service.createRecord(
           recordType: "Note",
           recordName: "note-1",
-          fields: ["title": .string("Hello")],
+          fields: ["title": .string(.value("Hello"))],
           zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
           database: Helper.publicDatabase
         )
@@ -88,7 +88,7 @@ extension CloudKitServiceTests.RecordWriteConvenience {
         _ = try await service.updateRecord(
           recordType: "Note",
           recordName: "note-1",
-          fields: ["title": .string("Renamed")],
+          fields: ["title": .string(.value("Renamed"))],
           recordChangeTag: "tag-1",
           zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
           database: Helper.publicDatabase

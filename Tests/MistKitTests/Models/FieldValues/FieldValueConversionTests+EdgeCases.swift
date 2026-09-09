@@ -13,10 +13,10 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let intZero = FieldValue.int64(0)
+      let intZero = FieldValue.int64(.value(0))
       _ = Components.Schemas.FieldValueRequest(from: intZero)
 
-      let doubleZero = FieldValue.double(0.0)
+      let doubleZero = FieldValue.double(.value(0.0))
       _ = Components.Schemas.FieldValueRequest(from: doubleZero)
     }
 
@@ -26,10 +26,10 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let negativeInt = FieldValue.int64(-100)
+      let negativeInt = FieldValue.int64(.value(-100))
       _ = Components.Schemas.FieldValueRequest(from: negativeInt)
 
-      let negativeDouble = FieldValue.double(-3.14)
+      let negativeDouble = FieldValue.double(.value(-3.14))
       _ = Components.Schemas.FieldValueRequest(from: negativeDouble)
     }
 
@@ -39,10 +39,10 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let largeInt = FieldValue.int64(Int.max)
+      let largeInt = FieldValue.int64(.value(Int.max))
       _ = Components.Schemas.FieldValueRequest(from: largeInt)
 
-      let largeDouble = FieldValue.double(Double.greatestFiniteMagnitude)
+      let largeDouble = FieldValue.double(.value(Double.greatestFiniteMagnitude))
       _ = Components.Schemas.FieldValueRequest(from: largeDouble)
     }
 
@@ -52,7 +52,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let emptyString = FieldValue.string("")
+      let emptyString = FieldValue.string(.value(""))
       _ = Components.Schemas.FieldValueRequest(from: emptyString)
     }
 
@@ -62,7 +62,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let specialString = FieldValue.string("Hello\nWorld\t🌍")
+      let specialString = FieldValue.string(.value("Hello\nWorld\t🌍"))
       _ = Components.Schemas.FieldValueRequest(from: specialString)
     }
   }

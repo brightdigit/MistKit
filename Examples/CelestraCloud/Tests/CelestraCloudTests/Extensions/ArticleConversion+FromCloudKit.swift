@@ -54,7 +54,7 @@ extension ArticleConversion {
         "author": .string("Jane Smith"),
         "imageURL": .string("https://example.com/img.jpg"),
         "language": .string("en-US"),
-        "tags": .list([.string("news"), .string("tech")]),
+        "tags": .string(.list(["news", "tech"])),
         "wordCount": .int64(750),
         "estimatedReadingTime": .int64(4),
         "fetchedTimestamp": .date(fetchedDate),

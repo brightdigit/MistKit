@@ -100,12 +100,12 @@ extension ArticleConversion {
       #expect(fields["estimatedReadingTime"] == .int64(3))
 
       // Check array field
-      if case .list(let tagValues) = fields["tags"] {
+      if case .string(.list(let tagValues)) = fields["tags"] {
         #expect(tagValues.count == 2)
-        #expect(tagValues[0] == .string("tech"))
-        #expect(tagValues[1] == .string("swift"))
+        #expect(tagValues[0] == "tech")
+        #expect(tagValues[1] == "swift")
       } else {
-        Issue.record("tags field should be a list")
+        Issue.record("tags field should be a string list")
       }
     }
 

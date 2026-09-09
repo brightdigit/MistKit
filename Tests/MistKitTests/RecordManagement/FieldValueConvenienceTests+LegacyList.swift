@@ -1,5 +1,5 @@
 //
-//  AltTestRecord.swift
+//  FieldValueConvenienceTests+LegacyList.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,30 +27,28 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import Testing
 
 @testable import MistKit
 
-/// Second CloudKit record type for collection-operation tests.
-internal struct AltTestRecord: CloudKitRecord {
-  internal static var cloudKitRecordType: String { "AltTestRecord" }
+/// Protocol shim so deprecated ``FieldValue/listValue`` can be exercised without
+/// `DeprecatedDeclaration` warnings (same pattern as FetchZoneChangesAPI).
+internal protocol FieldValueLegacyListReading {
+  var listValue: [FieldValue]? { get }
+}
 
-  internal var recordName: String
-  internal var title: String
+extension FieldValue: FieldValueLegacyListReading {}
 
-  internal static func from(recordInfo: RecordInfo) -> AltTestRecord? {
-    guard let title = recordInfo.fields["title"]?.stringValue else {
-      return nil
-    }
-    return AltTestRecord(recordName: recordInfo.recordName, title: title)
+extension FieldValueConvenienceTests {
+  @Test("listValue flattens homogeneous list to [FieldValue] of .value elements")
+  internal func listValueExtraction() {
+    let value: any FieldValueLegacyListReading = FieldValue.string(.list(["one", "two"]))
+    #expect(value.listValue == [.string(.value("one")), .string(.value("two"))])
   }
 
-  internal static func formatForDisplay(_ recordInfo: RecordInfo) -> String {
-    let title = recordInfo.fields["title"]?.stringValue ?? "Unknown"
-    return "  \(recordInfo.recordName): \(title)"
-  }
-
-  internal func toCloudKitFields() -> [String: FieldValue] {
-    ["title": .string(.value(title))]
+  @Test("listValue returns nil for non-list cases")
+  internal func listValueReturnsNilForWrongType() {
+    let value: any FieldValueLegacyListReading = FieldValue.string(.value("[]"))
+    #expect(value.listValue == nil)
   }
 }

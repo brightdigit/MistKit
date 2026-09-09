@@ -7,16 +7,16 @@ internal import Testing
 extension FieldValueConversionTests {
   @Suite("List Conversions")
   internal struct Lists {
-    @Test("Convert list FieldValue with strings to Components.FieldValue")
+    @Test("Convert STRING_LIST FieldValue with strings tags STRING_LIST")
     internal func convertListWithStrings() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let list: [FieldValue] = [.string("one"), .string("two"), .string("three")]
-      let fieldValue = FieldValue.list(list)
+      let fieldValue = FieldValue.string(.list(["one", "two", "three"]))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
+      #expect(components._type == .STRING_LIST)
       if case .ListValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
@@ -24,16 +24,16 @@ extension FieldValueConversionTests {
       }
     }
 
-    @Test("Convert list FieldValue with numbers to Components.FieldValue")
+    @Test("Convert INT64_LIST FieldValue with numbers tags INT64_LIST")
     internal func convertListWithNumbers() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let list: [FieldValue] = [.int64(1), .int64(2), .int64(3)]
-      let fieldValue = FieldValue.list(list)
+      let fieldValue = FieldValue.int64(.list([1, 2, 3]))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
+      #expect(components._type == .INT64_LIST)
       if case .ListValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
@@ -41,38 +41,16 @@ extension FieldValueConversionTests {
       }
     }
 
-    @Test("Convert list FieldValue with mixed types to Components.FieldValue")
-    internal func convertListWithMixedTypes() {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("FieldValue is not available on this operating system.")
-        return
-      }
-      let list: [FieldValue] = [
-        .string("text"),
-        .int64(42),
-        .double(3.14),
-        FieldValue(booleanValue: true),
-      ]
-      let fieldValue = FieldValue.list(list)
-      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
-
-      if case .ListValue(let values) = components.value {
-        #expect(values.count == 4)
-      } else {
-        Issue.record("Expected listValue")
-      }
-    }
-
-    @Test("Convert empty list FieldValue to Components.FieldValue")
+    @Test("Convert empty STRING_LIST tags STRING_LIST")
     internal func convertEmptyList() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let list: [FieldValue] = []
-      let fieldValue = FieldValue.list(list)
+      let fieldValue = FieldValue.string(.list([]))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
+      #expect(components._type == .STRING_LIST)
       if case .ListValue(let values) = components.value {
         #expect(values.isEmpty)
       } else {
@@ -80,26 +58,37 @@ extension FieldValueConversionTests {
       }
     }
 
-    @Test("Convert nested list FieldValue to Components.FieldValue")
-    internal func convertNestedList() {
+    @Test("STRING_LIST response empty array decodes as .string(.list([]))")
+    internal func decodeEmptyStringList() throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let innerList: [FieldValue] = [.string("a"), .string("b")]
-      let outerList: [FieldValue] = [.list(innerList), .string("c")]
-      let fieldValue = FieldValue.list(outerList)
-      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
-
-      // FieldValueRequest does not have a type field - CloudKit infers type from structure
-      if case .ListValue(let values) = components.value {
-        #expect(values.count == 2)
-      } else {
-        Issue.record("Expected ListValue")
-      }
+      let data = Data(#"{"value": [], "type": "STRING_LIST"}"#.utf8)
+      let response = try JSONDecoder().decode(
+        Components.Schemas.FieldValueResponse.self,
+        from: data
+      )
+      let value = try FieldValue(response, fieldName: "tags")
+      #expect(value == .string(.list([])))
     }
 
-    @Test("BYTES list element that is not valid base64 throws typeValueMismatch")
+    @Test("STRING_LIST response filled array decodes as .string(.value(.list))")
+    internal func decodeFilledStringList() throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      let data = Data(#"{"value": ["a", "b"], "type": "STRING_LIST"}"#.utf8)
+      let response = try JSONDecoder().decode(
+        Components.Schemas.FieldValueResponse.self,
+        from: data
+      )
+      let value = try FieldValue(response, fieldName: "tags")
+      #expect(value == .string(.list(["a", "b"])))
+    }
+
+    @Test("BYTES_LIST element that is not valid base64 throws typeValueMismatch")
     internal func malformedBytesListElementThrows() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
@@ -111,34 +100,13 @@ extension FieldValueConversionTests {
           #expect(
             throws: ConversionError.typeValueMismatch(
               fieldName: "field",
-              declaredType: "BYTES",
-              value: "not!valid!"
-            )
-          ) {
-            _ = try FieldValue(listItem: .BytesValue("not!valid!"), fieldName: "field")
-          }
-        }
-      )
-    }
-
-    @Test("Nested BYTES list element that is not valid base64 throws typeValueMismatch")
-    internal func malformedBytesNestedListElementThrows() {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("FieldValue is not available on this operating system.")
-        return
-      }
-      ConversionFailureReporter.$assertionHandler.withValue(
-        { _, _, _ in },
-        operation: {
-          #expect(
-            throws: ConversionError.typeValueMismatch(
-              fieldName: "field",
-              declaredType: "BYTES",
+              declaredType: "BYTES_LIST",
               value: "not!valid!"
             )
           ) {
             _ = try FieldValue(
-              nestedListValue: [.BytesValue("not!valid!")],
+              listValue: [.BytesValue("not!valid!")],
+              elementKind: .bytes,
               fieldName: "field"
             )
           }
@@ -146,20 +114,23 @@ extension FieldValueConversionTests {
       )
     }
 
-    @Test("BYTES list element with valid base64 reads as .bytes Data")
+    @Test("BYTES_LIST element with valid base64 reads as .bytes(.value(.list))")
     internal func validBytesListElement() throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let value = try FieldValue(listItem: .BytesValue("aGVsbG8="), fieldName: "field")
-      #expect(value == .bytes(Data("hello".utf8)))
+      let value = try FieldValue(
+        listValue: [.BytesValue("aGVsbG8=")],
+        elementKind: .bytes,
+        fieldName: "field"
+      )
+      #expect(value == .bytes(.list([Data("hello".utf8)])))
     }
 
     /// A fractional millisecond inside a list must be rounded, exactly as the scalar
     /// `.date` case is. CloudKit rejects a fractional TIMESTAMP with
-    /// `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`, and list elements carry no
-    /// `type` tag of their own — so the value's shape is all CloudKit has to go on.
+    /// `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`.
     @Test("List .date elements round to whole milliseconds")
     internal func convertListWithDatesRoundsMilliseconds() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -167,8 +138,11 @@ extension FieldValueConversionTests {
         return
       }
       let date = Date(timeIntervalSince1970: 1_747_999_812.3478923)
-      let components = Components.Schemas.FieldValueRequest(from: .list([.date(date)]))
+      let components = Components.Schemas.FieldValueRequest(
+        from: .date(.list([date]))
+      )
 
+      #expect(components._type == .TIMESTAMP_LIST)
       guard case .ListValue(let values) = components.value, let first = values.first else {
         Issue.record("Expected a ListValue with one element")
         return
@@ -194,8 +168,11 @@ extension FieldValueConversionTests {
         longitude: -122.4194,
         timestamp: Date(timeIntervalSince1970: 1_747_999_812.3478923)
       )
-      let components = Components.Schemas.FieldValueRequest(from: .list([.location(location)]))
+      let components = Components.Schemas.FieldValueRequest(
+        from: .location(.list([location]))
+      )
 
+      #expect(components._type == .LOCATION_LIST)
       guard case .ListValue(let values) = components.value, let first = values.first else {
         Issue.record("Expected a ListValue with one element")
         return
@@ -210,6 +187,27 @@ extension FieldValueConversionTests {
       }
       #expect(timestamp == 1_747_999_812_348)
       #expect(timestamp == timestamp.rounded())
+    }
+
+    @Test("STRING_LIST tag over non-list value throws typeValueMismatch")
+    internal func stringListOverScalarThrows() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(throws: ConversionError.self) {
+            let data = Data(#"{"value": "plain", "type": "STRING_LIST"}"#.utf8)
+            let response = try JSONDecoder().decode(
+              Components.Schemas.FieldValueResponse.self,
+              from: data
+            )
+            _ = try FieldValue(response, fieldName: "field")
+          }
+        }
+      )
     }
   }
 }

@@ -1,5 +1,5 @@
 //
-//  AltTestRecord.swift
+//  FieldValueConvenienceTests+Lists.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -28,29 +28,24 @@
 //
 
 internal import Foundation
+internal import Testing
 
 @testable import MistKit
 
-/// Second CloudKit record type for collection-operation tests.
-internal struct AltTestRecord: CloudKitRecord {
-  internal static var cloudKitRecordType: String { "AltTestRecord" }
-
-  internal var recordName: String
-  internal var title: String
-
-  internal static func from(recordInfo: RecordInfo) -> AltTestRecord? {
-    guard let title = recordInfo.fields["title"]?.stringValue else {
-      return nil
-    }
-    return AltTestRecord(recordName: recordInfo.recordName, title: title)
-  }
-
-  internal static func formatForDisplay(_ recordInfo: RecordInfo) -> String {
-    let title = recordInfo.fields["title"]?.stringValue ?? "Unknown"
-    return "  \(recordInfo.recordName): \(title)"
-  }
-
-  internal func toCloudKitFields() -> [String: FieldValue] {
-    ["title": .string(.value(title))]
+extension FieldValueConvenienceTests {
+  @Test("typed *ListValue accessors unwrap homogeneous lists")
+  internal func typedListValueAccessors() {
+    #expect(FieldValue.int64(.list([1, 2])).int64ListValue == [1, 2])
+    #expect(FieldValue.double(.list([1.5])).doubleListValue == [1.5])
+    let date = Date(timeIntervalSince1970: 0)
+    #expect(FieldValue.date(.list([date])).dateListValue == [date])
+    let data = Data([0x01])
+    #expect(FieldValue.bytes(.list([data])).bytesListValue == [data])
+    let location = Location(latitude: 1, longitude: 2, horizontalAccuracy: 3)
+    #expect(FieldValue.location(.list([location])).locationListValue == [location])
+    let reference = Reference(recordName: "r")
+    #expect(FieldValue.reference(.list([reference])).referenceListValue == [reference])
+    let asset = Asset(fileChecksum: "c", size: 1, downloadURL: "https://example.com")
+    #expect(FieldValue.asset(.list([asset])).assetListValue == [asset])
   }
 }

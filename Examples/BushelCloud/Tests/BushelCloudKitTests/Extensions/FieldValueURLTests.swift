@@ -41,7 +41,7 @@ internal struct FieldValueURLTests {
     let url = URL(string: "https://example.com/file.dmg")!
     let fieldValue = FieldValue(url: url)
 
-    if case .string(let value) = fieldValue {
+    if case .string(.value(let value)) = fieldValue {
       #expect(value == "https://example.com/file.dmg")
     } else {
       Issue.record("Expected .string FieldValue")
@@ -53,7 +53,7 @@ internal struct FieldValueURLTests {
     let url = URL(string: "https://example.com/path/to/file.ipsw")!
     let fieldValue = FieldValue(url: url)
 
-    if case .string(let value) = fieldValue {
+    if case .string(.value(let value)) = fieldValue {
       #expect(value == "https://example.com/path/to/file.ipsw")
     } else {
       Issue.record("Expected .string FieldValue")
@@ -65,7 +65,7 @@ internal struct FieldValueURLTests {
     let url = URL(string: "https://example.com/file.dmg?version=1.0&platform=mac")!
     let fieldValue = FieldValue(url: url)
 
-    if case .string(let value) = fieldValue {
+    if case .string(.value(let value)) = fieldValue {
       #expect(value == "https://example.com/file.dmg?version=1.0&platform=mac")
     } else {
       Issue.record("Expected .string FieldValue")
@@ -77,7 +77,7 @@ internal struct FieldValueURLTests {
     let url = URL(fileURLWithPath: "/Users/test/file.dmg")
     let fieldValue = FieldValue(url: url)
 
-    if case .string(let value) = fieldValue {
+    if case .string(.value(let value)) = fieldValue {
       #expect(value == "file:///Users/test/file.dmg")
     } else {
       Issue.record("Expected .string FieldValue")
@@ -210,7 +210,7 @@ internal struct FieldValueURLTests {
     let fieldValue = FieldValue(url: url)
 
     // When sent to CloudKit, this becomes a STRING field with the absolute URL
-    if case .string(let stringValue) = fieldValue {
+    if case .string(.value(let stringValue)) = fieldValue {
       // Verify it's a valid absolute URL string
       #expect(stringValue.hasPrefix("https://"))
       #expect(URL(string: stringValue) != nil)

@@ -82,7 +82,7 @@ extension OutputFormatterFactoryTests {
         fields: [
           "reference": .reference(.init(recordName: "ref-001")),
           "location": .location(.init(latitude: 37.7749, longitude: -122.4194)),
-          "list": .list([.string("item1"), .string("item2")]),
+          "list": .string(.list(["item1", "item2"])),
         ]
       )
 

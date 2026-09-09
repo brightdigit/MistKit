@@ -13,7 +13,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.equals("name", .string("John"))
+      let filter = FilterBuilder.equals("name", .string(.value("John")))
       #expect(filter.comparator == .EQUALS)
       #expect(filter.fieldName == "name")
     }
@@ -24,7 +24,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.notEquals("age", .int64(25))
+      let filter = FilterBuilder.notEquals("age", .int64(.value(25)))
       #expect(filter.comparator == .NOT_EQUALS)
       #expect(filter.fieldName == "age")
     }
@@ -35,7 +35,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.lessThan("score", .double(100.0))
+      let filter = FilterBuilder.lessThan("score", .double(.value(100.0)))
       #expect(filter.comparator == .LESS_THAN)
       #expect(filter.fieldName == "score")
     }
@@ -46,7 +46,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.lessThanOrEquals("count", .int64(50))
+      let filter = FilterBuilder.lessThanOrEquals("count", .int64(.value(50)))
       #expect(filter.comparator == .LESS_THAN_OR_EQUALS)
       #expect(filter.fieldName == "count")
     }
@@ -58,7 +58,7 @@ extension FilterBuilderTests {
         return
       }
       let date = Date()
-      let filter = FilterBuilder.greaterThan("createdAt", .date(date))
+      let filter = FilterBuilder.greaterThan("createdAt", .date(.value(date)))
       #expect(filter.comparator == .GREATER_THAN)
       #expect(filter.fieldName == "createdAt")
     }
@@ -69,7 +69,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let filter = FilterBuilder.greaterThanOrEquals("priority", .int64(3))
+      let filter = FilterBuilder.greaterThanOrEquals("priority", .int64(.value(3)))
       #expect(filter.comparator == .GREATER_THAN_OR_EQUALS)
       #expect(filter.fieldName == "priority")
     }

@@ -116,7 +116,7 @@ extension YAMLFormatterTests {
         recordName: "list-001",
         recordType: "List",
         fields: [
-          "tags": .list([.string("tag1"), .string("tag2"), .string("tag3")])
+          "tags": .string(.list(["tag1", "tag2", "tag3"]))
         ]
       )
       let formatter = YAMLFormatter()

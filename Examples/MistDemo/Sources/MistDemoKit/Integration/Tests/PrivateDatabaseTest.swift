@@ -52,6 +52,7 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     RereferenceAssetPhase(),
     QueryRecordsPhase(),
     LookupRecordsPhase(),
+    StringListRoundTripPhase(),
     InitialSyncPhase(),
     ModifyRecordsPhase(),
     FetchZoneChangesPhase(),

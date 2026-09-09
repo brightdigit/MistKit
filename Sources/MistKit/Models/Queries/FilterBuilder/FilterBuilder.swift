@@ -174,6 +174,10 @@ internal struct FilterBuilder {
 
   // Maps a single element to the `*_LIST` request type its list requires.
   //
+  // Only ``FieldValue/Arity/value(_:)`` elements are valid in IN/NOT_IN. A `.list`
+  // arity returns `nil` (omit the type) rather than inventing a nested-list tag —
+  // CloudKit rejects nested lists, and the call site should not pass them (issue #481).
+  //
   // The `switch` is `default`-free so a new `FieldValue` case has to be classified here
   // rather than silently emitting no `type` tag.
   // swiftlint:disable:next cyclomatic_complexity
@@ -181,25 +185,25 @@ internal struct FilterBuilder {
     for first: FieldValue
   ) -> Components.Schemas.FieldValueRequest._typePayload? {
     switch first {
-    case .string:
+    case .string(.value):
       return .STRING_LIST
-    case .int64:
+    case .int64(.value):
       return .INT64_LIST
-    case .double:
+    case .double(.value):
       return .DOUBLE_LIST
-    case .bytes:
+    case .bytes(.value):
       return .BYTES_LIST
-    case .date:
+    case .date(.value):
       return .TIMESTAMP_LIST
-    case .reference:
+    case .reference(.value):
       return .REFERENCE_LIST
-    case .location:
+    case .location(.value):
       return .LOCATION_LIST
-    case .asset:
+    case .asset(.value):
       return .ASSET_LIST
-    case .list:
-      // Nested lists aren't valid in IN/NOT_IN; omit the type and let CloudKit reject
-      // rather than emit an undocumented bare "LIST" tag.
+    case .string(.list), .int64(.list), .double(.list), .bytes(.list),
+      .date(.list), .reference(.list), .location(.list), .asset(.list):
+      // List-shaped FieldValues are not valid IN/NOT_IN elements.
       return nil
     }
   }

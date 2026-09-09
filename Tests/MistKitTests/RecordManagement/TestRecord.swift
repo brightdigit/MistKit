@@ -75,17 +75,17 @@ internal struct TestRecord: CloudKitRecord {
 
   internal func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
-      "name": .string(name),
-      "count": .int64(count),
+      "name": .string(.value(name)),
+      "count": .int64(.value(count)),
       "isActive": FieldValue(booleanValue: isActive),
     ]
 
     if let score {
-      fields["score"] = .double(score)
+      fields["score"] = .double(.value(score))
     }
 
     if let lastUpdated {
-      fields["lastUpdated"] = .date(lastUpdated)
+      fields["lastUpdated"] = .date(.value(lastUpdated))
     }
 
     return fields

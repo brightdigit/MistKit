@@ -49,8 +49,8 @@ extension RecordManagingTests {
           recordName: "test-1",
           recordType: "TestRecord",
           fields: [
-            "name": .string("First"),
-            "count": .int64(1),
+            "name": .string(.value("First")),
+            "count": .int64(.value(1)),
             "isActive": FieldValue(booleanValue: true),
           ]
         )

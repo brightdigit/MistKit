@@ -131,7 +131,7 @@ extension Feed: CloudKitConvertible {
 
     // Array fields
     if !tags.isEmpty {
-      fields["tags"] = .list(tags.map { .string($0) })
+      fields["tags"] = .string(.list(tags))
     }
 
     return fields

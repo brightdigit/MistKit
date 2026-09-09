@@ -32,59 +32,67 @@ internal import MistKit
 
 /// Utility for formatting FieldValue objects for display.
 internal enum FieldValueFormatter {
-  // Extract the raw display string from a FieldValue.
-  // swiftlint:disable:next cyclomatic_complexity
+  /// Extract the raw display string from a FieldValue.
   internal static func displayString(
     _ value: FieldValue
   ) -> String {
     switch value {
-    case .string(let string):
-      return string
-    case .int64(let int):
-      return "\(int)"
-    case .double(let double):
-      return "\(double)"
-    case .bytes(let bytes):
-      return bytes.base64EncodedString()
-    case .date(let date):
-      return formatDate(date)
-    case .location(let location):
-      return "(\(location.latitude), \(location.longitude))"
-    case .reference(let reference):
-      return reference.recordName
-    case .asset(let asset):
-      return asset.downloadURL ?? "no URL"
-    case .list(let values):
-      let items = values.map { displayString($0) }
-      return "[\(items.joined(separator: ", "))]"
+    case .string(let arity):
+      return formatArity(arity, element: { $0 })
+    case .int64(let arity):
+      return formatArity(arity, element: { "\($0)" })
+    case .double(let arity):
+      return formatArity(arity, element: { "\($0)" })
+    case .bytes(let arity):
+      return formatArity(arity, element: { $0.base64EncodedString() })
+    case .date(let arity):
+      return formatArity(arity, element: formatDate)
+    case .location(let arity):
+      return formatArity(arity, element: { "(\($0.latitude), \($0.longitude))" })
+    case .reference(let arity):
+      return formatArity(arity, element: \.recordName)
+    case .asset(let arity):
+      return formatArity(arity, element: { $0.downloadURL ?? "no URL" })
     }
   }
 
-  // Format a single FieldValue for display.
-  // swiftlint:disable:next cyclomatic_complexity
+  /// Format a single FieldValue for display.
   internal static func formatFieldValue(
     _ value: FieldValue
   ) -> String {
     switch value {
-    case .string(let string):
-      return "\"\(string)\""
-    case .int64(let int):
-      return "\(int)"
-    case .double(let double):
-      return "\(double)"
-    case .bytes(let bytes):
-      return "bytes(\(bytes.count) bytes, base64: \(bytes.base64EncodedString()))"
-    case .date(let date):
-      return "date(\(formatDate(date)))"
-    case .location(let location):
-      return "location(\(location.latitude), \(location.longitude))"
-    case .reference(let reference):
-      return "reference(\(reference.recordName))"
-    case .asset(let asset):
-      return "asset(\(asset.downloadURL ?? "no URL"))"
+    case .string(let arity):
+      return formatArity(arity, element: { "\"\($0)\"" })
+    case .int64(let arity):
+      return formatArity(arity, element: { "\($0)" })
+    case .double(let arity):
+      return formatArity(arity, element: { "\($0)" })
+    case .bytes(let arity):
+      return formatArity(arity) { bytes in
+        "bytes(\(bytes.count) bytes, base64: \(bytes.base64EncodedString()))"
+      }
+    case .date(let arity):
+      return formatArity(arity, element: { "date(\(formatDate($0)))" })
+    case .location(let arity):
+      return formatArity(arity) { location in
+        "location(\(location.latitude), \(location.longitude))"
+      }
+    case .reference(let arity):
+      return formatArity(arity, element: { "reference(\($0.recordName))" })
+    case .asset(let arity):
+      return formatArity(arity, element: { "asset(\($0.downloadURL ?? "no URL"))" })
+    }
+  }
+
+  private static func formatArity<T>(
+    _ arity: FieldValue.Arity<T>,
+    element: (T) -> String
+  ) -> String {
+    switch arity {
+    case .value(let value):
+      return element(value)
     case .list(let values):
-      let items = values.map { formatFieldValue($0) }
-      return "[\(items.joined(separator: ", "))]"
+      return "[\(values.map(element).joined(separator: ", "))]"
     }
   }
 
