@@ -6,11 +6,31 @@ From iOS to server-side Swift — the talk behind MistKit, consolidated into one
 
 CloudKit is great for iOS apps. How about backend services? This article is the written form of a conference talk by Leo Dion ([@leogdion@c.im](https://c.im/@leogdion)) that walks from "what is CloudKit" to a scheduled GitHub Actions job writing to a CloudKit public database from a stock Ubuntu runner, and explains the three problems that shaped MistKit along the way: authentication, field-type polymorphism, and error handling.
 
-The talk was given in 2026 at Swift Craft, Swift Rockies (Calgary), and iOSDevUK (Aberystwyth). The abstract:
+The talk was given in 2026 at Swift Craft and iOSDevUK (Aberystwyth). The abstract:
 
 > CloudKit has excellent documentation for iOS and macOS client development. But backend services — podcast aggregation, RSS readers, data processing — face APIs that Apple barely documents. I rebuilt a comprehensive CloudKit library using AI-generated OpenAPI specifications. The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling, and production deployments.
 
 The sections below follow the slide order. Every code sample is taken from the current MistKit source or its example projects, so the article stays accurate as the library evolves. A complete list of the links shown during the talk is at the end, in <doc:CloudKitAsYourBackend#Links>.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [What is CloudKit](#what-is-cloudkit)
+- [What is CloudKit Web Services](#what-is-cloudkit-web-services)
+- [Why server-side CloudKit](#why-server-side-cloudkit)
+    - [Private database: Heartwitch](#private-database-heartwitch)
+    - [Public database: Bushel](#public-database-bushel)
+- [Building MistKit](#building-mistkit)
+- [Authentication](#authentication)
+    - [API token](#api-token)
+    - [Web auth token](#web-auth-token)
+    - [Server to server](#server-to-server)
+- [Field type polymorphism](#field-type-polymorphism)
+- [Error handling](#error-handling)
+- [Deployment](#deployment)
+- [What's next](#whats-next)
+- [Links](#links)
+- [Questions](#questions)
 
 ## What is CloudKit
 
