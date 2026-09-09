@@ -360,7 +360,7 @@ There is no `Authorization` header. Every mistake in any of those pieces produce
 | Web auth token | ✓ user-attributed | ✓ | ✓ |
 | Server-to-server | ✓ developer-attributed | — | — |
 
-The public database accepts two methods and they are **not interchangeable**: the same record written via web auth and via server-to-server ends up with two different creators, and the [`/users/*` routes](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/GetCurrentUser.html) accept web auth only. MistKit therefore makes every public call say which it wants — ``Database/public(_:)`` carries a ``PublicAuthPreference`` — rather than defaulting silently. <doc:AuthenticationAndDatabases> covers the model; the deeper "why" is in <doc:WhatCloudKitGotWrong>.
+The public database accepts two methods and they are **not interchangeable**: the same record written via web auth and via server-to-server ends up with two different creators, and the `/users/*` routes accept web auth only. MistKit therefore makes every public call say which it wants — ``Database/public(_:)`` carries a ``PublicAuthPreference`` — rather than defaulting silently. <doc:AuthenticationAndDatabases> covers the model; the deeper "why" is in <doc:WhatCloudKitGotWrong>.
 
 ### OpenAPI middleware
 

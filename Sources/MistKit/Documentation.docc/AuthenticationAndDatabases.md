@@ -12,7 +12,7 @@ Configure ``CloudKitService`` once with the credentials it needs, then pick a ``
 | `.private` | — | ✓ | — |
 | `.shared` | — | ✓ | — |
 
-The same backend legitimately needs both attribution paths — server-attributed writes against the public database (catalog seeds, moderation actions) and user-attributed reads against [`users/caller`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/GetCurrentUser.html) (knowing which iCloud user a session belongs to). MistKit models this by:
+The same backend legitimately needs both attribution paths — server-attributed writes against the public database (catalog seeds, moderation actions) and user-attributed reads against `users/caller` (knowing which iCloud user a session belongs to). MistKit models this by:
 
 1. Letting ``CloudKitService`` hold a ``Credentials`` value that carries either or both credential sets.
 2. Making the target ``Database`` an argument on each operation, with `.public` carrying a ``PublicAuthPreference`` that picks the signing method *for that call*.
@@ -136,7 +136,7 @@ There is no default on the `database:` parameter. Every call picks explicitly.
 
 ## User-identity routes
 
-A handful of routes ([`/users/caller`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/GetCurrentUser.html), [`/users/discover`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/DiscoveringUserIdentities%28usersdiscover%29.html), `/users/lookup/email`, `/users/lookup/id`) only work against the public database with web-auth credentials — CloudKit rejects server-to-server signing on these endpoints. MistKit's user-identity methods (``CloudKitService/fetchCaller()``, ``CloudKitService/lookupUsersByEmail(_:)``, ``CloudKitService/lookupUsersByRecordName(_:)``) pass `.public(.requires(.webAuth))` internally — they will throw ``CloudKitError/missingCredentials(database:availability:reason:)`` if your ``Credentials`` lack ``APICredentials/webAuthToken``.
+A handful of routes (`/users/caller`, [`/users/discover`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/DiscoveringUserIdentities%28usersdiscover%29.html), `/users/lookup/email`, `/users/lookup/id`) only work against the public database with web-auth credentials — CloudKit rejects server-to-server signing on these endpoints. MistKit's user-identity methods (``CloudKitService/fetchCaller()``, ``CloudKitService/lookupUsersByEmail(_:)``, ``CloudKitService/lookupUsersByRecordName(_:)``) pass `.public(.requires(.webAuth))` internally — they will throw ``CloudKitError/missingCredentials(database:availability:reason:)`` if your ``Credentials`` lack ``APICredentials/webAuthToken``.
 
 ## Where the signing happens
 

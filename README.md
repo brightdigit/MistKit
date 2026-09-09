@@ -38,7 +38,7 @@ A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Service
 
 ## Overview
 
-MistKit provides a modern Swift interface to [CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices) REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the [CloudKit framework](https://developer.apple.com/documentation/cloudkit) isn't available. 
+MistKit provides a modern Swift interface to [CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html) REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the [CloudKit framework](https://developer.apple.com/documentation/cloudkit) isn't available. 
 
 Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
@@ -178,7 +178,7 @@ Private/shared always use web-auth.
 #### API Token Authentication
 
 1. **Get API Token**:
-   - Log into [Apple Developer Console](https://developer.apple.com)
+   - Log into the [CloudKit Console](https://icloud.developer.apple.com/dashboard/)
    - Navigate to CloudKit Database
    - Generate an API Token
 
