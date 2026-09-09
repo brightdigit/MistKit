@@ -1,5 +1,6 @@
 ## 1.0.0-beta.5
 
+* Make `FieldValue` lists homogeneous by construction: each kind carries `Arity` (`.value` / `.list`), so mixed and nested lists are unrepresentable. Response OpenAPI accepts live `*_LIST` tags (e.g. `STRING_LIST`); record-field list writes are tagged; deprecated scalar factories cover `.string("x")`-style call sites (#481)
 * Represent `FieldValue.bytes` as `Data` instead of a base64 `String` (#467)
 * Add `Asset.download(using:)`, which fetches an asset's `downloadURL` from the CDN and returns the bytes, plus `CloudKitError.missingAssetDownloadURL`. `fileChecksum` turned out to be a server-minted identity token rather than a digest of the file, so no client-side checksum verification is offered — check `Asset.size` to guard against truncation (#466, #473)
 * Add `VALIDATE` to `Reference.Action` for CloudKit Web Services reference dictionaries (#464)

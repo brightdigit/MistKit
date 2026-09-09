@@ -111,7 +111,7 @@ extension CloudKitServiceTests.Sharing {
       let created = try await service.createShare(
         rootRecordType: "Note",
         rootRecordName: "root-1",
-        rootFields: ["title": .string("Shared Note")],
+        rootFields: ["title": .string(.value("Shared Note"))],
         zoneID: Self.zoneID,
         participants: [Self.sharee],
         database: .private
@@ -150,7 +150,7 @@ extension CloudKitServiceTests.Sharing {
       _ = try await service.createShare(
         rootRecordType: "Note",
         rootRecordName: "root-1",
-        rootFields: ["title": .string("Shared Note")],
+        rootFields: ["title": .string(.value("Shared Note"))],
         zoneID: Self.zoneID,
         publicPermission: .none,
         participants: [Self.sharee],

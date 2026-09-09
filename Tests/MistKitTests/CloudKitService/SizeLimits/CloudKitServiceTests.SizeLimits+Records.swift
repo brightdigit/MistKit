@@ -64,11 +64,11 @@ extension CloudKitServiceTests.SizeLimits {
       let oversized = String(repeating: "x", count: 1_500_000)
       let smallOperation = RecordOperation.create(
         recordType: "Note",
-        fields: ["body": .string("small")]
+        fields: ["body": .string(.value("small"))]
       )
       let oversizedOperation = RecordOperation.create(
         recordType: "Note",
-        fields: ["body": .string(oversized)]
+        fields: ["body": .string(.value(oversized))]
       )
 
       await #expect {
@@ -92,7 +92,7 @@ extension CloudKitServiceTests.SizeLimits {
       let service = try Self.makeService(reason: "iCloud storage quota exhausted")
       let operation = RecordOperation.create(
         recordType: "Note",
-        fields: ["body": .string("small")]
+        fields: ["body": .string(.value("small"))]
       )
 
       await #expect {

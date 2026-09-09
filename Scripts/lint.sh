@@ -284,9 +284,13 @@ fi
 # unreachable per above).
 periphery_index_store() {
 	local candidate
-	for candidate in "$PACKAGE_DIR"/.build/*/debug/index/store \
-		"$PACKAGE_DIR"/.build/debug/index/store \
-		"$PACKAGE_DIR"/.build/out; do
+	# Prefer swiftbuild's `.build/out` when present. An older
+	# `.build/<triple>/debug/index/store` may still exist from prior
+	# toolchains and yields false-positive unused declarations if chosen
+	# first (test-only and freshly-added public APIs look dead).
+	for candidate in "$PACKAGE_DIR"/.build/out \
+		"$PACKAGE_DIR"/.build/*/debug/index/store \
+		"$PACKAGE_DIR"/.build/debug/index/store; do
 		if [ -d "$candidate/v5/units" ]; then
 			printf '%s\n' "$candidate"
 			return 0

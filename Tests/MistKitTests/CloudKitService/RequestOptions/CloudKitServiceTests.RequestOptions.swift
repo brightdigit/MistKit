@@ -96,7 +96,7 @@ extension CloudKitServiceTests {
         operationType: .create,
         recordType: "TestRecord",
         recordName: "rec-1",
-        fields: ["title": .string("Test")]
+        fields: ["title": .string(.value("Test"))]
       )
 
       _ = try? await service.modifyRecords(

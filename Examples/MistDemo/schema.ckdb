@@ -7,6 +7,7 @@ RECORD TYPE Note (
     "title"                  STRING QUERYABLE SORTABLE SEARCHABLE,
     "index"                  INT64 QUERYABLE SORTABLE,
     "image"                  ASSET,
+    "tags"                   LIST<STRING>,
 
     GRANT READ, CREATE, WRITE TO "_creator",
     GRANT READ, CREATE, WRITE TO "_icloud",

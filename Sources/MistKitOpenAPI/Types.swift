@@ -1407,6 +1407,8 @@ public enum Components {
         }
         /// A CloudKit field value from API responses.
         /// May include optional type field for explicit type information.
+        /// List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
+        /// live CloudKit responses — not a flat LIST tag.
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueResponse`.
@@ -1518,7 +1520,9 @@ public enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/FieldValueResponse/value`.
             public var value: Components.Schemas.FieldValueResponse.valuePayload
-            /// The CloudKit field type (optional, may be inferred from value)
+            /// The CloudKit field type (optional). List responses use STRING_LIST,
+            /// INT64_LIST, etc. (verified live against MistDemo, 2026-09-09).
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueResponse/type`.
             @frozen public enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
@@ -1526,14 +1530,23 @@ public enum Components {
                 case INT64 = "INT64"
                 case DOUBLE = "DOUBLE"
                 case BYTES = "BYTES"
+                case TIMESTAMP = "TIMESTAMP"
                 case REFERENCE = "REFERENCE"
                 case ASSET = "ASSET"
                 case ASSETID = "ASSETID"
                 case LOCATION = "LOCATION"
-                case TIMESTAMP = "TIMESTAMP"
-                case LIST = "LIST"
+                case STRING_LIST = "STRING_LIST"
+                case INT64_LIST = "INT64_LIST"
+                case DOUBLE_LIST = "DOUBLE_LIST"
+                case BYTES_LIST = "BYTES_LIST"
+                case TIMESTAMP_LIST = "TIMESTAMP_LIST"
+                case REFERENCE_LIST = "REFERENCE_LIST"
+                case LOCATION_LIST = "LOCATION_LIST"
+                case ASSET_LIST = "ASSET_LIST"
             }
-            /// The CloudKit field type (optional, may be inferred from value)
+            /// The CloudKit field type (optional). List responses use STRING_LIST,
+            /// INT64_LIST, etc. (verified live against MistDemo, 2026-09-09).
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueResponse/type`.
             public var _type: Components.Schemas.FieldValueResponse._typePayload?
@@ -1541,7 +1554,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - value:
-            ///   - _type: The CloudKit field type (optional, may be inferred from value)
+            ///   - _type: The CloudKit field type (optional). List responses use STRING_LIST,
             public init(
                 value: Components.Schemas.FieldValueResponse.valuePayload,
                 _type: Components.Schemas.FieldValueResponse._typePayload? = nil

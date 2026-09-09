@@ -63,6 +63,8 @@ implementation phases.
 `research/` holds dated investigations into specific failures, kept for the
 reasoning rather than as current reference. Each is a point-in-time record.
 
+- [481-homogeneous-list-without-duplicate-enums.md](research/481-homogeneous-list-without-duplicate-enums.md) — #481: prefer `Arity<T>` on each kind over parallel list enum / protocol storage; deprecated scalar polyfills only
+
 ## Related
 
 Example-specific domain docs live with their examples, not here:

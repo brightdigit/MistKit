@@ -55,7 +55,7 @@ extension CloudKitServiceTests {
       let record = try await service.createRecord(
         recordType: "Note",
         recordName: "note-1",
-        fields: ["title": .string("Hello")],
+        fields: ["title": .string(.value("Hello"))],
         database: Helper.publicDatabase
       )
 
@@ -75,7 +75,7 @@ extension CloudKitServiceTests {
       await #expect(throws: CloudKitError.self) {
         _ = try await service.createRecord(
           recordType: "Note",
-          fields: ["title": .string("Hello")],
+          fields: ["title": .string(.value("Hello"))],
           database: Helper.publicDatabase
         )
       }
@@ -96,7 +96,7 @@ extension CloudKitServiceTests {
       let record = try await service.updateRecord(
         recordType: "Note",
         recordName: "note-1",
-        fields: ["title": .string("Renamed")],
+        fields: ["title": .string(.value("Renamed"))],
         recordChangeTag: "tag-1",
         database: Helper.publicDatabase
       )
@@ -119,7 +119,7 @@ extension CloudKitServiceTests {
         _ = try await service.updateRecord(
           recordType: "Note",
           recordName: "note-1",
-          fields: ["title": .string("Renamed")],
+          fields: ["title": .string(.value("Renamed"))],
           database: Helper.publicDatabase
         )
       }

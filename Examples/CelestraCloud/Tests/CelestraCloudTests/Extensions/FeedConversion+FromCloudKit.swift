@@ -55,7 +55,7 @@ extension FeedConversion {
         "createdTimestamp": .date(Date(timeIntervalSince1970: 1_000_000)),
         "verifiedTimestamp": .date(Date(timeIntervalSince1970: 2_000_000)),
         "updateFrequency": .double(3_600.0),
-        "tags": .list([.string("tech"), .string("news")]),
+        "tags": .string(.list(["tech", "news"])),
         "totalAttempts": .int64(10),
         "successfulAttempts": .int64(8),
         "attemptedTimestamp": .date(Date(timeIntervalSince1970: 3_000_000)),

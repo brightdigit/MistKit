@@ -68,7 +68,7 @@ extension CloudKitServiceTests.Rereference {
       )
 
       #expect(updated.recordName == "note-b")
-      guard case .asset(let asset) = updated.fields["image"] else {
+      guard case .asset(.value(let asset)) = updated.fields["image"] else {
         Issue.record("Updated target should carry an image asset")
         return
       }

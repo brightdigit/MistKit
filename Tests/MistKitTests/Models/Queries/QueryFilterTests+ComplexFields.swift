@@ -27,7 +27,7 @@ extension QueryFilterTests {
         return
       }
       let reference = Reference(recordName: "parent-record-123")
-      let filter = QueryFilter.equals("parentRef", .reference(reference))
+      let filter = QueryFilter.equals("parentRef", .reference(.value(reference)))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .EQUALS)
       #expect(components.fieldName == "parentRef")
@@ -40,7 +40,7 @@ extension QueryFilterTests {
         return
       }
       let now = Date()
-      let filter = QueryFilter.lessThan("expiresAt", .date(now))
+      let filter = QueryFilter.lessThan("expiresAt", .date(.value(now)))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .LESS_THAN)
       #expect(components.fieldName == "expiresAt")
@@ -52,7 +52,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.greaterThanOrEquals("temperature", .double(98.6))
+      let filter = QueryFilter.greaterThanOrEquals("temperature", .double(.value(98.6)))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .GREATER_THAN_OR_EQUALS)
       #expect(components.fieldName == "temperature")

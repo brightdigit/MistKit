@@ -13,7 +13,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let values: [FieldValue] = [.string("draft"), .string("published")]
+      let values: [FieldValue] = [.string(.value("draft")), .string(.value("published"))]
       let filter = QueryFilter.in("state", values)
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .IN)
@@ -27,7 +27,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let values: [FieldValue] = [.int64(0), .int64(-1)]
+      let values: [FieldValue] = [.int64(.value(0)), .int64(.value(-1))]
       let filter = QueryFilter.notIn("errorCode", values)
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .NOT_IN)

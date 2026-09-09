@@ -37,57 +37,57 @@ internal import Testing
 internal struct FieldValueConvenienceTests {
   @Test("stringValue extracts String from .string case")
   internal func stringValueExtraction() {
-    let value = FieldValue.string("test")
+    let value = FieldValue.string(.value("test"))
     #expect(value.stringValue == "test")
   }
 
   @Test("stringValue returns nil for non-string cases")
   internal func stringValueReturnsNilForWrongType() {
-    #expect(FieldValue.int64(42).stringValue == nil)
-    #expect(FieldValue.double(3.14).stringValue == nil)
+    #expect(FieldValue.int64(.value(42)).stringValue == nil)
+    #expect(FieldValue.double(.value(3.14)).stringValue == nil)
     #expect(FieldValue(booleanValue: true).stringValue == nil)
   }
 
   @Test("intValue extracts Int from .int64 case")
   internal func intValueExtraction() {
-    let value = FieldValue.int64(42)
+    let value = FieldValue.int64(.value(42))
     #expect(value.intValue == 42)
   }
 
   @Test("intValue returns nil for non-int cases")
   internal func intValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("42").intValue == nil)
-    #expect(FieldValue.double(42.0).intValue == nil)
+    #expect(FieldValue.string(.value("42")).intValue == nil)
+    #expect(FieldValue.double(.value(42.0)).intValue == nil)
   }
 
   @Test("doubleValue extracts Double from .double case")
   internal func doubleValueExtraction() {
-    let value = FieldValue.double(3.14)
+    let value = FieldValue.double(.value(3.14))
     #expect(value.doubleValue == 3.14)
   }
 
   @Test("doubleValue returns nil for non-double cases")
   internal func doubleValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("3.14").doubleValue == nil)
-    #expect(FieldValue.int64(3).doubleValue == nil)
+    #expect(FieldValue.string(.value("3.14")).doubleValue == nil)
+    #expect(FieldValue.int64(.value(3)).doubleValue == nil)
   }
 
-  @Test("boolValue extracts Bool from .int64(0) as false")
+  @Test("boolValue extracts Bool from .int64(.value(0)) as false")
   internal func boolValueFromInt64Zero() {
-    let value = FieldValue.int64(0)
+    let value = FieldValue.int64(.value(0))
     #expect(value.boolValue == false)
   }
 
-  @Test("boolValue extracts Bool from .int64(1) as true")
+  @Test("boolValue extracts Bool from .int64(.value(1)) as true")
   internal func boolValueFromInt64One() {
-    let value = FieldValue.int64(1)
+    let value = FieldValue.int64(.value(1))
     #expect(value.boolValue == true)
   }
 
   @Test("boolValue asserts for .int64 with values other than 0 or 1")
   internal func boolValueAssertsForInvalidInt64() async {
     await confirmation("Assertion handler called", expectedCount: 1) { assertionCalled in
-      let value2 = FieldValue.int64(2)
+      let value2 = FieldValue.int64(.value(2))
       let value = value2.boolValue { condition, message in
         assertionCalled()
         #expect(condition == false)
@@ -99,47 +99,47 @@ internal struct FieldValueConvenienceTests {
 
   @Test("boolValue returns nil for non-boolean-compatible cases")
   internal func boolValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("true").boolValue == nil)
-    #expect(FieldValue.double(1.0).boolValue == nil)
+    #expect(FieldValue.string(.value("true")).boolValue == nil)
+    #expect(FieldValue.double(.value(1.0)).boolValue == nil)
   }
 
   @Test("dateValue extracts Date from .date case")
   internal func dateValueExtraction() {
     let date = Date()
-    let value = FieldValue.date(date)
+    let value = FieldValue.date(.value(date))
     #expect(value.dateValue == date)
   }
 
   @Test("dateValue returns nil for non-date cases")
   internal func dateValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("2024-01-01").dateValue == nil)
-    #expect(FieldValue.int64(1_704_067_200).dateValue == nil)
+    #expect(FieldValue.string(.value("2024-01-01")).dateValue == nil)
+    #expect(FieldValue.int64(.value(1_704_067_200)).dateValue == nil)
   }
 
   @Test("bytesValue extracts base64 String from .bytes case")
   internal func bytesValueExtraction() {
     let data = Data("Hello World".utf8)
-    let value = FieldValue.bytes(data)
+    let value = FieldValue.bytes(.value(data))
     #expect(value.bytesValue == data.base64EncodedString())
   }
 
   @Test("bytesValue returns nil for non-bytes cases")
   internal func bytesValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("test").bytesValue == nil)
+    #expect(FieldValue.string(.value("test")).bytesValue == nil)
   }
 
   @Test("dataValue extracts Data from .bytes case")
   internal func dataValueExtraction() {
     let data = Data("Hello World".utf8)
-    let value = FieldValue.bytes(data)
+    let value = FieldValue.bytes(.value(data))
     #expect(value.dataValue == data)
   }
 
   @Test("dataValue returns nil for non-bytes cases including .string")
   internal func dataValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("test").dataValue == nil)
-    #expect(FieldValue.string("SGVsbG8gV29ybGQ=").dataValue == nil)
-    #expect(FieldValue.string("Chen").dataValue == nil)
+    #expect(FieldValue.string(.value("test")).dataValue == nil)
+    #expect(FieldValue.string(.value("SGVsbG8gV29ybGQ=")).dataValue == nil)
+    #expect(FieldValue.string(.value("Chen")).dataValue == nil)
   }
 
   @Test("locationValue extracts Location from .location case")
@@ -149,25 +149,25 @@ internal struct FieldValueConvenienceTests {
       longitude: -122.4194,
       horizontalAccuracy: 10.0
     )
-    let value = FieldValue.location(location)
+    let value = FieldValue.location(.value(location))
     #expect(value.locationValue == location)
   }
 
   @Test("locationValue returns nil for non-location cases")
   internal func locationValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("37.7749,-122.4194").locationValue == nil)
+    #expect(FieldValue.string(.value("37.7749,-122.4194")).locationValue == nil)
   }
 
   @Test("referenceValue extracts Reference from .reference case")
   internal func referenceValueExtraction() {
     let reference = Reference(recordName: "test-record")
-    let value = FieldValue.reference(reference)
+    let value = FieldValue.reference(.value(reference))
     #expect(value.referenceValue == reference)
   }
 
   @Test("referenceValue returns nil for non-reference cases")
   internal func referenceValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("test-record").referenceValue == nil)
+    #expect(FieldValue.string(.value("test-record")).referenceValue == nil)
   }
 
   @Test("assetValue extracts Asset from .asset case")
@@ -177,35 +177,29 @@ internal struct FieldValueConvenienceTests {
       size: 1_024,
       downloadURL: "https://example.com/file"
     )
-    let value = FieldValue.asset(asset)
+    let value = FieldValue.asset(.value(asset))
     #expect(value.assetValue == asset)
   }
 
   @Test("assetValue returns nil for non-asset cases")
   internal func assetValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("asset").assetValue == nil)
+    #expect(FieldValue.string(.value("asset")).assetValue == nil)
   }
 
-  @Test("listValue extracts [FieldValue] from .list case")
-  internal func listValueExtraction() {
-    let list: [FieldValue] = [.string("one"), .int64(2), .double(3.0)]
-    let value = FieldValue.list(list)
-    #expect(value.listValue == list)
-  }
-
-  @Test("listValue returns nil for non-list cases")
-  internal func listValueReturnsNilForWrongType() {
-    #expect(FieldValue.string("[]").listValue == nil)
+  @Test("stringListValue extracts [String] from .string(.value(.list))")
+  internal func stringListValueExtraction() {
+    #expect(FieldValue.string(.list(["a", "b"])).stringListValue == ["a", "b"])
+    #expect(FieldValue.string(.value("a")).stringListValue == nil)
   }
 
   @Test("Convenience extractors work in field dictionary")
   internal func convenienceExtractorsInDictionary() {
     let fields: [String: FieldValue] = [
-      "name": .string("Test"),
-      "count": .int64(42),
+      "name": .string(.value("Test")),
+      "count": .int64(.value(42)),
       "enabled": FieldValue(booleanValue: true),
-      "legacyFlag": .int64(1),
-      "score": .double(98.5),
+      "legacyFlag": .int64(.value(1)),
+      "score": .double(.value(98.5)),
     ]
 
     #expect(fields["name"]?.stringValue == "Test")
@@ -213,8 +207,6 @@ internal struct FieldValueConvenienceTests {
     #expect(fields["enabled"]?.boolValue == true)
     #expect(fields["legacyFlag"]?.boolValue == true)
     #expect(fields["score"]?.doubleValue == 98.5)
-
-    // Type mismatches return nil
     #expect(fields["name"]?.intValue == nil)
     #expect(fields["count"]?.stringValue == nil)
   }

@@ -41,8 +41,8 @@ extension CloudKitRecordTests {
         recordName: "test-7",
         recordType: "TestRecord",
         fields: [
-          "name": .string("Display Record"),
-          "count": .int64(99),
+          "name": .string(.value("Display Record")),
+          "count": .int64(.value(99)),
         ]
       )
 

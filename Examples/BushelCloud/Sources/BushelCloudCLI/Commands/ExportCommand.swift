@@ -109,7 +109,7 @@ internal enum ExportCommand {
     // Filter signed-only restore images
     if exportConfig.signedOnly {
       restoreImages = restoreImages.filter { record in
-        if case .int64(let isSigned) = record.fields["isSigned"] {
+        if case .int64(.value(let isSigned)) = record.fields["isSigned"] {
           return isSigned != 0
         }
         return false
@@ -119,21 +119,21 @@ internal enum ExportCommand {
     // Filter out betas
     if exportConfig.noBetas {
       restoreImages = restoreImages.filter { record in
-        if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+        if case .int64(.value(let isPrerelease)) = record.fields["isPrerelease"] {
           return isPrerelease == 0
         }
         return true
       }
 
       xcodeVersions = xcodeVersions.filter { record in
-        if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+        if case .int64(.value(let isPrerelease)) = record.fields["isPrerelease"] {
           return isPrerelease == 0
         }
         return true
       }
 
       swiftVersions = swiftVersions.filter { record in
-        if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+        if case .int64(.value(let isPrerelease)) = record.fields["isPrerelease"] {
           return isPrerelease == 0
         }
         return true

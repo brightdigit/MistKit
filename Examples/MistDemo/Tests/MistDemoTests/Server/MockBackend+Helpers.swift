@@ -72,11 +72,11 @@
       var result: [String: String] = [:]
       for (name, value) in fields {
         switch value {
-        case .string(let string):
+        case .string(.value(let string)):
           result[name] = string
-        case .int64(let int):
+        case .int64(.value(let int)):
           result[name] = String(int)
-        case .double(let double):
+        case .double(.value(let double)):
           result[name] = String(double)
         default:
           continue

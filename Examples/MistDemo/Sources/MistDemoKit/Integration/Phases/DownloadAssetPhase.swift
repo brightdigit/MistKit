@@ -62,7 +62,7 @@ internal struct DownloadAssetPhase: IntegrationPhase {
         "Lookup of '\(recordName)' did not return a record for asset download"
       )
     }
-    guard case .asset(let asset) = record.fields["image"] else {
+    guard case .asset(.value(let asset)) = record.fields["image"] else {
       throw IntegrationTestError.verificationFailed(
         "Record '\(recordName)' has no 'image' asset to download"
       )

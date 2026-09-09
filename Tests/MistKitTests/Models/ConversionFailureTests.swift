@@ -69,7 +69,7 @@ internal struct ConversionFailureTests {
 
     let field = try FieldValue(response, fieldName: "image")
 
-    guard case .asset(let asset) = field else {
+    guard case .asset(.value(let asset)) = field else {
       Issue.record("Expected .asset, got \(field)")
       return
     }

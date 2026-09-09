@@ -30,6 +30,7 @@
 internal import Foundation
 internal import MistKitOpenAPI
 
+// swiftlint:disable file_length
 /// Scalar-value conversions for `FieldValue` ← `Components.Schemas` response types.
 extension FieldValue {
   /// A decoded response `value` narrowed to its five scalar `oneOf` cases.
@@ -54,18 +55,18 @@ extension FieldValue {
     fileprivate var inferred: FieldValue {
       switch self {
       case .string(let strVal):
-        return .string(strVal)
+        return .string(.value(strVal))
       case .bytes(let bytesVal):
         if let data = Data(base64Encoded: bytesVal) {
-          return .bytes(data)
+          return .bytes(.value(data))
         }
-        return .string(bytesVal)
+        return .string(.value(bytesVal))
       case .int64(let intVal):
-        return .int64(Int(intVal))
+        return .int64(.value(Int(intVal)))
       case .double(let dblVal):
-        return .double(dblVal)
+        return .double(.value(dblVal))
       case .date(let dateVal):
-        return .date(Date(timeIntervalSince1970: dateVal / 1_000))
+        return .date(.value(Date(timeIntervalSince1970: dateVal / 1_000)))
       }
     }
 
@@ -158,21 +159,31 @@ extension FieldValue {
     switch ResponseTypeTag(fieldType) {
     case .numeric(.timestamp):
       let number = try requireNumeric(value, fieldName: fieldName, declaredType: declared)
-      return .date(Date(timeIntervalSince1970: number / 1_000))
+      return .date(.value(Date(timeIntervalSince1970: number / 1_000)))
     case .numeric(.double):
-      return .double(try requireNumeric(value, fieldName: fieldName, declaredType: declared))
+      return .double(
+        .value(
+          try requireNumeric(
+            value,
+            fieldName: fieldName,
+            declaredType: declared
+          )
+        )
+      )
     case .numeric(.int64):
       // Validate the category, then defer to inference so a fractional number isn't truncated.
       _ = try requireNumeric(value, fieldName: fieldName, declaredType: declared)
       return nil
     case .text(.bytes):
       let string = try requireString(value, fieldName: fieldName, declaredType: declared)
-      return .bytes(try dataFromBase64(string, fieldName: fieldName, declaredType: declared))
+      return .bytes(
+        .value(try dataFromBase64(string, fieldName: fieldName, declaredType: declared))
+      )
     case .text(.string):
       // Validate the category, then defer to inference, which already produces `.string`.
       _ = try requireString(value, fieldName: fieldName, declaredType: declared)
       return nil
-    case .complex:
+    case .complex, .list:
       return nil
     }
   }
@@ -222,3 +233,4 @@ extension FieldValue {
     ScalarPayload(value)?.inferred
   }
 }
+// swiftlint:enable file_length

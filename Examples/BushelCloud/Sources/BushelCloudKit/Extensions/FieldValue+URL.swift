@@ -47,7 +47,7 @@ extension FieldValue {
   ///
   /// - Returns: The URL if this is a string FieldValue with a valid URL format, otherwise `nil`
   public var urlValue: URL? {
-    if case .string(let value) = self {
+    if case .string(.value(let value)) = self {
       return URL(string: value)
     }
     return nil

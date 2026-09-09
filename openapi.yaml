@@ -1556,6 +1556,8 @@ components:
       description: |
         A CloudKit field value from API responses.
         May include optional type field for explicit type information.
+        List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
+        live CloudKit responses — not a flat LIST tag.
       properties:
         value:
           oneOf:
@@ -1570,8 +1572,10 @@ components:
             - $ref: '#/components/schemas/ListValue'
         type:
           type: string
-          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
-          description: The CloudKit field type (optional, may be inferred from value)
+          enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
+          description: |
+            The CloudKit field type (optional). List responses use STRING_LIST,
+            INT64_LIST, etc. (verified live against MistDemo, 2026-09-09).
       required:
         - value
 

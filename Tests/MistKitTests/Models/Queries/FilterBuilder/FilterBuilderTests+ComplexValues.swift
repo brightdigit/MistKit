@@ -25,7 +25,7 @@ extension FilterBuilderTests {
         return
       }
       let reference = Reference(recordName: "user-123")
-      let filter = FilterBuilder.equals("owner", .reference(reference))
+      let filter = FilterBuilder.equals("owner", .reference(.value(reference)))
       #expect(filter.comparator == .EQUALS)
       #expect(filter.fieldName == "owner")
     }
@@ -40,7 +40,7 @@ extension FilterBuilderTests {
         latitude: 37.7749,
         longitude: -122.4194
       )
-      let filter = FilterBuilder.equals("location", .location(location))
+      let filter = FilterBuilder.equals("location", .location(.value(location)))
       #expect(filter.comparator == .EQUALS)
       #expect(filter.fieldName == "location")
     }

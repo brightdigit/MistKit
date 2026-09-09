@@ -41,7 +41,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: 19.99 as Double, fieldType: .double)
 
       #expect(fieldValue != nil)
-      if case .double(let value) = fieldValue {
+      if case .double(.value(let value)) = fieldValue {
         #expect(value == 19.99)
       } else {
         Issue.record("Expected .double case")
@@ -53,7 +53,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: -3.14 as Double, fieldType: .double)
 
       #expect(fieldValue != nil)
-      if case .double(let value) = fieldValue {
+      if case .double(.value(let value)) = fieldValue {
         #expect(value == -3.14)
       } else {
         Issue.record("Expected .double case")
@@ -65,7 +65,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: 0.0 as Double, fieldType: .double)
 
       #expect(fieldValue != nil)
-      if case .double(let value) = fieldValue {
+      if case .double(.value(let value)) = fieldValue {
         #expect(value == 0.0)
       } else {
         Issue.record("Expected .double case")
@@ -77,7 +77,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: 42.0 as Double, fieldType: .double)
 
       #expect(fieldValue != nil)
-      if case .double(let value) = fieldValue {
+      if case .double(.value(let value)) = fieldValue {
         #expect(value == 42.0)
       } else {
         Issue.record("Expected .double case")

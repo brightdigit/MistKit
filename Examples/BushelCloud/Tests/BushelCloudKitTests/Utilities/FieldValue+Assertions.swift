@@ -35,7 +35,7 @@ internal import Testing
 extension FieldValue {
   /// Asserts that this FieldValue is a string with the expected value
   public func assertStringEquals(_ expected: String) {
-    guard case .string(let actual) = self else {
+    guard case .string(.value(let actual)) = self else {
       Issue.record("Expected .string, got \(self)")
       return
     }
@@ -44,7 +44,7 @@ extension FieldValue {
 
   /// Asserts that this FieldValue is an int64 with the expected value
   public func assertInt64Equals(_ expected: Int) {
-    guard case .int64(let actual) = self else {
+    guard case .int64(.value(let actual)) = self else {
       Issue.record("Expected .int64, got \(self)")
       return
     }
@@ -53,7 +53,7 @@ extension FieldValue {
 
   /// Asserts that this FieldValue is a double with the expected value
   public func assertDoubleEquals(_ expected: Double) {
-    guard case .double(let actual) = self else {
+    guard case .double(.value(let actual)) = self else {
       Issue.record("Expected .double, got \(self)")
       return
     }
@@ -63,7 +63,7 @@ extension FieldValue {
   /// Asserts that this FieldValue is a boolean stored as INT64 (0 or 1)
   public func assertBoolEquals(_ expected: Bool) {
     // Boolean is stored as INT64 (0 or 1) in CloudKit
-    guard case .int64(let actual) = self else {
+    guard case .int64(.value(let actual)) = self else {
       Issue.record("Expected .int64 (boolean), got \(self)")
       return
     }
@@ -73,7 +73,7 @@ extension FieldValue {
 
   /// Asserts that this FieldValue is a reference with the expected record name
   public func assertReferenceEquals(_ expectedRecordName: String) {
-    guard case .reference(let ref) = self else {
+    guard case .reference(.value(let ref)) = self else {
       Issue.record("Expected .reference, got \(self)")
       return
     }
@@ -90,7 +90,7 @@ extension FieldValue {
 
   /// Asserts that this FieldValue is a date with the expected value
   public func assertDateEquals(_ expected: Date) {
-    guard case .date(let actual) = self else {
+    guard case .date(.value(let actual)) = self else {
       Issue.record("Expected .date, got \(self)")
       return
     }

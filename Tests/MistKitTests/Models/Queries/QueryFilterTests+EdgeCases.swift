@@ -13,7 +13,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.equals("emptyField", .string(""))
+      let filter = QueryFilter.equals("emptyField", .string(.value("")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.fieldName == "emptyField")
     }
@@ -24,7 +24,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.equals("field_name_123", .string("value"))
+      let filter = QueryFilter.equals("field_name_123", .string(.value("value")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.fieldName == "field_name_123")
     }
@@ -35,11 +35,11 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let intFilter = QueryFilter.equals("count", .int64(0))
+      let intFilter = QueryFilter.equals("count", .int64(.value(0)))
       let intComponents = Components.Schemas.Filter(from: intFilter)
       #expect(intComponents.fieldName == "count")
 
-      let doubleFilter = QueryFilter.equals("amount", .double(0.0))
+      let doubleFilter = QueryFilter.equals("amount", .double(.value(0.0)))
       let doubleComponents = Components.Schemas.Filter(from: doubleFilter)
       #expect(doubleComponents.fieldName == "amount")
     }
@@ -50,7 +50,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.lessThan("balance", .int64(-100))
+      let filter = QueryFilter.lessThan("balance", .int64(.value(-100)))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .LESS_THAN)
     }
@@ -61,7 +61,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.greaterThan("views", .int64(1_000_000))
+      let filter = QueryFilter.greaterThan("views", .int64(.value(1_000_000)))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .GREATER_THAN)
     }

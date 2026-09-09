@@ -58,7 +58,7 @@ internal struct RecordOperationConversionTests {
       operationType: operationType,
       recordType: "TestRecord",
       recordName: "test-record-name",
-      fields: ["title": .string("Test")]
+      fields: ["title": .string(.value("Test"))]
     )
 
     let apiOperation = try Components.Schemas.RecordOperation(from: operation)
@@ -77,8 +77,8 @@ internal struct RecordOperationConversionTests {
       recordType: "TestRecord",
       recordName: "test-name",
       fields: [
-        "title": .string("Hello"),
-        "count": .int64(42),
+        "title": .string(.value("Hello")),
+        "count": .int64(.value(42)),
       ]
     )
 
@@ -96,7 +96,7 @@ internal struct RecordOperationConversionTests {
       operationType: .update,
       recordType: "TestRecord",
       recordName: "test-name",
-      fields: ["title": .string("Updated")],
+      fields: ["title": .string(.value("Updated"))],
       recordChangeTag: "abc123"
     )
 
