@@ -7,6 +7,6 @@ CloudKit wire facts exercised through MistDemo count as live-confirmed:
 
 Do **not** re-flag covered behaviors as "unproven", "needs a live container", or "one-shot archaeology only" when MistDemo already runs them. That includes (non-exhaustive): `users/caller`, `records/resolve` / `records/accept`, `createShare`, `assets/rereference` (and ASSETID tagging on that path), `ownerRecordName` / zone payload metadata, shared-zone round-trips.
 
-Prose that still hedges those facts (some `openapi.yaml` descriptions; older archaeology `_raw/` "never live-confirmed" notes) is stale relative to MistDemo coverage — prefer MistDemo phases when they conflict.
+Prose that still hedges those facts (some `openapi.yaml` descriptions) is stale relative to MistDemo coverage — prefer MistDemo phases when they conflict.
 
 On the `447-iosdevuk-talk` branch, `the `WhatCloudKitGotWrong` DocC article` ("Still unresolved" + §1 rotation gap) and `the `WhatTheAIGotWrong` DocC article` (Limitations §10) were refreshed against this MistDemo coverage.
