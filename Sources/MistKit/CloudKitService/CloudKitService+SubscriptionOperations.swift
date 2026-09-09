@@ -34,8 +34,8 @@ extension CloudKitService {
   ///
   /// Subscriptions are the change triggers that produce push notifications;
   /// pair them with a registered APNs token
-  /// (``createAPNsToken(environment:database:)`` /
-  /// ``registerAPNsToken(_:database:)``) to receive pushes.
+  /// (``createAPNsToken(environment:clientId:database:)`` /
+  /// ``registerAPNsToken(_:environment:clientId:database:)``) to receive pushes.
   ///
   /// - Parameter database: The CloudKit database scope to query.
   /// - Returns: Every subscription registered in the database.

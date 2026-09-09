@@ -27,8 +27,8 @@ openapi.yaml
      ▼
 swift-openapi-generator  (provisioned by mise)
      │
-     ├── Sources/MistKitOpenAPI/Client.swift   (~3,600 lines, committed)
-     └── Sources/MistKitOpenAPI/Types.swift    (~8,600 lines, committed)
+     ├── Sources/MistKitOpenAPI/Client.swift   (~5,000 lines, committed)
+     └── Sources/MistKitOpenAPI/Types.swift    (~14,200 lines, committed)
      │
      ▼
 Hand-written wrapper (Sources/MistKit/, committed)
@@ -59,7 +59,7 @@ mise exec -- swiftlint --fix
 mise exec -- swift-openapi-generator --version
 ```
 
-`./Scripts/generate-openapi.sh` puts mise's `$PATH` shims in front of the user's shell, then calls `swift-openapi-generator generate` directly. There is no Mintfile; references in older documentation to `mint`/`Mintfile` are out of date.
+`./Scripts/generate-openapi.sh` puts mise's `$PATH` shims in front of the user's shell and calls `swift-openapi-generator generate`. When the generator is not on `$PATH` (CI containers, remote sessions) it falls back to `swift run --package-path Scripts/OpenAPITools swift-openapi-generator`, a tiny package that pins the same generator version, so regeneration works without mise. There is no Mintfile; references in older documentation to `mint`/`Mintfile` are out of date.
 
 ## Generation script
 
@@ -73,16 +73,23 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PACKAGE_DIR="${SCRIPT_DIR}/.."
 
 # Put mise-managed tools on PATH
-if command -v mise >/dev/null 2>&1; then
+if command -v mise >/dev/null 2>&1 && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   eval "$(mise -C "$PACKAGE_DIR" env -s bash)"
 fi
 
-pushd $PACKAGE_DIR
+pushd "$PACKAGE_DIR" || exit
 
-swift-openapi-generator generate \
-  --output-directory Sources/MistKit/Generated \
-  --config openapi-generator-config.yaml \
-  openapi.yaml
+if command -v swift-openapi-generator >/dev/null 2>&1; then
+  GENERATOR=(swift-openapi-generator)
+else
+  echo "ℹ️  swift-openapi-generator not on PATH; building it from Scripts/OpenAPITools."
+  GENERATOR=(swift run --package-path Scripts/OpenAPITools swift-openapi-generator)
+fi
+
+"${GENERATOR[@]}" generate \
+    --output-directory Sources/MistKitOpenAPI \
+    --config openapi-generator-config.yaml \
+    openapi.yaml
 
 popd
 
@@ -103,7 +110,7 @@ Run it whenever `openapi.yaml` or `openapi-generator-config.yaml` changes:
 generate:
   - types
   - client
-accessModifier: internal
+accessModifier: public
 additionalFileComments:
   - periphery:ignore:all
   - swift-format-ignore-file
@@ -119,32 +126,20 @@ There is intentionally no `typeOverrides` block. The asymmetry between request a
 
 ## Package.swift integration
 
-Generated code is referenced as ordinary source files in the `MistKit` target. The generator is **not** used as a SwiftPM build plugin. Library consumers don't need mise or `swift-openapi-generator`; they just compile the committed sources.
+Generated code lives in its own target and product, `MistKitOpenAPI`, which the `MistKit` target depends on with `internal import MistKitOpenAPI`. Consumers who need the raw client can `import MistKitOpenAPI` directly. The generator is **not** used as a SwiftPM build plugin. Library consumers don't need mise or `swift-openapi-generator`; they just compile the committed sources.
 
 The runtime dependencies pulled in by the generated client:
 
 ```swift
 .package(url: "https://github.com/apple/swift-openapi-runtime",  from: "1.8.0"),
-.package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
+.package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
 ```
 
-Plus the standard MistKit dependencies: `swift-http-types`, `swift-crypto`, `swift-log`, `swift-async-algorithms`.
+Plus MistKit's other dependencies: `swift-crypto` (server-to-server signing) and `swift-log`. `HTTPTypes` arrives transitively through `swift-openapi-runtime`.
 
 ## Swift language settings
 
-MistKit declares `swift-tools-version: 6.1` and enables the Swift 6.2 upcoming features that are stable for production use:
-
-```swift
-let swiftSettings: [SwiftSetting] = [
-  .enableUpcomingFeature("ExistentialAny"),           // SE-0335
-  .enableUpcomingFeature("InternalImportsByDefault"), // SE-0409
-  .enableUpcomingFeature("MemberImportVisibility"),   // SE-0444 (Swift 6.1+)
-  .enableUpcomingFeature("FullTypedThrows"),          // SE-0413
-  // … plus experimental features stable enough for production use
-]
-```
-
-`InternalImportsByDefault` is the reason every import in MistKit has an explicit access modifier (`internal import Foundation`, `public import OpenAPIRuntime`, …). Generated code is compiled with the same settings.
+MistKit declares `swift-tools-version: 6.1`. The `MistKit` target compiles with the Swift 6 language mode plus the upcoming features that `Package.swift` enables in its shared `swiftSettings` — including `InternalImportsByDefault`, which is why every import in the hand-written sources carries an explicit access modifier (`internal import Foundation`, `public import HTTPTypes`, …). The generated `MistKitOpenAPI` target is compiled without those settings so the generator's output never has to be post-processed; its single bare `import HTTPTypes` in `Client.swift` is the documented exception to the import convention.
 
 ## Request/response asymmetry
 
@@ -176,8 +171,8 @@ The compiler refuses to slot a response value into a request, and vice versa. Co
 
 ```
 Sources/MistKitOpenAPI/
-├── Client.swift   (~3,600 lines, committed)
-└── Types.swift    (~8,600 lines, committed)
+├── Client.swift   (~5,000 lines, committed)
+└── Types.swift    (~14,200 lines, committed)
 ```
 
 Both files lead with:
@@ -212,6 +207,8 @@ The anatomy of these files — `APIProtocol`, `Components.Schemas.*`, `Operation
 Never edit anything under `Sources/MistKitOpenAPI/` by hand — change `openapi.yaml` and regenerate.
 
 ## See Also
+
+- <doc:FieldTypePolymorphism>
 
 - <doc:GeneratedCodeAnalysis>
 - <doc:GeneratedCodeWorkflow>

@@ -32,7 +32,7 @@ internal import MistKit
 
 /// Command for `records/resolve`. Resolves share short GUIDs — the handle
 /// carried by CloudKit share URLs — into the root record, the governing
-/// `cloudKit.share` record, and the caller's participation in each share.
+/// `cloudkit.share` record, and the caller's participation in each share.
 public struct ResolveCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = ResolveConfig

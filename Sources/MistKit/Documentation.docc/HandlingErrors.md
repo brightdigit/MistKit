@@ -188,7 +188,7 @@ MistKit infers the duplicate from that reason string and surfaces it through two
 - ``OperationFailure/isLikelyDuplicate`` — opt-in `Bool` on a ``SubscriptionOperationFailure``, an exact-match on the marker reason.
 - ``CloudKitError/subscriptionLikelyDuplicate(_:)`` — thrown from the single-subscription ``CloudKitService/createSubscription(_:database:)`` convenience when the hint matches.
 
-Both are intentionally hedged (`isLikely…`) because the wire-level code is just `INTERNAL_ERROR` — the duplicate interpretation is MistKit's inference from the reason string, not a confirmed server signal. Batch ``CloudKitService/modifySubscriptions(_:database:)`` is unchanged: per-subscription failures still flow through ``SubscriptionResult/failure(_:)`` with the raw `serverErrorCode` and reason intact, so callers that want the unhedged result can inspect them directly.
+Both are intentionally hedged (`isLikely…`) because the wire-level code is just `INTERNAL_ERROR` — the duplicate interpretation is MistKit's inference from the reason string, not a confirmed server signal. Batch ``CloudKitService/modifySubscriptions(_:database:)`` is unchanged: per-subscription failures still flow through ``OperationResult/failure(_:)`` with the raw `serverErrorCode` and reason intact, so callers that want the unhedged result can inspect them directly.
 
 ```swift
 do {
@@ -202,6 +202,81 @@ do {
 ```
 
 > Note: Empirical probing (2026-05-25, public DB) confirmed the uniqueness key is `(recordType, firesOn)` with **exact-set** match on `firesOn` (a superset or disjoint fire-event set does *not* collide), and that re-creating with the *same* `subscriptionID` succeeds idempotently rather than erroring. CloudKit is silent on which subscription collided; reconcile client-side by `(recordType, firesOn)`, not by ID.
+
+## Under the hood: from HTTP response to CloudKitError
+
+CloudKit returns every failure as JSON with the same shape, whatever the status code:
+
+```json
+{
+  "uuid": "a1b2c3d4-...",
+  "serverErrorCode": "AUTHENTICATION_FAILED",
+  "reason": "The request requires authentication."
+}
+```
+
+`openapi.yaml` models that as one `Failure` response, and swift-openapi-generator turns each operation's status codes into an `Output` enum with a case per status plus `.undocumented`. Turning that into a ``CloudKitError`` is a short, fully typed pipeline:
+
+```
+Operations.queryRecords.Output          (generated: .ok / .badRequest / … / .undocumented)
+        │
+        ▼
+CloudKitResponseType.toCloudKitError()  one exhaustive switch per operation
+        │                               (.ok → nil; each failure case → statusCode)
+        ▼
+CloudKitError(failure, statusCode:)     reads serverErrorCode + reason from the JSON body
+        │
+        ▼
+CloudKitError(serverErrorCode:statusCode:reason:)
+        ├── nil code           → .httpErrorWithDetails(statusCode:reason:)
+        ├── known code         → dedicated case, e.g. .badRequest(reason:)
+        └── unknown code       → .unknownServerError(code:statusCode:reason:)
+```
+
+Each generated `Output` conforms to an internal `CloudKitResponseType` protocol with a single requirement, `toCloudKitError()`, implemented as an exhaustive switch — so a status code added to `openapi.yaml` becomes a build error rather than a silently dropped case:
+
+```swift
+extension Operations.queryRecords.Output: CloudKitResponseType {
+  internal func toCloudKitError() -> CloudKitError? {
+    switch self {
+    case .ok: return nil
+    case .badRequest(let response): return .init(response, statusCode: 400)
+    case .unauthorized(let response): return .init(response, statusCode: 401)
+    // … one line per documented status …
+    case .undocumented(let statusCode, _):
+      return .undocumented(statusCode: statusCode, response: self)
+    }
+  }
+}
+```
+
+The status-keyed initializer reads the body and delegates the code-to-case mapping to a single dictionary-backed lookup in ``CloudKitServerErrorCode``, so the wire strings and their documented HTTP statuses live in one place:
+
+```swift
+internal init(serverErrorCode code: String?, statusCode: Int, reason: String?) {
+  guard let code else {
+    self = .httpErrorWithDetails(statusCode: statusCode, reason: reason)
+    return
+  }
+  self = Self.make(
+    from: CloudKitServerErrorCode(rawValue: code),
+    statusCode: statusCode,
+    reason: reason
+  )
+}
+```
+
+An undocumented status logs the full response at `.debug` (it may echo request data such as email addresses) and a sanitized line at `.warning`, then becomes ``CloudKitError/httpError(statusCode:)``. Every ``CloudKitService`` operation checks for an error first and only then unwraps the success payload, so a caller never sees a generated response type.
+
+End to end:
+
+```
+HTTP 400  {"serverErrorCode": "BAD_REQUEST", "reason": "Invalid filter"}
+   → Operations.queryRecords.Output.badRequest(…)
+   → toCloudKitError()  → CloudKitError(failure, statusCode: 400)
+   → CloudKitError(serverErrorCode: "BAD_REQUEST", statusCode: 400, reason: "Invalid filter")
+   → CloudKitError.badRequest(reason: "Invalid filter")
+```
 
 ## Retry and recovery
 
@@ -264,5 +339,12 @@ func isTransient(_ error: CloudKitError) -> Bool {
 
 ### Per-operation failures
 
+- ``OperationResult``
 - ``SubscriptionOperationFailure``
 - ``SubscriptionResult``
+- ``CloudKitServerErrorCode``
+
+## See Also
+
+- <doc:FieldTypePolymorphism>
+- <doc:WhatCloudKitGotWrong>

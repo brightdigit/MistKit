@@ -36,8 +36,8 @@
 /// MistKit so forward-compatibility never drops information.
 ///
 /// Wire string, documented HTTP status, and human summary for each known code
-/// live in ``knownCatalog`` — the single source of truth used by both
-/// ``CloudKitError`` construction and ``ServerErrorCodeDetail``.
+/// live in `knownCatalog` — the single source of truth used by both
+/// ``CloudKitError`` construction and `ServerErrorCodeDetail`.
 public enum CloudKitServerErrorCode: Codable, Hashable, Sendable {
   case accessDenied
   case atomicError

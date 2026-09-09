@@ -239,7 +239,7 @@ paths:
       summary: Fetch Record Information
       description: |
         Resolve one or more share short GUIDs into information about the shared
-        records they identify — the root record, the `cloudKit.share` record,
+        records they identify — the root record, the `cloudkit.share` record,
         the owner identity, and the caller's participation in each share.
 
         Routed against the public database with web-auth credentials
@@ -1438,11 +1438,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions to apply. Set when creating a
-            `cloudKit.share` record.
+            `cloudkit.share` record.
         participants:
           type: array
           description: |
-            The participants to invite. Set when creating a `cloudKit.share`
+            The participants to invite. Set when creating a `cloudkit.share`
             record.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1450,7 +1450,7 @@ components:
     ShareTargetReference:
       type: object
       description: |
-        Identifies the record being shared when creating a `cloudKit.share`
+        Identifies the record being shared when creating a `cloudkit.share`
         record (the `forRecord` key).
       properties:
         recordName:
@@ -1497,11 +1497,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions of a shared record. Present on
-            `cloudKit.share` records.
+            `cloudkit.share` records.
         participants:
           type: array
           description: |
-            The participants in a shared record. Present on `cloudKit.share`
+            The participants in a shared record. Present on `cloudkit.share`
             records.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1513,7 +1513,11 @@ components:
     ShareReference:
       type: object
       description: |
-        A reference to the `cloudKit.share` record governing a shared record.
+        A reference to the `cloudkit.share` record governing a shared record.
+        Note the lowercase `k`: Apple's archived "Sharing Records" docs write
+        `cloudKit.share`, but the live `records/modify` API accepts and returns
+        only `cloudkit.share`. The camelCase spelling fails with
+        "Cannot share - no such record exists to share".
       properties:
         recordName:
           type: string

@@ -38,7 +38,8 @@ internal import Testing
 /// deployment docs rely on, and the command-line flags the README documents.
 @Suite("MistDemoKeys")
 internal struct MistDemoKeysTests {
-  /// The eight variables `MistDemo-Integration.yml` and `docs/cloudkit-guide/` set.
+  /// The eight variables `MistDemo-Integration.yml` sets (see the
+  /// "Deploying MistKit" article in the DocC catalog for the contract).
   ///
   /// `CLOUDKIT_CONTAINER_ID` is the one that changed: the old `container.identifier`
   /// base resolved to `CLOUDKIT_CONTAINER_IDENTIFIER`, so the value CI supplied was

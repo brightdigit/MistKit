@@ -30,7 +30,7 @@
 /// A per-record failure returned inline in a CloudKit `modifyRecords` or
 /// `lookupRecords` response.
 ///
-/// Surfaced via ``RecordResult/failure(_:)`` from `modifyRecords` /
+/// Surfaced via ``OperationResult/failure(_:)`` on a ``RecordResult`` from `modifyRecords` /
 /// `lookupRecords`, and wrapped in ``CloudKitError/recordOperationFailed(_:)``
 /// when a single-record convenience method (`createRecord`/`updateRecord`/
 /// `deleteRecord`) hits one.

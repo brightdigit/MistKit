@@ -45,7 +45,7 @@ extension CloudKitService {
   /// The unified ``Query`` value carries the `recordType` plus any
   /// ``QueryFilter`` predicates and ``QuerySort`` descriptors. The same
   /// value can be embedded in a subscription via
-  /// ``SubscriptionInfo/Kind/query(_:)``.
+  /// ``SubscriptionInfo/Kind/query(_:firesOn:firesOnce:)``.
   ///
   /// - Parameters:
   ///   - query: The query to execute.

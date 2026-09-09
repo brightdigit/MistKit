@@ -66,7 +66,8 @@ extension CloudKitService {
   /// // Store result.syncToken for the next fetch.
   /// ```
   ///
-  /// - Note: Per-zone failures are surfaced as ``ZoneChangeResult/failure(_:)``
+  /// - Note: Per-zone failures are surfaced as ``OperationResult/failure(_:)``
+  ///   on a ``ZoneChangeResult``
   ///   entries in ``DatabaseChangesResult/zones`` rather than thrown, so one
   ///   bad zone never discards the zones that succeeded.
   public func fetchDatabaseChanges(
