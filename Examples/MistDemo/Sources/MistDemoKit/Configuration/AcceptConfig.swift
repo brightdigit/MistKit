@@ -80,18 +80,11 @@ public struct AcceptConfig: Sendable, ConfigurationParseable {
     }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
-    let fetchRootRecord = configuration.optionalBool(
-      forKey: "fetch.root.record"
-    )
-    let fields = configuration.commaSeparatedList(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
+    let fetchRootRecord = configuration.read(MistDemoKeys.Sharing.fetchRootRecord)
+    let fields = configuration.commaSeparatedList(MistDemoKeys.Record.fields)
 
     let shortGUIDs = ResolveConfig.parseShortGUIDs(from: configuration)
     guard !shortGUIDs.isEmpty else {

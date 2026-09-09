@@ -103,7 +103,10 @@ extension CloudKitServiceTests.FetchZoneChanges.SuccessCases {
       (zoneCount: 3, syncToken: "token-2"),
     ])
 
-    let (zones, token) = try await service.fetchAllZoneChanges(database: .private)
+    let (zones, token) = try await CloudKitServiceTests.FetchZoneChanges.fetchAllZoneChanges(
+      service,
+      database: .private
+    )
 
     #expect(zones.count == 3)
     #expect(token == "token-2")
@@ -121,7 +124,10 @@ extension CloudKitServiceTests.FetchZoneChanges.SuccessCases {
       (zoneCount: 2, syncToken: "token-3"),
     ])
 
-    let (zones, token) = try await service.fetchAllZoneChanges(database: .private)
+    let (zones, token) = try await CloudKitServiceTests.FetchZoneChanges.fetchAllZoneChanges(
+      service,
+      database: .private
+    )
 
     #expect(zones.count == 7)
     #expect(token == "token-3")
@@ -137,7 +143,8 @@ extension CloudKitServiceTests.FetchZoneChanges.SuccessCases {
       syncToken: "stuck-token"
     )
 
-    let (zones, token) = try await service.fetchAllZoneChanges(
+    let (zones, token) = try await CloudKitServiceTests.FetchZoneChanges.fetchAllZoneChanges(
+      service,
       syncToken: "stuck-token",
       database: .private
     )

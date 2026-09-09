@@ -9,13 +9,12 @@ https://api.apple-cloudkit.com/database/{version}/{container}/{environment}/{dat
 
 ### Authentication
 
-**API Token (User-based)**
+**API Token / Web Auth (user-based)** — query parameters, **not** headers:
 ```
-Headers:
-  X-Apple-CloudKit-Request-KeyID: [api-token]
-  X-Apple-CloudKit-Request-ISO8601Date: [timestamp]
-  X-Apple-CloudKit-Request-SignatureV1: [signature]
+?ckAPIToken=[api-token]&ckWebAuthToken=[web-auth-token]
 ```
+`ckWebAuthToken` must be percent-encoded (`+`→`%2B`, `/`→`%2F`, `=`→`%3D`).
+Required for private/shared databases and for every `/users/*` route.
 
 **Server-to-Server Key**
 ```
@@ -36,7 +35,7 @@ Body: Included in signature
 | Record Changes | `/records/changes` | POST |
 | List Zones | `/zones/list` | POST |
 | Modify Zones | `/zones/modify` | POST |
-| Current User | `/users/current` | GET |
+| Current User | `/users/caller` | GET | *(`users/current` is deprecated)*
 | Upload Asset | `/assets/upload` | POST |
 
 ### Request Format (POST endpoints)
@@ -103,16 +102,18 @@ Body: Included in signature
 | `INT64` | Integer | `{"value": 42}` |
 | `DOUBLE` | Floating point | `{"value": 3.14}` |
 | `BYTES` | Binary data | `{"value": "base64..."}` |
-| `DATE` | Timestamp | `{"value": 1234567890000}` |
+| `TIMESTAMP` | Timestamp (ms since epoch) | `{"value": 1234567890000}` |
 | `LOCATION` | Coordinates | `{"value": {"latitude": 37.7, "longitude": -122.4}}` |
 | `REFERENCE` | Record ref | `{"value": {"recordName": "id", "action": "NONE"}}` |
 | `ASSET` | File reference | `{"value": {"fileChecksum": "...", "size": 1024, "downloadURL": "..."}}` |
 | `STRING_LIST` | Array of strings | `{"value": ["a", "b"]}` |
 | `INT64_LIST` | Array of ints | `{"value": [1, 2, 3]}` |
 | `DOUBLE_LIST` | Array of doubles | `{"value": [1.1, 2.2]}` |
-| `DATE_LIST` | Array of dates | `{"value": [123, 456]}` |
+| `TIMESTAMP_LIST` | Array of timestamps | `{"value": [123, 456]}` |
 | `LOCATION_LIST` | Array of locations | `{"value": [{"latitude": ...}, ...]}` |
 | `REFERENCE_LIST` | Array of refs | `{"value": [{"recordName": "id1"}, ...]}` |
+
+Ambiguous scalars on writes (`TIMESTAMP`, `BYTES`, `DOUBLE`) must carry an explicit `type` tag — otherwise CloudKit infers the wrong type and rejects with `BAD_REQUEST` (issue #375).
 
 ---
 
@@ -229,7 +230,7 @@ struct FeatureXTests {
 | `INT64` | `Int` |
 | `DOUBLE` | `Double` |
 | `BYTES` | `Data` |
-| `DATE` | `Date` (milliseconds since epoch) |
+| `TIMESTAMP` | `Date` (milliseconds since epoch) |
 | `LOCATION` | `CLLocationCoordinate2D` or custom struct |
 | `REFERENCE` | Custom `CKReference` struct |
 | `ASSET` | Custom `CKAsset` struct with URL |

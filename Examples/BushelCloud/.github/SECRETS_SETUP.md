@@ -11,7 +11,7 @@ Before adding secrets, you need a CloudKit Server-to-Server key:
 3. Navigate to: **API Access → Server-to-Server Keys**
 4. Click **+** to create a new key
 5. Download the `.pem` file (you can only download once!)
-6. Copy the Key ID (32-character hex string)
+6. Copy the Key ID (64-character hex string)
 
 ## Required Secrets
 
@@ -24,7 +24,7 @@ You need to add **2 secrets** to your GitHub repository:
 
 **Secret configuration:**
 - **Name:** `CLOUDKIT_KEY_ID`
-- **Value:** Your 32-character key ID from CloudKit Dashboard
+- **Value:** Your 64-character key ID from CloudKit Dashboard
 - **Example:** `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`
 
 ### 2. CLOUDKIT_PRIVATE_KEY
@@ -90,7 +90,7 @@ If you see authentication errors, double-check:
 
 | Secret Name | Where to Get It | Format |
 |-------------|-----------------|--------|
-| `CLOUDKIT_KEY_ID` | CloudKit Dashboard → API Access → Server-to-Server Keys | 32-character hex (e.g., `a1b2c3...`) |
+| `CLOUDKIT_KEY_ID` | CloudKit Dashboard → API Access → Server-to-Server Keys | 64-character hex (e.g., `a1b2c3...`) |
 | `CLOUDKIT_PRIVATE_KEY` | Downloaded `.pem` file | Multi-line PEM format with headers |
 
 ## Next Steps

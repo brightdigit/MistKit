@@ -81,7 +81,7 @@ extension ResponseConfig {
         [
           "zoneID": [
             "zoneName": "modified-zone-\(index)",
-            "ownerName": "_defaultOwner",
+            "ownerRecordName": "_defaultOwner",
           ]
         ]
       }

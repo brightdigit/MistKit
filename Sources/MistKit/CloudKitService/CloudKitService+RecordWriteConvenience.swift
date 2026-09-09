@@ -35,6 +35,8 @@ extension CloudKitService {
   ///   - recordType: The type of record to create
   ///   - recordName: Optional unique record name
   ///   - fields: Dictionary of field names to FieldValue
+  ///   - zoneID: Optional target zone (defaults to the request's zone /
+  ///     `_defaultZone` when omitted)
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
@@ -51,6 +53,7 @@ extension CloudKitService {
     recordType: String,
     recordName: String? = nil,
     fields: [String: FieldValue],
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.create(
@@ -59,7 +62,9 @@ extension CloudKitService {
       fields: fields
     )
 
-    let results = try await modifyRecords([operation], database: database)
+    let results = try await modifyRecords(
+      [operation], zoneID: zoneID, database: database
+    )
     guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
@@ -72,6 +77,8 @@ extension CloudKitService {
   ///   - recordName: The unique record name
   ///   - fields: Dictionary of field names to FieldValue
   ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - zoneID: Optional target zone (defaults to the request's zone /
+  ///     `_defaultZone` when omitted)
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the updated record
   /// - Throws: CloudKitError if the operation fails
@@ -91,6 +98,7 @@ extension CloudKitService {
     recordName: String,
     fields: [String: FieldValue],
     recordChangeTag: String? = nil,
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.update(
@@ -100,7 +108,9 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    let results = try await modifyRecords([operation], database: database)
+    let results = try await modifyRecords(
+      [operation], zoneID: zoneID, database: database
+    )
     guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
@@ -112,12 +122,15 @@ extension CloudKitService {
   ///   - recordType: The type of record to delete
   ///   - recordName: The unique record name
   ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - zoneID: Optional target zone (defaults to the request's zone /
+  ///     `_defaultZone` when omitted)
   ///   - database: The CloudKit database scope to delete from (`.public`, `.private`, `.shared`)
   /// - Throws: CloudKitError if the operation fails
   public func deleteRecord(
     recordType: String,
     recordName: String,
     recordChangeTag: String? = nil,
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) {
     let operation = RecordOperation.delete(
@@ -126,7 +139,9 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    let results = try await modifyRecords([operation], database: database)
+    let results = try await modifyRecords(
+      [operation], zoneID: zoneID, database: database
+    )
     for result in results {
       // `get()` rethrows a per-record failure as `recordOperationFailed`.
       _ = try result.get()

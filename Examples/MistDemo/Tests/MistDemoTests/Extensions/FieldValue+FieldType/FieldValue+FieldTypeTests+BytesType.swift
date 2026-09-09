@@ -36,16 +36,23 @@ internal import Testing
 extension FieldValueFieldTypeTests {
   @Suite("Bytes Type")
   internal struct BytesType {
-    @Test("Initialize FieldValue.bytes from String value and bytes type")
+    @Test("Initialize FieldValue.bytes from valid base64 String value and bytes type")
     internal func initializeBytesFromStringValue() {
-      let fieldValue = FieldValue(value: "base64data" as String, fieldType: .bytes)
+      let fieldValue = FieldValue(value: "aGVsbG8=" as String, fieldType: .bytes)
 
       #expect(fieldValue != nil)
       if case .bytes(let value) = fieldValue {
-        #expect(value == "base64data")
+        #expect(value == Data("hello".utf8))
       } else {
         Issue.record("Expected .bytes case")
       }
+    }
+
+    @Test("Bytes type with malformed base64 returns nil")
+    internal func bytesTypeWithMalformedBase64ReturnsNil() {
+      let fieldValue = FieldValue(value: "not!valid!" as String, fieldType: .bytes)
+
+      #expect(fieldValue == nil)
     }
 
     @Test("Bytes type with non-String value returns nil")

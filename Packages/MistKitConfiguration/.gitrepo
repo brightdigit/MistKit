@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:brightdigit/MistKitConfiguration.git
+	branch = mistkit-beta.5
+	commit = a70afee6b05575a654e442216dad47dc5ea7a672
+	method = merge
+	cmdver = 0.4.9

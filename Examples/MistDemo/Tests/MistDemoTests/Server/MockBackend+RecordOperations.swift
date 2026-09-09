@@ -37,16 +37,14 @@
       recordType: String,
       limit: Int?,
       sortBy: [WebRequests.QuerySortField]?,
-      zoneName: String?,
-      zoneOwner: String?,
+      zone: WebRequests.ZoneSelector?,
       database: MistKit.Database
     ) async throws -> [RecordInfo] {
       lastQuery = QueryCall(
         recordType: recordType,
         limit: limit,
         sortBy: sortBy,
-        zoneName: zoneName,
-        zoneOwner: zoneOwner,
+        zone: zone,
         database: database
       )
       try consumePendingError()
@@ -59,12 +57,14 @@
       recordType: String,
       recordName: String?,
       fields: [String: FieldValue],
+      zone: WebRequests.ZoneSelector?,
       database: MistKit.Database
     ) async throws -> RecordInfo {
       lastCreate = CreateCall(
         recordType: recordType,
         recordName: recordName,
         fields: Self.flatten(fields),
+        zone: zone,
         database: database
       )
       try consumePendingError()
@@ -78,6 +78,7 @@
       recordName: String,
       fields: [String: FieldValue],
       recordChangeTag: String?,
+      zone: WebRequests.ZoneSelector?,
       database: MistKit.Database
     ) async throws -> RecordInfo {
       lastUpdate = UpdateCall(
@@ -85,6 +86,7 @@
         recordName: recordName,
         fields: Self.flatten(fields),
         recordChangeTag: recordChangeTag,
+        zone: zone,
         database: database
       )
       try consumePendingError()
@@ -97,12 +99,14 @@
       recordType: String,
       recordName: String,
       recordChangeTag: String?,
+      zone: WebRequests.ZoneSelector?,
       database: MistKit.Database
     ) async throws {
       lastDelete = DeleteCall(
         recordType: recordType,
         recordName: recordName,
         recordChangeTag: recordChangeTag,
+        zone: zone,
         database: database
       )
       try consumePendingError()

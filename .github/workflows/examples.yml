@@ -2,7 +2,10 @@ name: Examples
 
 on:
   pull_request:
-    branches: [main]
+    # Match MistKit.yml full-matrix bases: main and semver release branches (e.g. v1.0.0-beta.5).
+    branches:
+      - main
+      - 'v*.*.*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -15,8 +18,9 @@ jobs:
   test-examples:
     name: Test ${{ matrix.example }} on Ubuntu
     runs-on: ubuntu-latest
-    # BushelCloud / CelestraCloud declare swift-tools-version: 6.4; MistDemo is 6.2.
-    # Swift 6.4 has no release image yet — use the nightly (same pin as the subrepos).
+    # MistDemo / BushelCloud / CelestraCloud / MistKitConfiguration all declare
+    # swift-tools-version: 6.4. Swift 6.4 has no release image yet — use the
+    # nightly (same pin as the subrepos).
     container: ${{ matrix.container }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
@@ -24,10 +28,16 @@ jobs:
       matrix:
         include:
           - example: MistDemo
-            container: swift:6.3
+            path: Examples/MistDemo
+            container: swiftlang/swift:nightly-6.4.x-noble
           - example: BushelCloud
+            path: Examples/BushelCloud
             container: swiftlang/swift:nightly-6.4.x-noble
           - example: CelestraCloud
+            path: Examples/CelestraCloud
+            container: swiftlang/swift:nightly-6.4.x-noble
+          - example: MistKitConfiguration
+            path: Packages/MistKitConfiguration
             container: swiftlang/swift:nightly-6.4.x-noble
 
     steps:
@@ -37,4 +47,7 @@ jobs:
       - name: Build and Test ${{ matrix.example }}
         uses: brightdigit/swift-build@v1
         with:
-          working-directory: Examples/${{ matrix.example }}
+          working-directory: ${{ matrix.path }}
+          # MistKitConfiguration gitignores Package.resolved (standalone CI uses the
+          # same flag). Examples that commit a lockfile keep the default.
+          skip-package-resolved: ${{ matrix.example == 'MistKitConfiguration' }}

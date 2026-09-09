@@ -88,7 +88,7 @@ extension CloudKitServiceTests.Sharing {
       "containerIdentifier": TestConstants.serviceContainerIdentifier,
       "databaseScope": "SHARED",
       "environment": "development",
-      "zoneID": ["zoneName": "SharedZone", "ownerName": "_owner"],
+      "zoneID": ["zoneName": "SharedZone", "ownerRecordName": "_owner"],
       "rootRecordName": "root-\(value)",
       "share": shareRecord(for: value),
       "ownerIdentity": [

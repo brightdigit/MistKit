@@ -34,7 +34,7 @@ extension CloudKitService {
   /// (`records/resolve`).
   ///
   /// Given the short GUIDs carried by share URLs, returns the root record,
-  /// the governing `cloudKit.share` record, the owner's identity, and the
+  /// the governing `cloudkit.share` record, the owner's identity, and the
   /// caller's participation in each share. Set
   /// ``ShortGUIDDictionary/shouldFetchRootRecord`` to have CloudKit include the root
   /// record itself, optionally narrowed by

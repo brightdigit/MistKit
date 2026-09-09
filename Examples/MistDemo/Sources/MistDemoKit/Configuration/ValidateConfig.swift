@@ -76,20 +76,11 @@ public struct ValidateConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let skipNetwork = configuration.bool(
-      forKey: "validate.skip-network",
-      default: false
-    )
-    let testQuery = configuration.bool(
-      forKey: "validate.test-query",
-      default: false
-    )
+    let skipNetwork = configuration.read(MistDemoKeys.Integration.validateSkipNetwork)
+    let testQuery = configuration.read(MistDemoKeys.Integration.validateTestQuery)
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

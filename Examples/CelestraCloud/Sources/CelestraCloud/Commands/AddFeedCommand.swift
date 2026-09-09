@@ -31,6 +31,7 @@ internal import CelestraCloudKit
 internal import CelestraKit
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 
 // MARK: - Main Type
 
@@ -65,8 +66,8 @@ internal enum AddFeedCommand {
     // 3. Load configuration and create CloudKit service
     let loader = ConfigurationLoader()
     let config = try await loader.loadConfiguration()
-    let validatedCloudKit = try config.cloudkit.validated()
-    let service = try CelestraConfig.createCloudKitService(from: validatedCloudKit)
+    let validatedCloudKit = try config.cloudkit.validatedForCelestra()
+    let service = try validatedCloudKit.makeCloudKitService()
 
     // 4. Create Feed record with initial metadata
     let feed = Feed(

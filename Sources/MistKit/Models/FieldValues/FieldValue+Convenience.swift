@@ -85,10 +85,27 @@ extension FieldValue {
     return nil
   }
 
-  /// Extract base64-encoded bytes if this is a .bytes case
+  /// Extract base64-encoded bytes if this is a `.bytes` case.
   ///
-  /// - Returns: The base64 string, or nil if this is not a .bytes case
+  /// - Returns: The payload as a base64 string, or nil if this is not a `.bytes` case
   public var bytesValue: String? {
+    if case .bytes(let value) = self {
+      return value.base64EncodedString()
+    }
+    return nil
+  }
+
+  /// Extract the binary payload if this is a `.bytes` case.
+  ///
+  /// Matches `.bytes` only. An untagged CloudKit `BYTES` response is claimed by
+  /// first-match-wins inference as `.string`, so `dataValue` returns `nil` for
+  /// it; the base64 text remains available via ``stringValue``. This accessor
+  /// does not attempt `Data(base64Encoded:)` on a `.string` payload: base64 has
+  /// no false-positive signal, so ordinary strings such as `"Chen"` or `"test"`
+  /// would decode as plausible-looking garbage.
+  ///
+  /// - Returns: The `Data` payload, or nil if this is not a `.bytes` case
+  public var dataValue: Data? {
     if case .bytes(let value) = self {
       return value
     }

@@ -73,15 +73,14 @@ public struct CurrentUserConfig: Sendable, ConfigurationParseable {
     }
 
     // Parse fields filter
-    let fieldsString = configReader.string(forKey: "fields")
+    let fieldsString = configReader.read(MistDemoKeys.Record.fields)
     let fields = fieldsString?.split(separator: ",").map {
       String($0).trimmingCharacters(in: .whitespaces)
     }
 
     // Parse output format
     let outputString =
-      configReader.string(forKey: "output.format", default: "json")
-      ?? "json"
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

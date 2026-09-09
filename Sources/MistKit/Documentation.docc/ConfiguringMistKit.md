@@ -1,6 +1,6 @@
 # Configuring MistKit
 
-There is no single `MistKitConfiguration` type — configuration is what you pass to ``CloudKitService``: a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom transport.
+MistKit itself has no configuration package dependency — you pass a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom transport to ``CloudKitService``. For reading CloudKit credentials from CLI / environment / `.env`, validating them, and building a service, use the separate [MistKitConfiguration](https://github.com/brightdigit/MistKitConfiguration) package (`CloudKitConfigurationKeys` → `validated()` → `makeCloudKitService()`).
 
 ## Overview
 
@@ -12,6 +12,18 @@ let service = CloudKitService(
   credentials: credentials,
   environment: .production
 )
+```
+
+Or, with MistKitConfiguration:
+
+```swift
+let keys = CloudKitConfigurationKeys(defaultContainerID: "iCloud.com.example.MyApp")
+let service = try ConfigurationSources.makeConfigReader(
+  secretCommandLineFlags: keys.secretCommandLineFlags
+)
+.readCloudKitConfiguration(keys: keys)
+.validated()
+.makeCloudKitService()
 ```
 
 Everything else — which ``Database`` to use, which signing method on the public database, which token to refresh — is decided per call. This article covers the construction-time inputs (container, environment, transport, logging). For credentials and per-call database selection, see <doc:AuthenticationAndDatabases>.
@@ -67,22 +79,15 @@ The configuration question for your app is: which credentials does the deploymen
 
 ## Custom transport
 
-The default public initializer uses `URLSessionTransport` from `swift-openapi-urlsession`. For testing, request inspection, or platforms without URLSession, supply your own ``ClientTransport`` via the generic initializer:
+The public initializers use `URLSessionTransport` from `swift-openapi-urlsession` and are available on every platform except WASI (`#if !os(WASI)`). ``CloudKitService`` stores its `ClientTransport` internally, but the initializers that accept a transport are not part of the public surface today — MistKit's own tests use them to substitute a mock transport that asserts on outgoing requests and returns canned responses.
 
-```swift
-let service = CloudKitService(
-  containerIdentifier: container,
-  credentials: credentials,
-  environment: .development,
-  transport: customTransport
-)
-```
+Consequences for consumers:
 
-Common reasons to override the transport:
+- **Apple platforms and Linux** — construct the service with the public initializers; URLSession is wired up for you.
+- **Instrumentation** — configure the `middleware` logging subsystem (below) rather than wrapping the transport.
+- **WASI** — has no public ``CloudKitService`` initializer yet, and the web-services API needs ECDSA signing and an HTTP transport that WASI lacks. For CloudKit access from a browser, use [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs).
 
-- **Tests** — substitute a mock transport that asserts on outgoing requests and returns canned responses.
-- **Instrumentation** — wrap `URLSessionTransport` to record request/response pairs for debugging.
-- **WASI** — `URLSession` is unavailable, so the WASI build path requires a transport you provide (the public URLSession initializer is gated behind `#if !os(WASI)`).
+A public transport-accepting initializer (for AsyncHTTPClient on the server, for example) is tracked on the project roadmap in the README.
 
 > Warning: Asset uploads do **not** flow through the configured `transport`. They use `URLSession.shared` directly to avoid HTTP/2 connection reuse between CloudKit's API host and the CDN, which surfaces as 421 Misdirected Request errors. See <doc:CloudKitLimitsAndPerformance> for the full rationale.
 
@@ -156,7 +161,7 @@ func env(_ key: String) throws -> String {
 - ``Environment``
 - ``Database``
 
-### See Also
+## See Also
 
 - <doc:AuthenticationAndDatabases>
 - <doc:HandlingErrors>

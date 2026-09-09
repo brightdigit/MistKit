@@ -130,6 +130,10 @@ inputs:
     description: 'Run export after sync and generate reports'
     required: false
     default: 'true'
+  mistkit-branch:
+    description: 'MistKit ref to check out when falling back to a fresh build'
+    required: false
+    default: 'v1.0.0-beta.4'
 
 runs:
   using: "composite"
@@ -144,6 +148,12 @@ runs:
         name: bushel-cloud-binary
         path: ./binary
         branch: ${{ github.ref_name }}
+
+    - name: Setup MistKit
+      if: steps.download-binary.outcome != 'success'
+      uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+      with:
+        branch: ${{ inputs.mistkit-branch }}
 
     - name: Build binary (fallback if artifact unavailable)
       if: steps.download-binary.outcome != 'success'

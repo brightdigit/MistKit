@@ -31,6 +31,7 @@ internal import CelestraCloudKit
 internal import CelestraKit
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 
 extension UpdateCommand {
   internal static func createFeedResult(
@@ -99,7 +100,8 @@ extension UpdateCommand {
         maxFailures: config.update.maxFailures,
         minPopularity: config.update.minPopularity,
         limit: config.update.limit,
-        environment: config.cloudkit.environment == .production ? "production" : "development"
+        environment: (config.cloudkit.environment ?? "development")
+          .lowercased() == "production" ? "production" : "development"
       ),
       summary: UpdateReport.Summary(
         totalFeeds: summary.successCount + summary.errorCount

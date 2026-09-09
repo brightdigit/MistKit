@@ -37,8 +37,8 @@ internal import MistKitOpenAPI
 /// *optional*: CloudKit omits it for tombstones (deleted records, `deleted ==
 /// true`) and other typeless results, so it is `nil` in those cases. Per-record
 /// failures from `modifyRecords` / `lookupRecords` are surfaced separately as
-/// ``RecordResult/failure(_:)`` (a ``RecordOperationFailure``) and never become a
-/// `RecordInfo`. A response record missing its `recordName` is treated as a
+/// ``OperationResult/failure(_:)`` on a ``RecordResult`` (a ``RecordOperationFailure``)
+/// and never become a `RecordInfo`. A response record missing its `recordName` is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
   /// The record name

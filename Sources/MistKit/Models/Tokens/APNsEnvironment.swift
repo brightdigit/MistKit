@@ -31,7 +31,7 @@ internal import MistKitOpenAPI
 
 /// The APNs environment a CloudKit-minted token targets.
 ///
-/// Passed to ``CloudKitService/createAPNsToken(environment:database:)`` to mint a
+/// Passed to ``CloudKitService/createAPNsToken(environment:clientId:database:)`` to mint a
 /// token for either the sandbox or production Apple Push Notification service.
 public enum APNsEnvironment: String, Codable, Sendable, CaseIterable {
   /// The APNs sandbox environment, paired with the CloudKit `development`

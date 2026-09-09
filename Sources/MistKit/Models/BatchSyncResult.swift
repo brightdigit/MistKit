@@ -37,7 +37,8 @@ internal import Foundation
 ///
 /// - `created`: results whose record name was classified as a create
 /// - `updated`: results whose record name was classified as an update
-/// - `failed`: per-record errors (``RecordResult/failure(_:)``) returned by CloudKit
+/// - `failed`: per-record errors (``OperationResult/failure(_:)`` on a
+///   ``RecordResult``) returned by CloudKit
 /// - `unclassified`: successful results whose record name was in neither
 ///   the creates nor updates sets — for example, anonymous creates where
 ///   CloudKit assigned the record name server-side, or records whose name

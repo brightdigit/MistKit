@@ -161,5 +161,40 @@ extension CloudKitServiceTests.Upload {
       let count = await tracker.callCount
       #expect(count == 1, "Custom uploader should have been called exactly once")
     }
+
+    @Test("uploadAssets() forwards zoneID into the uploadAssets request body")
+    internal func uploadAssetsForwardsZoneID() async throws {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let responseProvider = ResponseProvider(
+        defaultResponse: .successfulUploadResponse(tokenCount: 1)
+      )
+      let transport = MockTransport(responseProvider: responseProvider)
+      let service = try CloudKitService(
+        containerIdentifier: TestConstants.serviceContainerIdentifier,
+        credentials: Credentials(apiAuth: APICredentials(apiToken: TestConstants.apiToken)),
+        transport: transport
+      )
+
+      _ = try await service.uploadAssets(
+        data: Data(count: 256),
+        recordType: "Note",
+        fieldName: "image",
+        zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+        database: .public(.prefers(.serverToServer))
+      )
+
+      let bodies = await responseProvider.bodies(for: "uploadAssets").compactMap { $0 }
+      let data = try #require(bodies.first)
+      let body = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      let zoneID = try #require(body["zoneID"] as? [String: Any])
+      #expect(zoneID["zoneName"] as? String == "Articles")
+      #expect(zoneID["ownerRecordName"] as? String == "_abc123")
+    }
   }
 }

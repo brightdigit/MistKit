@@ -80,18 +80,11 @@ public struct ResolveConfig: Sendable, ConfigurationParseable {
     }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
-    let fetchRootRecord = configuration.optionalBool(
-      forKey: "fetch.root.record"
-    )
-    let fields = configuration.commaSeparatedList(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
+    let fetchRootRecord = configuration.read(MistDemoKeys.Sharing.fetchRootRecord)
+    let fields = configuration.commaSeparatedList(MistDemoKeys.Record.fields)
 
     let shortGUIDs = Self.parseShortGUIDs(from: configuration)
     guard !shortGUIDs.isEmpty else {
@@ -114,13 +107,13 @@ public struct ResolveConfig: Sendable, ConfigurationParseable {
   internal static func parseShortGUIDs(
     from configuration: MistDemoConfiguration
   ) -> [String] {
-    if let fromGUIDs = configuration.commaSeparatedList(forKey: "short.guid"),
+    if let fromGUIDs = configuration.commaSeparatedList(MistDemoKeys.Sharing.shortGUID),
       !fromGUIDs.isEmpty
     {
       return fromGUIDs
     }
 
-    guard let shareURLs = configuration.commaSeparatedList(forKey: "share.url")
+    guard let shareURLs = configuration.commaSeparatedList(MistDemoKeys.Sharing.shareURL)
     else {
       return []
     }

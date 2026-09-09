@@ -3,17 +3,180 @@
 # Remove set -e to allow script to continue running
 # set -e  # Exit on any error
 
+# Report mode (read-only, structured output for humans and agents):
+#   LINT_REPORT=1    human summary on stderr + JSON between delimiter markers
+#   LINT_REPORT=json JSON report only (delimiters on stdout)
+#
+# Exit code is non-zero when any pipeline step fails. Each lint tool runs with
+# --strict so warnings/findings fail their step. summary.totalFindings in the
+# JSON counts individual findings across tools (must be 0 for a clean run).
+
 ERRORS=0
+FAILED_STEP_NAMES=()
+LINT_REPORT_MODE=0
+LINT_REPORT_OUTPUT=""
+REPORT_DIR=""
+MANIFEST_PATH=""
 
 run_command() {
-		"$@" || ERRORS=$((ERRORS + 1))
+	"$@" || ERRORS=$((ERRORS + 1))
+}
+
+record_failed_step() {
+	local step="$1"
+	FAILED_STEP_NAMES+=("$step")
+}
+
+log_status() {
+	if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+		echo "$@" >&2
+	else
+		echo "$@"
+	fi
+}
+
+run_report_step() {
+	local step="$1"
+	shift
+	local exit_code=0
+
+	"$@"
+	exit_code=$?
+
+	if [ "$exit_code" -ne 0 ]; then
+		ERRORS=$((ERRORS + 1))
+		record_failed_step "$step"
+	fi
+
+	printf '%s' "$exit_code" >"$REPORT_DIR/${step}.exit"
+	return "$exit_code"
+}
+
+init_report_mode() {
+	case "${LINT_REPORT:-}" in
+	1 | yes | true | TRUE | YES)
+		LINT_REPORT_OUTPUT=both
+		LINT_REPORT_MODE=1
+		;;
+	json | JSON)
+		LINT_REPORT_OUTPUT=json
+		LINT_REPORT_MODE=1
+		;;
+	*)
+		LINT_REPORT_OUTPUT=""
+		LINT_REPORT_MODE=0
+		;;
+	esac
+
+	if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+		REPORT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/mistkit-lint-report.XXXXXX")
+		MANIFEST_PATH="$REPORT_DIR/manifest.json"
+	fi
+}
+
+cleanup_report_mode() {
+	if [ -n "$REPORT_DIR" ] && [ -d "$REPORT_DIR" ]; then
+		rm -rf "$REPORT_DIR"
+	fi
+}
+
+write_manifest() {
+	local swiftlint_skipped="${1:-0}"
+	local swiftlint_skip_reason="${2:-}"
+	local periphery_skipped="${3:-0}"
+	local periphery_skip_reason="${4:-}"
+	local swift_build_skipped="${5:-0}"
+	local swift_build_skip_reason="${6:-}"
+	local failed_steps_csv=""
+
+	if [ "${#FAILED_STEP_NAMES[@]}" -gt 0 ]; then
+		local IFS=,
+		failed_steps_csv="${FAILED_STEP_NAMES[*]}"
+	fi
+
+	REPORT_DIR="$REPORT_DIR" \
+		MANIFEST_PATH="$MANIFEST_PATH" \
+		LINT_REPORT_OUTPUT="$LINT_REPORT_OUTPUT" \
+		FAILED_STEPS_CSV="$failed_steps_csv" \
+		SWIFTLINT_SKIPPED="$swiftlint_skipped" \
+		SWIFTLINT_SKIP_REASON="$swiftlint_skip_reason" \
+		PERIPHERY_SKIPPED="$periphery_skipped" \
+		PERIPHERY_SKIP_REASON="$periphery_skip_reason" \
+		SWIFT_BUILD_SKIPPED="$swift_build_skipped" \
+		SWIFT_BUILD_SKIP_REASON="$swift_build_skip_reason" \
+		python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+report_dir = Path(os.environ["REPORT_DIR"])
+manifest_path = Path(os.environ["MANIFEST_PATH"])
+failed_steps = [
+    step for step in os.environ.get("FAILED_STEPS_CSV", "").split(",") if step
+]
+
+
+def read_exit(step: str) -> int | None:
+    exit_path = report_dir / f"{step}.exit"
+    if not exit_path.is_file():
+        return None
+    return int(exit_path.read_text(encoding="utf-8"))
+
+
+manifest = {
+    "reportDir": str(report_dir),
+    "outputFormat": os.environ["LINT_REPORT_OUTPUT"],
+    "failedSteps": failed_steps,
+    "steps": {
+        "swift-format": {"exitCode": read_exit("swift-format")},
+        "swiftlint": {
+            "skipped": os.environ.get("SWIFTLINT_SKIPPED") == "1",
+            "skipReason": os.environ.get("SWIFTLINT_SKIP_REASON") or None,
+            "exitCode": read_exit("swiftlint"),
+        },
+        "swift-build": {
+            "skipped": os.environ.get("SWIFT_BUILD_SKIPPED") == "1",
+            "skipReason": os.environ.get("SWIFT_BUILD_SKIP_REASON") or None,
+            "exitCode": read_exit("swift-build"),
+        },
+        "periphery": {
+            "skipped": os.environ.get("PERIPHERY_SKIPPED") == "1",
+            "skipReason": os.environ.get("PERIPHERY_SKIP_REASON") or None,
+            "exitCode": read_exit("periphery"),
+        },
+    },
+}
+manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+PY
+}
+
+emit_lint_report() {
+	local swiftlint_skipped="$1"
+	local swiftlint_skip_reason="$2"
+	local periphery_skipped="$3"
+	local periphery_skip_reason="$4"
+	local swift_build_skipped="$5"
+	local swift_build_skip_reason="$6"
+
+	write_manifest \
+		"$swiftlint_skipped" "$swiftlint_skip_reason" \
+		"$periphery_skipped" "$periphery_skip_reason" \
+		"$swift_build_skipped" "$swift_build_skip_reason"
+
+	python3 "$PACKAGE_DIR/.claude/skills/fix-lint/scripts/compile-lint-report.py" "$MANIFEST_PATH"
 }
 
 if [ "$LINT_MODE" = "INSTALL" ]; then
 	exit
 fi
 
-echo "LintMode: $LINT_MODE"
+init_report_mode
+trap cleanup_report_mode EXIT
+
+echo "LintMode: $LINT_MODE" >&2
+if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+	echo "LintReport: $LINT_REPORT_OUTPUT (read-only)" >&2
+fi
 
 # More portable way to get script directory
 if [ -z "$SRCROOT" ]; then
@@ -44,35 +207,69 @@ fi
 
 if [ "$LINT_MODE" = "NONE" ]; then
 	exit
-elif [ "$LINT_MODE" = "STRICT" ]; then
-	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
-	SWIFTLINT_OPTIONS="--strict"
-else
-	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
-	SWIFTLINT_OPTIONS=""
 fi
 
-pushd "$PACKAGE_DIR" || exit
+SWIFTFORMAT_FORMAT_OPTIONS="--configuration .swift-format"
+SWIFTFORMAT_LINT_OPTIONS="--configuration .swift-format --strict"
+SWIFTLINT_OPTIONS="--strict"
+PERIPHERY_OPTIONS="--strict"
 
-if [ -z "$CI" ]; then
-	run_command swift-format format $SWIFTFORMAT_OPTIONS  --recursive --parallel --in-place Sources Tests
+SWIFTLINT_SKIP_REASON=""
+PERIPHERY_SKIP_REASON=""
+SWIFT_BUILD_SKIP_REASON=""
+
+pushd "$PACKAGE_DIR" >/dev/null || exit
+
+if [ -z "$CI" ] && [ "$LINT_REPORT_MODE" -eq 0 ]; then
+	run_command swift-format format $SWIFTFORMAT_FORMAT_OPTIONS --recursive --parallel --in-place Sources Tests
 	if [ "$RUN_SWIFTLINT" -eq 1 ]; then
 		run_command swiftlint --fix
 	fi
 fi
 
-if [ -z "$FORMAT_ONLY" ]; then
-	run_command swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
-	if [ "$RUN_SWIFTLINT" -eq 1 ]; then
-		run_command swiftlint lint $SWIFTLINT_OPTIONS
+if [ -z "$FORMAT_ONLY" ] || [ "$LINT_REPORT_MODE" -eq 1 ]; then
+	if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+		run_report_step swift-format \
+			swift-format lint --recursive --parallel \
+			$SWIFTFORMAT_LINT_OPTIONS Sources Tests \
+			>"$REPORT_DIR/swift-format.log" 2>&1
 	else
-		echo "Skipping SwiftLint (Claude Code web session)."
+		run_command swift-format lint --recursive --parallel \
+			$SWIFTFORMAT_LINT_OPTIONS Sources Tests
 	fi
-	# Check for compilation errors
-	run_command swift build --build-tests
+
+	if [ "$RUN_SWIFTLINT" -eq 1 ]; then
+		if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+			run_report_step swiftlint \
+				swiftlint lint --quiet --reporter json $SWIFTLINT_OPTIONS \
+				>"$REPORT_DIR/swiftlint.json" 2>"$REPORT_DIR/swiftlint.stderr"
+		else
+			run_command swiftlint lint $SWIFTLINT_OPTIONS
+		fi
+	else
+		SWIFTLINT_SKIP_REASON="Claude Code web session"
+		if [ "$LINT_REPORT_MODE" -eq 0 ]; then
+			echo "Skipping SwiftLint (Claude Code web session)."
+		fi
+	fi
+
+	if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+		run_report_step swift-build \
+			swift build --build-tests \
+			>"$REPORT_DIR/swift-build.log" 2>&1
+	else
+		run_command swift build --build-tests
+	fi
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
+if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+	if ! "$PACKAGE_DIR/Scripts/header.sh" -d "$PACKAGE_DIR/Sources" -c "Leo Dion" -o "BrightDigit" -p "MistKit" >&2; then
+		ERRORS=$((ERRORS + 1))
+		record_failed_step header
+	fi
+else
+	"$PACKAGE_DIR/Scripts/header.sh" -d "$PACKAGE_DIR/Sources" -c "Leo Dion" -o "BrightDigit" -p "MistKit"
+fi
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
@@ -98,25 +295,60 @@ periphery_index_store() {
 	return 1
 }
 
-if [ -z "$CI" ] && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+if { [ -z "$FORMAT_ONLY" ] || [ "$LINT_REPORT_MODE" -eq 1 ]; } \
+	&& [ -z "$CI" ] && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
 	if INDEX_STORE_PATH=$(periphery_index_store); then
-		run_command periphery scan $PERIPHERY_OPTIONS \
-			--index-store-path "$INDEX_STORE_PATH" --skip-build \
-			--disable-update-check
+		if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+			run_report_step periphery \
+				periphery scan $PERIPHERY_OPTIONS \
+				--index-store-path "$INDEX_STORE_PATH" --skip-build \
+				--disable-update-check --format json --quiet \
+				>"$REPORT_DIR/periphery.json" 2>"$REPORT_DIR/periphery.stderr"
+		else
+			run_command periphery scan $PERIPHERY_OPTIONS \
+				--index-store-path "$INDEX_STORE_PATH" --skip-build \
+				--disable-update-check
+		fi
 	else
-		echo "Skipping periphery scan (no index store under .build; run swift build first)."
+		PERIPHERY_SKIP_REASON="no index store under .build; run swift build first"
+		if [ "$LINT_REPORT_MODE" -eq 0 ]; then
+			echo "Skipping periphery scan ($PERIPHERY_SKIP_REASON)."
+		fi
 	fi
 else
-	echo "Skipping periphery scan (CI or Claude Code web session)."
+	if [ -n "$CI" ]; then
+		PERIPHERY_SKIP_REASON="CI"
+	elif [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
+		PERIPHERY_SKIP_REASON="Claude Code web session"
+	fi
+	if [ "$LINT_REPORT_MODE" -eq 0 ]; then
+		echo "Skipping periphery scan (${PERIPHERY_SKIP_REASON:-CI or Claude Code web session})."
+	fi
 fi
 
-popd
+if [ "$LINT_REPORT_MODE" -eq 1 ]; then
+	swiftlint_skipped=0
+	if [ "$RUN_SWIFTLINT" -eq 0 ]; then
+		swiftlint_skipped=1
+	fi
+	periphery_skipped=0
+	if [ -n "$PERIPHERY_SKIP_REASON" ]; then
+		periphery_skipped=1
+	fi
+	swift_build_skipped=0
+	emit_lint_report \
+		"$swiftlint_skipped" "$SWIFTLINT_SKIP_REASON" \
+		"$periphery_skipped" "$PERIPHERY_SKIP_REASON" \
+		"$swift_build_skipped" "$SWIFT_BUILD_SKIP_REASON"
+fi
+
+popd >/dev/null
 
 # Exit with error code if any errors occurred
 if [ $ERRORS -gt 0 ]; then
-	echo "Linting completed with $ERRORS error(s)"
+	log_status "Linting completed with $ERRORS error(s)"
 	exit 1
 else
-	echo "Linting completed successfully"
+	log_status "Linting completed successfully"
 	exit 0
 fi

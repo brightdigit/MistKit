@@ -135,6 +135,8 @@ public enum CloudKitError: LocalizedError, Sendable {
     reason: String
   )
   case invalidPrivateKey(path: String?, underlying: any Error)
+  /// `Asset.download(using:)` had no usable `downloadURL`.
+  case missingAssetDownloadURL
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   ///

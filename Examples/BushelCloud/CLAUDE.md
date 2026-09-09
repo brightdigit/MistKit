@@ -442,7 +442,7 @@ CloudKit enforces a **200 operations per request** limit. Operations are automat
 let batchSize = 200
 for start in stride(from: 0, to: operations.count, by: batchSize) {
     let batch = Array(operations[start ..< min(start + batchSize, operations.count)])
-    // MistKit (beta.3+) partitions results using a pre-computed classification and
+    // MistKit (beta.4+) partitions results using a pre-computed classification and
     // returns a structured batch result — no manual .success/.failure switching.
     let batchResult = try await service.modifyRecords(
         batch,
@@ -620,13 +620,13 @@ Note: The `.xcodeproj` is in `.gitignore` - always regenerate rather than commit
 
 ## Dependencies
 
-- **MistKit** (local path: `../MistKit`) - CloudKit Web Services client with S2S auth
+- **MistKit** (1.0.0-beta.4+) - CloudKit Web Services client with S2S auth
 - **IPSWDownloads** - ipsw.me API wrapper for restore images
 - **SwiftSoup** - HTML parsing for web scraping
 - **ArgumentParser** - CLI framework
 - **swift-log** - Logging infrastructure
 
-MistKit is the parent package; BushelCloud is an example in `Examples/Bushel/`.
+BushelCloud consumes MistKit as a tagged Swift Package Manager dependency from GitHub.
 
 ## CI/CD and Code Quality
 
@@ -707,3 +707,15 @@ For detailed guides on advanced topics, see:
   - Critical issues solved and lessons learned
   - Common pitfalls to avoid
   - Lessons for building future CloudKit demos
+
+- **[.claude/data-sources-api-research.md](.claude/data-sources-api-research.md)** - External data source research
+  - xcodereleases.com API structure
+  - swiftversion.net scraping approach
+  - MistKit API patterns used by the sync tool
+
+- **[.claude/firmware-wiki.md](.claude/firmware-wiki.md)** - IPSW/OTA firmware reference (TheAppleWiki)
+  - Firmware file formats and contents
+  - Background for IPSWFetcher and MESUFetcher
+
+- **[.claude/mobileasset-wiki.md](.claude/mobileasset-wiki.md)** - MobileAsset framework reference (TheAppleWiki)
+  - Asset catalog structure behind MESU endpoints

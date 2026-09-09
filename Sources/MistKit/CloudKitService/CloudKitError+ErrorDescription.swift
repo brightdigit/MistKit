@@ -82,6 +82,8 @@ extension CloudKitError {
       let location = path.map { "from '\($0)'" } ?? "from inline material"
       return
         "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
+    case .missingAssetDownloadURL:
+      return "Asset downloadURL is missing or is not a valid URL"
     case .accessDenied, .atomicFailure, .authenticationFailed, .authenticationRequired,
       .badRequest, .conflict, .exists, .internalServerError, .notFound, .quotaExceeded,
       .throttled, .tryAgainLater, .validatingReferenceError, .zoneNotFound,

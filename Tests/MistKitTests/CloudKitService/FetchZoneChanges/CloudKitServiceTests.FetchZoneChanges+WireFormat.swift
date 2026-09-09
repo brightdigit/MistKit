@@ -79,7 +79,11 @@ extension CloudKitServiceTests.FetchZoneChanges {
       let provider = try ResponseProvider.successfulFetchZoneChanges(zoneCount: 1)
       let service = try Self.makeService(provider: provider)
 
-      _ = try await service.fetchZoneChanges(syncToken: "baseline-token", database: .private)
+      _ = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
+        syncToken: "baseline-token",
+        database: .private
+      )
 
       let sent = try await Self.sentBodies(provider)
       #expect(sent.count == 1)
@@ -97,7 +101,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
       // The decoy `syncToken` is what MistKit used to read; the live container
       // never sends it.
       let provider = ResponseProvider(
-        defaultResponse: try .zoneChangesRawResponse(
+        defaultResponse: .zoneChangesRawResponse(
           body: """
             {
               "zones": [],
@@ -110,7 +114,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
       )
       let service = try Self.makeService(provider: provider)
 
-      let result = try await service.fetchZoneChanges(database: .private)
+      let result = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
+        database: .private
+      )
 
       #expect(result.syncToken == "real-token")
     }
@@ -136,7 +143,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
       )
       let service = try Self.makeService(provider: provider)
 
-      _ = try await service.fetchAllZoneChanges(database: .private)
+      _ = try await CloudKitServiceTests.FetchZoneChanges.fetchAllZoneChanges(
+        service,
+        database: .private
+      )
 
       let sent = try await Self.sentBodies(provider)
       #expect(sent.count == 2)

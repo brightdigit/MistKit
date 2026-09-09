@@ -59,7 +59,7 @@ extension CloudKitServiceTests.ServerErrorCodes {
           database: .public(.prefers(.serverToServer))
         )
         Issue.record("expected queryRecords to throw for \(expectation.code)")
-      } catch let error as CloudKitError {
+      } catch {
         #expect(
           CloudKitServiceTests.ServerErrorCodes.caseLabel(of: error) == expectation.caseLabel
         )

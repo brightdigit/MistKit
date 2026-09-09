@@ -43,8 +43,7 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     limit: Int?,
     sortBy: [WebRequests.QuerySortField]?,
-    zoneName: String?,
-    zoneOwner: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> [RecordInfo]
 
@@ -52,6 +51,7 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     recordName: String?,
     fields: [String: FieldValue],
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> RecordInfo
 
@@ -60,6 +60,7 @@ internal protocol WebBackend: Sendable {
     recordName: String,
     fields: [String: FieldValue],
     recordChangeTag: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> RecordInfo
 
@@ -67,6 +68,7 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     recordName: String,
     recordChangeTag: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws
 
@@ -154,6 +156,7 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     fieldName: String,
     recordName: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> AssetUploadReceipt
 

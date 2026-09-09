@@ -49,6 +49,11 @@ extension HTTPField.Name {
     "X-Apple-CloudKit-Request-SignatureV1"
   )
 
+  /// Rotated web authentication token returned on every CloudKit response.
+  internal static let cloudKitWebAuthToken = Self.knownFieldName(
+    "X-Apple-CloudKit-Web-Auth-Token"
+  )
+
   private static func knownFieldName(_ name: String) -> HTTPField.Name {
     guard let fieldName = HTTPField.Name(name) else {
       preconditionFailure("Invalid HTTP field name: \(name)")

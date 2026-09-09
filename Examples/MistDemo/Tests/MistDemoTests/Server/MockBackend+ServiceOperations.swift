@@ -129,6 +129,7 @@
       recordType: String,
       fieldName: String,
       recordName: String?,
+      zone: WebRequests.ZoneSelector?,
       database: MistKit.Database
     ) async throws -> AssetUploadReceipt {
       lastUploadAsset = UploadAssetCall(
@@ -136,6 +137,7 @@
         recordType: recordType,
         fieldName: fieldName,
         recordName: recordName,
+        zone: zone,
         database: database
       )
       try consumePendingError()

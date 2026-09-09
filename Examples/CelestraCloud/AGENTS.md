@@ -390,6 +390,7 @@ Code must be concurrency-safe with proper actor isolation.
 - `.claude/IMPLEMENTATION_NOTES.md` - Design decisions, patterns, and technical context
 - `.claude/AI_SCHEMA_WORKFLOW.md` - CloudKit schema design guide for AI agents
 - `.claude/CLOUDKIT_SCHEMA_SETUP.md` - Schema deployment instructions
+- `.claude/cloudkit-public-database-architecture.md` - Public database architecture and schema reference for the RSS reader
 
 ## Pull Request Testing
 

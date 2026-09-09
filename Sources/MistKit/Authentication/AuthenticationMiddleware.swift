@@ -29,6 +29,7 @@
 
 internal import Foundation
 internal import HTTPTypes
+internal import Logging
 internal import OpenAPIRuntime
 
 /// Authentication middleware that delegates request mutation to whichever
@@ -50,6 +51,16 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     var modifiedRequest = request
     var modifiedBody = body
     try await authenticator.authenticate(request: &modifiedRequest, body: &modifiedBody)
-    return try await next(modifiedRequest, modifiedBody, baseURL)
+    let (response, responseBody) = try await next(modifiedRequest, modifiedBody, baseURL)
+    if let rotated = response.headerFields[.cloudKitWebAuthToken] {
+      do {
+        try await tokenManager.didReceiveRotatedWebAuthToken(rotated)
+      } catch {
+        let message = "Failed to consume rotated web auth token: \(error.localizedDescription)"
+        Logger(subsystem: .auth).warning("\(message)")
+        RotatedWebAuthTokenFailureReporter.assertionHandler(message)
+      }
+    }
+    return (response, responseBody)
   }
 }

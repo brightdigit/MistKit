@@ -1,5 +1,5 @@
 {
-  "originHash" : "323c779f5e9cb02107c3e61f0a8a2b1608eb6e67b7923401f1b2767942516400",
+  "originHash" : "18ab5c7ce47b802d34f49cbd082522ade7b3e8b125db7298f2ff028e4a016cb3",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/ConfigKeyKit.git",
       "state" : {
-        "revision" : "6949abb4b7f3e50f7f81d668e6c11aa4721e97fd",
-        "version" : "1.0.0-beta.2"
+        "revision" : "3c8ae3825b4cdcbf60fb1adeaaaf324557e7fd41",
+        "version" : "1.0.0-beta.3"
       }
     },
     {

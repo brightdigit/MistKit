@@ -58,14 +58,16 @@ public struct CloudKitService: Sendable {
 }
 ```
 
-The four public initialisers live in `Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift`:
+The initialisers live in `Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift`:
 
-| Initializer | Use case |
-| --- | --- |
-| `init(containerIdentifier:credentials:environment:transport:)` | Standard. Per-call database, per-call token manager resolution. |
-| `init(containerIdentifier:tokenManager:environment:transport:)` | Bespoke. One manager for every dispatched call regardless of database. |
-| `init(containerIdentifier:credentials:environment:)` | URLSession convenience (non-WASI). |
-| `init(containerIdentifier:tokenManager:environment:)` | URLSession convenience (non-WASI). |
+| Initializer | Visibility | Use case |
+| --- | --- | --- |
+| ``CloudKitService/init(containerIdentifier:credentials:environment:)`` | public (non-WASI) | Standard. Per-call database, per-call token manager resolution, `URLSessionTransport`. |
+| ``CloudKitService/init(containerIdentifier:tokenManager:environment:)`` | public (non-WASI) | Bespoke. One manager for every dispatched call regardless of database. |
+| `init(containerIdentifier:credentials:environment:transport:)` | internal | Same, with an injected `ClientTransport` — used by MistKit's tests. |
+| `init(containerIdentifier:tokenManager:environment:transport:)` | internal | Same, with an injected `ClientTransport`. |
+
+A public transport-accepting initializer is on the roadmap; see <doc:ConfiguringMistKit>.
 
 Operations are split across focused extension files (`CloudKitService+Operations.swift`, `+WriteOperations.swift`, `+ZoneOperations.swift`, `+UserOperations.swift`, `+AssetOperations.swift`, etc.). Each extension method takes a `database:` where applicable, resolves a `TokenManager`, builds a fresh generated `Client` with that manager wired into `AuthenticationMiddleware`, and dispatches the request.
 
@@ -237,9 +239,9 @@ The closure shape (`(Data, URL) async throws -> (statusCode: Int?, data: Data)`)
 
 ## Logging
 
-`MistKitLogger` is the central swift-log wrapper with three subsystems (`api`, `auth`, `network`). Helpers (`logError`, `logWarning`, `logInfo`, `logDebug`) call through `SecureLogging.safeLogMessage` by default to mask tokens, key IDs, and other secrets. Set `MISTKIT_DISABLE_LOG_REDACTION=1` to suppress redaction while debugging.
+MistKit logs through [swift-log](https://github.com/apple/swift-log) with four labeled subsystems — `com.brightdigit.MistKit.api`, `.auth`, `.network`, and `.middleware` — created via an internal `Logger(subsystem:)` initializer. Consumers bootstrap `LoggingSystem` once and set the level per label.
 
-`LoggingMiddleware` runs after `AuthenticationMiddleware` and emits structured request/response logs in `DEBUG` builds — the auth values it sees are already in their wire form, but the secure helpers redact them again before they reach the log line.
+`LoggingMiddleware` runs after `AuthenticationMiddleware` and emits request/response traces on the `middleware` subsystem at `.debug`. Bodies (up to 1 MiB) and query parameters are only collected when that subsystem's level is `.debug` or lower, so the default `.info` level costs nothing. There is no built-in redaction: the values the middleware sees are already in wire form (query tokens, signed headers), so leave the `middleware` subsystem above `.debug` in production. See <doc:ConfiguringMistKit>.
 
 ## What the wrapper does *not* do
 
@@ -253,6 +255,8 @@ A few intentional non-features that show up in many wrapper libraries but not th
 ## See Also
 
 - <doc:AuthenticationAndDatabases>
+- <doc:RequestSigning>
+- <doc:FieldTypePolymorphism>
 - <doc:OpenAPICodeGeneration>
 - <doc:GeneratedCodeAnalysis>
 - <doc:GeneratedCodeWorkflow>

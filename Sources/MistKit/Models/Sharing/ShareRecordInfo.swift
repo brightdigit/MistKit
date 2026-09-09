@@ -85,7 +85,11 @@ public struct ShareRecordInfo: Codable, Sendable {
     self.containerIdentifier = schema.containerIdentifier
     self.databaseScope = schema.databaseScope.map(ShareDatabaseScope.init(from:))
     self.environment = schema.environment.map(Environment.init(from:))
-    self.zoneID = schema.zoneID.map(ZoneID.init(from:))
+    if let schemaZoneID = schema.zoneID {
+      self.zoneID = try ZoneID(from: schemaZoneID)
+    } else {
+      self.zoneID = nil
+    }
     self.rootRecordName = schema.rootRecordName
     if let rootRecord = schema.rootRecord {
       self.rootRecord = try RecordInfo(from: rootRecord)

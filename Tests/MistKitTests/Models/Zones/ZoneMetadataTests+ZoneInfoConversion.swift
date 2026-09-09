@@ -47,7 +47,7 @@ extension ZoneMetadataTests {
       let zone = try Self.decodeZone(
         """
         {
-          "zoneID": { "zoneName": "Articles", "ownerName": "_defaultOwner" },
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" },
           "syncToken": "AQAAAAAAAAAB",
           "atomic": true
         }
@@ -64,7 +64,7 @@ extension ZoneMetadataTests {
       let zone = try Self.decodeZone(
         """
         {
-          "zoneID": { "zoneName": "Articles", "ownerName": "_defaultOwner" },
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" },
           "syncToken": "AQAAAAAAAAAB",
           "atomic": true
         }
@@ -77,6 +77,121 @@ extension ZoneMetadataTests {
       #expect(info.ownerRecordName == "_defaultOwner")
       #expect(info.syncToken == "AQAAAAAAAAAB")
       #expect(info.atomic == true)
+      #expect(info.deleted == nil)
+    }
+
+    @Test(
+      "ZoneInfo decodes live-shaped change-feed payload with ownerRecordName, zoneType, and deleted"
+    )
+    internal func zoneInfoDecodesLiveChangeFeedShape() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "WebChangeTest",
+            "ownerRecordName": "_aca0fa3547ae9f9cd1f7e25fed948a20",
+            "zoneType": "REGULAR_CUSTOM_ZONE"
+          },
+          "deleted": true
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.zoneName == "WebChangeTest")
+      #expect(info.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
+      #expect(info.zoneType == .regularCustom)
+      #expect(info.deleted == true)
+    }
+
+    @Test("Absent deleted stays nil rather than defaulting to false")
+    internal func absentDeletedStaysNil() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" }
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.deleted == nil)
+    }
+
+    @Test("DatabaseChangedZone tombstone surfaces deleted on ZoneInfo")
+    internal func databaseChangedZoneDeletedSurfaces() throws {
+      let item = try JSONDecoder().decode(
+        Components.Schemas.DatabaseChangesResponse.zonesPayloadPayload.self,
+        from: Data(
+          """
+          {
+            "zoneID": {
+              "zoneName": "WebChangeTest",
+              "ownerRecordName": "_aca0fa3547ae9f9cd1f7e25fed948a20",
+              "zoneType": "REGULAR_CUSTOM_ZONE"
+            },
+            "deleted": true
+          }
+          """.utf8
+        )
+      )
+
+      let result = try ZoneChangeResult(from: item)
+      let zone = try result.get()
+
+      #expect(zone.zoneName == "WebChangeTest")
+      #expect(zone.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
+      #expect(zone.zoneType == .regularCustom)
+      #expect(zone.deleted == true)
+    }
+
+    @Test("unrecognizedZoneType exposes a localized description")
+    internal func unrecognizedZoneTypeDescription() {
+      let error = ConversionError.unrecognizedZoneType("SHARED_ZONE")
+      #expect(error.errorDescription == "Zone entry has unrecognized zoneType 'SHARED_ZONE'")
+    }
+
+    @Test("Unrecognized zoneType throws ConversionError")
+    internal func unrecognizedZoneTypeThrows() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "Articles",
+            "zoneType": "SHARED_ZONE"
+          }
+        }
+        """
+      )
+
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(throws: ConversionError.unrecognizedZoneType("SHARED_ZONE")) {
+            _ = try ZoneInfo(from: zone)
+          }
+        }
+      )
+    }
+
+    @Test("DEFAULT_ZONE decodes to ZoneType.defaultZone")
+    internal func defaultZoneTypeDecodes() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "_defaultZone",
+            "zoneType": "DEFAULT_ZONE"
+          }
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.zoneType == .defaultZone)
     }
 
     @Test("Absent metadata stays nil rather than defaulting")
@@ -93,38 +208,8 @@ extension ZoneMetadataTests {
       // an explicit `false`.
       #expect(info.syncToken == nil)
       #expect(info.atomic == nil)
+      #expect(info.deleted == nil)
       #expect(info.zoneName == "Articles")
-    }
-
-    @Test("atomic decodes false without collapsing into nil")
-    internal func atomicFalseIsPreserved() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "zoneName": "Articles" }, "atomic": false }
-        """
-      )
-
-      let info = try ZoneInfo(from: zone)
-
-      #expect(try #require(info.atomic) == false)
-    }
-
-    @Test("ZoneInfo still throws when the zone payload has no zoneName")
-    internal func missingZoneNameThrows() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "ownerName": "_defaultOwner" }, "atomic": true }
-        """
-      )
-
-      ConversionFailureReporter.$assertionHandler.withValue(
-        { _, _, _ in },
-        operation: {
-          #expect(throws: ConversionError.self) {
-            _ = try ZoneInfo(from: zone)
-          }
-        }
-      )
     }
   }
 }

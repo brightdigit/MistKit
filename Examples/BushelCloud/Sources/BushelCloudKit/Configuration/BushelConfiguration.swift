@@ -28,21 +28,8 @@
 //
 
 public import BushelFoundation
-internal import Foundation
-internal import MistKit
-
-// MARK: - Configuration Error
-
-/// Errors that can occur during configuration validation
-public struct ConfigurationError: Error, Sendable {
-  public let message: String
-  public let key: String?
-
-  public init(_ message: String, key: String? = nil) {
-    self.message = message
-    self.key = key
-  }
-}
+public import Foundation
+public import MistKitConfiguration
 
 // MARK: - Root Configuration
 
@@ -79,11 +66,17 @@ public struct BushelConfiguration: Sendable {
 
   /// Validate that all required fields are present
   public func validated() throws -> ValidatedBushelConfiguration {
-    guard let cloudKit = cloudKit else {
+    guard let cloudKit else {
       throw ConfigurationError("CloudKit configuration required", key: "cloudkit")
     }
+    let validatedCloudKit: ValidatedCloudKitConfiguration
+    do {
+      validatedCloudKit = try cloudKit.validated()
+    } catch let error as CloudKitConfigurationError {
+      throw error.map(keys: ConfigurationKeys.cloudKit)
+    }
     return ValidatedBushelConfiguration(
-      cloudKit: try cloudKit.validated(),
+      cloudKit: validatedCloudKit,
       virtualBuddy: virtualBuddy,
       fetch: fetch,
       sync: sync,

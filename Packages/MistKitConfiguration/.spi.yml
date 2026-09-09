@@ -1,0 +1,5 @@
+version: 1
+builder:
+  configs:
+    - documentation_targets: [MistKitConfiguration]
+      swift_version: 6.4

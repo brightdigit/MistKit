@@ -75,10 +75,10 @@ public struct ProbeDuplicateSubscriptionConfig: Sendable, ConfigurationParseable
     }
 
     let recordType =
-      configuration.string(forKey: "record-type", default: "Note") ?? "Note"
+      configuration.read(MistDemoKeys.Record.recordType)
     let alternateRecordType =
-      configuration.string(forKey: "alternate-record-type", default: "Article") ?? "Article"
-    let verbose = configuration.bool(forKey: "verbose", default: false)
+      configuration.read(MistDemoKeys.Record.alternateRecordType)
+    let verbose = configuration.read(MistDemoKeys.Output.verbose)
 
     self.init(
       base: baseConfig,

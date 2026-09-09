@@ -75,7 +75,7 @@ public struct DeleteZoneConfig: Sendable, ConfigurationParseable {
     }
 
     guard
-      let zoneName = configuration.string(forKey: "zone.name"),
+      let zoneName = configuration.read(MistDemoKeys.Query.zoneName),
       !zoneName.isEmpty
     else {
       throw ConfigurationError.missingRequired(
@@ -84,11 +84,10 @@ public struct DeleteZoneConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let ownerRecordName = configuration.string(forKey: "zone.owner")
+    let ownerRecordName = configuration.read(MistDemoKeys.Query.zoneOwner)
 
     let outputString =
-      configuration.string(forKey: "output.format", default: "table")
-      ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

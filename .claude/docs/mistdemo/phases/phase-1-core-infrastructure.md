@@ -185,7 +185,7 @@ targets: [
 **Note**: MistDemo uses Swift Configuration (v1.0.0+) for configuration management, replacing ArgumentParser during Phase 1 (issue #212). The current architecture uses manual argument parsing with hierarchical provider resolution (CLI → Environment → Defaults). See `MistDemoConfig.swift` for the implementation pattern.
 
 **Reference Documentation:**
-- [Swift Configuration Guide](.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md)
+- [Swift Configuration Guide](.claude/docs/swift-configuration.md)
 - [MistDemo Swift Configuration Reference](./swift-configuration-reference.md)
 
 ## File Structure

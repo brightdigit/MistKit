@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
 internal import MistKit
@@ -36,18 +37,10 @@ internal import Testing
 
 @Suite("AuthTokensConfig Tests")
 internal struct AuthTokensConfigTests {
-  private static func key(_ path: String) -> AbsoluteConfigKey {
-    AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
-  }
-
   private static func configuration(
-    values: [String: ConfigValue]
+    values: [(key: any ConfigurationKey, value: String)]
   ) -> MistDemoConfiguration {
-    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
-    for (path, value) in values {
-      mapped[key(path)] = value
-    }
-    return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
+    MistDemoConfiguration.forTesting(values)
   }
 
   @Test("Memberwise init applies defaults")
@@ -74,7 +67,7 @@ internal struct AuthTokensConfigTests {
 
   @Test("Configuration init throws when api.token is absent")
   internal func missingApiTokenThrows() async {
-    let configuration = Self.configuration(values: [:])
+    let configuration = Self.configuration(values: [])
 
     await #expect(throws: ConfigurationError.self) {
       _ = try await AuthTokensConfig(configuration: configuration)
@@ -84,8 +77,8 @@ internal struct AuthTokensConfigTests {
   @Test("Configuration init parses sharee.email")
   internal func parsesShareeEmail() async throws {
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "tok"),
-      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+      (MistDemoKeys.Auth.apiToken, "tok"),
+      (MistDemoKeys.Auth.shareeEmail, "sharee@example.com"),
     ])
 
     let config = try await AuthTokensConfig(configuration: configuration)

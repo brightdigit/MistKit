@@ -51,7 +51,37 @@ internal enum WebRequests {
     internal let ascending: Bool
   }
 
+  /// Zone target for a web request: default zone is `nil`, own custom zone is
+  /// name-only, shared zone is name + owner. A lone owner is unrepresentable.
+  ///
+  /// Kept separate from MistKit's ``ZoneID`` so request selectors never carry
+  /// response-only fields like `zoneType`.
+  internal struct ZoneSelector: Sendable, Equatable {
+    internal let zoneName: String
+    internal let zoneOwner: String?
+
+    internal init(zoneName: String, zoneOwner: String? = nil) {
+      self.zoneName = zoneName
+      self.zoneOwner = zoneOwner
+    }
+
+    /// MistKit zone identity for `queryRecords` / `modifyRecords`.
+    internal var zoneID: ZoneID {
+      ZoneID(zoneName: zoneName, ownerName: zoneOwner)
+    }
+  }
+
+  /// Coding keys shared by request bodies that accept a flat zone selector.
+  internal enum ZoneCodingKeys: String, CodingKey {
+    case zoneName
+    case zoneOwner
+  }
+
   /// `POST /api/records/query`
+  ///
+  /// Wire format stays flat (`zoneName` / `zoneOwner` at the top level) so
+  /// `app.js` and existing tests keep working; decode folds them into
+  /// ``zone``.
   internal struct Query: Decodable {
     private enum CodingKeys: String, CodingKey {
       case recordType
@@ -66,10 +96,8 @@ internal enum WebRequests {
     internal let limit: Int?
     internal let sortBy: [QuerySortField]?
     internal let database: MistKit.Database
-    /// Optional zone name for custom/shared zone queries.
-    internal let zoneName: String?
-    /// Optional zone owner (ownerName) for shared zones.
-    internal let zoneOwner: String?
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -81,19 +109,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
-      self.zoneName = try container.decodeIfPresent(
-        String.self, forKey: .zoneName
-      )
-      self.zoneOwner = try container.decodeIfPresent(
-        String.self, forKey: .zoneOwner
-      )
-      if self.zoneOwner != nil, self.zoneName == nil {
-        throw DecodingError.dataCorruptedError(
-          forKey: .zoneOwner,
-          in: container,
-          debugDescription: "zoneOwner requires zoneName"
-        )
-      }
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -108,12 +124,16 @@ internal enum WebRequests {
       case recordName
       case fields
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
     internal let recordName: String?
     internal let fields: [String: FieldValue]
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -127,6 +147,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -142,6 +163,8 @@ internal enum WebRequests {
       case fields
       case recordChangeTag
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
@@ -149,6 +172,8 @@ internal enum WebRequests {
     internal let fields: [String: FieldValue]
     internal let recordChangeTag: String?
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -163,6 +188,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -177,12 +203,16 @@ internal enum WebRequests {
       case recordName
       case recordChangeTag
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
     internal let recordName: String
     internal let recordChangeTag: String?
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -194,6 +224,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -222,5 +253,33 @@ internal enum WebRequests {
       )
     }
     return database
+  }
+
+  /// Decode flat `zoneName` / `zoneOwner` into a ``ZoneSelector``.
+  /// Rejects owner-without-name so shared-zone wire mistakes surface as 400.
+  internal static func decodeZoneSelector<Key: CodingKey>(
+    from container: KeyedDecodingContainer<Key>
+  ) throws -> ZoneSelector? {
+    guard let zoneNameKey = Key(stringValue: ZoneCodingKeys.zoneName.rawValue),
+      let zoneOwnerKey = Key(stringValue: ZoneCodingKeys.zoneOwner.rawValue)
+    else {
+      return nil
+    }
+    let zoneName = try container.decodeIfPresent(
+      String.self, forKey: zoneNameKey
+    )
+    let zoneOwner = try container.decodeIfPresent(
+      String.self, forKey: zoneOwnerKey
+    )
+    if zoneOwner != nil, zoneName == nil {
+      throw DecodingError.dataCorruptedError(
+        forKey: zoneOwnerKey,
+        in: container,
+        debugDescription: "zoneOwner requires zoneName"
+      )
+    }
+    return zoneName.map {
+      ZoneSelector(zoneName: $0, zoneOwner: zoneOwner)
+    }
   }
 }

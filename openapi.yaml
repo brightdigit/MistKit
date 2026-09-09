@@ -239,7 +239,7 @@ paths:
       summary: Fetch Record Information
       description: |
         Resolve one or more share short GUIDs into information about the shared
-        records they identify — the root record, the `cloudKit.share` record,
+        records they identify — the root record, the `cloudkit.share` record,
         the owner identity, and the caller's participation in each share.
 
         Routed against the public database with web-auth credentials
@@ -858,9 +858,10 @@ paths:
       summary: Get the Caller (Current User)
       description: |
         Fetch the authenticated caller's user information. This replaces the deprecated
-        `users/current` endpoint. Requires public database with a web-auth token
-        (user-context auth); server-to-server credentials and the private database
-        will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+        `users/current` endpoint. MistKit routes `fetchCaller` against the public
+        database with web-auth; MistDemo's FetchCallerPhase and share phases exercise
+        it successfully against a live container. Server-to-server credentials are
+        rejected. MistKit does not exercise a private-database path for this endpoint.
       operationId: getCaller
       tags:
         - Users
@@ -1352,8 +1353,16 @@ components:
       properties:
         zoneName:
           type: string
-        ownerName:
+        ownerRecordName:
           type: string
+          description: >
+            The zone owner's user record name. Use this key to identify a zone
+            owned by another user (e.g. a shared zone).
+        zoneType:
+          type: string
+          description: >
+            The zone's type. Live responses carry values such as
+            `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
 
     Filter:
       type: object
@@ -1429,11 +1438,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions to apply. Set when creating a
-            `cloudKit.share` record.
+            `cloudkit.share` record.
         participants:
           type: array
           description: |
-            The participants to invite. Set when creating a `cloudKit.share`
+            The participants to invite. Set when creating a `cloudkit.share`
             record.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1441,7 +1450,7 @@ components:
     ShareTargetReference:
       type: object
       description: |
-        Identifies the record being shared when creating a `cloudKit.share`
+        Identifies the record being shared when creating a `cloudkit.share`
         record (the `forRecord` key).
       properties:
         recordName:
@@ -1488,11 +1497,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions of a shared record. Present on
-            `cloudKit.share` records.
+            `cloudkit.share` records.
         participants:
           type: array
           description: |
-            The participants in a shared record. Present on `cloudKit.share`
+            The participants in a shared record. Present on `cloudkit.share`
             records.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1504,7 +1513,11 @@ components:
     ShareReference:
       type: object
       description: |
-        A reference to the `cloudKit.share` record governing a shared record.
+        A reference to the `cloudkit.share` record governing a shared record.
+        Note the lowercase `k`: Apple's archived "Sharing Records" docs write
+        `cloudKit.share`, but the live `records/modify` API accepts and returns
+        only `cloudkit.share`. The camelCase spelling fails with
+        "Cannot share - no such record exists to share".
       properties:
         recordName:
           type: string
@@ -1636,8 +1649,14 @@ components:
           description: The record name being referenced
         action:
           type: string
-          enum: [NONE, DELETE_SELF]
-          description: Action to perform on the referenced record
+          enum: [NONE, DELETE_SELF, VALIDATE]
+          description: >
+            Action to perform on the referenced record. NONE performs no action;
+            DELETE_SELF deletes this record when the referenced record is deleted;
+            VALIDATE verifies the target record exists before creating the
+            reference (create fails if missing). VALIDATE is a CloudKit Web
+            Services value; native CKRecord.ReferenceAction has only none and
+            deleteSelf.
 
     AssetValue:
       type: object
@@ -1848,11 +1867,11 @@ components:
       type: object
       description: >
         A record zone as returned by the zone endpoints (`zones/list`,
-        `zones/lookup`, `zones/modify`, `zones/changes`). Matches the
-        "Zone Dictionary" in Apple's archived CloudKit Web Services
-        Reference, which documents exactly three keys: `zoneID`,
-        `syncToken`, and `atomic`. `isEager` is deliberately absent — it
-        appears in no primary Apple source (see issue #386).
+        `zones/lookup`, `zones/modify`, `zones/changes`). The archived
+        "Zone Dictionary" documents `zoneID`, `syncToken`, and `atomic`;
+        live change feeds also carry `deleted` (issue #444). `isEager` is
+        deliberately absent — it appears in no primary Apple source (see
+        issue #386).
       properties:
         zoneID:
           $ref: '#/components/schemas/ZoneID'
@@ -1864,6 +1883,12 @@ components:
           description: >
             A Boolean value indicating whether this zone supports atomic
             operations.
+        deleted:
+          type: boolean
+          description: >
+            When `true`, the zone was deleted. Present on change-feed
+            responses (`zones/changes`); absent on list/lookup/modify
+            success payloads.
 
     ZonesListResponse:
       type: object
@@ -1946,10 +1971,18 @@ components:
 
     DatabaseChangedZone:
       type: object
-      description: A zone that changed, as returned by `changes/database`.
+      description: >
+        A zone that changed, as returned by `changes/database`. Carries the
+        same tombstone shape as `zones/changes` — `deleted: true` when the
+        zone was removed (issue #444).
       properties:
         zoneID:
           $ref: '#/components/schemas/ZoneID'
+        deleted:
+          type: boolean
+          description: >
+            When `true`, the zone was deleted and should be removed from
+            local storage.
 
     ZoneFetchFailure:
       type: object

@@ -41,13 +41,14 @@ extension MistDemoConstants {
     /// Default port number.
     public static let port = 8_080
     /// Default output format.
-    public static let outputFormat = "json"
+    ///
+    /// `table` is the human-facing default for every command; pass
+    /// `--output-format json` for machine-readable output.
+    public static let outputFormat = "table"
     /// Default query result limit.
     public static let queryLimit = 20
     /// Default CloudKit environment.
     public static let environment = "development"
-    /// Default CloudKit database.
-    public static let database = "private"
     /// Default container identifier.
     public static let containerIdentifier =
       "iCloud.com.brightdigit.MistDemo"

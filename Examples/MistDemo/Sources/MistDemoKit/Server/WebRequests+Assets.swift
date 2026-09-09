@@ -49,6 +49,8 @@ extension WebRequests {
       case recordName
       case data
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
@@ -56,6 +58,8 @@ extension WebRequests {
     internal let recordName: String?
     internal let data: Data
     internal let database: MistKit.Database
+    /// Must match the zone on the following create/update that attaches the asset.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -68,6 +72,7 @@ extension WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 

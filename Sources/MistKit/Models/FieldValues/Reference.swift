@@ -29,15 +29,19 @@
 
 /// Reference dictionary as defined in CloudKit Web Services
 public struct Reference: Codable, Equatable, Sendable {
-  /// Reference action types supported by CloudKit
+  /// Reference action types supported by CloudKit Web Services.
+  /// Native `CKRecord.ReferenceAction` only has `none` and `deleteSelf`;
+  /// `validate` is a Web Services case that verifies the target record exists
+  /// before creating the reference (create fails if missing).
   public enum Action: String, Codable, Sendable {
     case deleteSelf = "DELETE_SELF"
     case none = "NONE"
+    case validate = "VALIDATE"
   }
 
   /// The record name being referenced
   public let recordName: String
-  /// The action to take (DELETE_SELF, NONE, or nil)
+  /// The action to take (`NONE`, `DELETE_SELF`, `VALIDATE`, or nil)
   public let action: Action?
 
   /// Initialize a reference value

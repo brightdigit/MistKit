@@ -31,7 +31,7 @@ public import Foundation
 internal import MistKitOpenAPI
 
 /// A CloudKit-minted APNs token, returned by
-/// ``CloudKitService/createAPNsToken(environment:database:)``.
+/// ``CloudKitService/createAPNsToken(environment:clientId:database:)``.
 ///
 /// Used by non-device callers (CloudKit JS in a browser, server processes) that
 /// have no device APNs token to register. The `apnsToken` becomes the push

@@ -71,10 +71,12 @@ extension FieldValue {
       return .date(dateValue)
 
     case .bytes:
-      guard let stringValue = value as? String else {
+      guard let stringValue = value as? String,
+        let data = Data(base64Encoded: stringValue)
+      else {
         return nil
       }
-      return .bytes(stringValue)
+      return .bytes(data)
 
     case .asset:
       return convertAsset(value: value)

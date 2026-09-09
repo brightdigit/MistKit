@@ -56,7 +56,7 @@ extension Components.Schemas.FieldValueRequest {
       self.init(value: .DoubleValue(value), _type: .DOUBLE)
     case .bytes(let value):
       // A base64 string is otherwise indistinguishable from a STRING.
-      self.init(value: .BytesValue(value), _type: .BYTES)
+      self.init(value: .BytesValue(value.base64EncodedString()), _type: .BYTES)
     case .date(let value):
       // Tag TIMESTAMP (else inferred as INT64/DOUBLE) and round to whole milliseconds:
       // CloudKit rejects a fractional TIMESTAMP value (e.g. 1747999812347.89) with
@@ -101,6 +101,8 @@ extension Components.Schemas.FieldValueRequest {
       action = .DELETE_SELF
     case .some(.none):
       action = .NONE
+    case .some(.validate):
+      action = .VALIDATE
     case nil:
       action = nil
     }

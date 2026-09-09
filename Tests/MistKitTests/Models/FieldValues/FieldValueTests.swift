@@ -135,18 +135,19 @@ internal struct FieldValueTests {
     #expect(milliseconds == date.timeIntervalSince1970 * 1_000)
   }
 
-  /// Tests that `.bytes` encodes as its raw string payload.
+  /// Tests that `.bytes` encodes as a base64 string payload.
   ///
-  /// `.bytes` shares the scalar arm with `.string`, so it emits the same wire
-  /// value; it decodes back as `.string` since the decoder has no bytes branch.
-  @Test("FieldValue bytes encodes as its string payload")
+  /// Encoding emits `Data.base64EncodedString()`. Decoding still has no bytes
+  /// branch, so the payload reads back as `.string`.
+  @Test("FieldValue bytes encodes as its base64 string payload")
   internal func fieldValueBytesEncodesAsString() throws {
-    let payload = "YWJjMTIz"
+    let payload = Data("abc123".utf8)
+    let encoded = payload.base64EncodedString()
     let bytesData = try JSONEncoder().encode(FieldValue.bytes(payload))
-    let stringData = try JSONEncoder().encode(FieldValue.string(payload))
+    let stringData = try JSONEncoder().encode(FieldValue.string(encoded))
     #expect(bytesData == stringData)
 
     let decoded = try JSONDecoder().decode(FieldValue.self, from: bytesData)
-    #expect(decoded == .string(payload))
+    #expect(decoded == .string(encoded))
   }
 }

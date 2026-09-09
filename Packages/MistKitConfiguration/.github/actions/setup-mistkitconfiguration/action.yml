@@ -1,0 +1,87 @@
+name: Setup MistKitConfiguration
+description: >
+  Replaces monorepo path dependencies for MistKit and MistKitConfiguration with
+  remote references pinned to each branch's current commit. Standalone example CI
+  must rewrite both — a path: MistKit and a url: MistKit cannot coexist.
+
+inputs:
+  mistkit-branch:
+    description: MistKit branch to pin (leave empty to keep the local MistKit path dependency)
+    required: false
+    default: ""
+  mistkitconfiguration-branch:
+    description: MistKitConfiguration branch to pin (leave empty to keep the local path dependency)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    # Resolve each branch to its current HEAD and pin by `revision:` so
+    # `swift package dump-package` (hashed by swift-build@v1) changes when the
+    # branch advances. Falls back to `branch:` if the ref can't be resolved.
+    - name: Update Package.swift (Unix)
+      if: (inputs.mistkit-branch != '' || inputs.mistkitconfiguration-branch != '') && runner.os != 'Windows'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        pin_dep() {
+          local NAME="$1"
+          local REPO="$2"
+          local BRANCH="$3"
+          local PATH_PATTERN="$4"
+          local REF
+          REF=$(git ls-remote "https://github.com/brightdigit/${REPO}.git" "$BRANCH" | head -n1 | cut -f1)
+          local REQ
+          if [ -n "$REF" ]; then
+            REQ="revision: \"$REF\""
+            echo "Pinning $NAME to $BRANCH @ $REF"
+          else
+            REQ="branch: \"$BRANCH\""
+            echo "Could not resolve $BRANCH for $NAME; pinning by branch"
+          fi
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            sed -i '' "s|${PATH_PATTERN}|.package(url: \"https://github.com/brightdigit/${REPO}.git\", ${REQ})|g" Package.swift
+          else
+            sed -i "s|${PATH_PATTERN}|.package(url: \"https://github.com/brightdigit/${REPO}.git\", ${REQ})|g" Package.swift
+          fi
+        }
+
+        if [ -n '${{ inputs.mistkit-branch }}' ]; then
+          pin_dep MistKit MistKit '${{ inputs.mistkit-branch }}' \
+            '\.package(name: "MistKit", path: "\.\./\.\.")'
+        fi
+
+        if [ -n '${{ inputs.mistkitconfiguration-branch }}' ]; then
+          # Monorepo dogfood form used by Examples/*/Package.swift
+          pin_dep MistKitConfiguration MistKitConfiguration '${{ inputs.mistkitconfiguration-branch }}' \
+            '\.package(path: "\.\./\.\./Packages/MistKitConfiguration")'
+        fi
+
+        rm -f Package.resolved
+
+    - name: Update Package.swift (Windows)
+      if: (inputs.mistkit-branch != '' || inputs.mistkitconfiguration-branch != '') && runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        function Pin-Dep($Name, $Repo, $Branch, $PathPattern) {
+          $ref = (git ls-remote "https://github.com/brightdigit/$Repo.git" $Branch | Select-Object -First 1) -split "`t" | Select-Object -First 1
+          if ($ref) {
+            $req = "revision: `"$ref`""
+            Write-Host "Pinning $Name to $Branch @ $ref"
+          } else {
+            $req = "branch: `"$Branch`""
+            Write-Host "Could not resolve $Branch for $Name; pinning by branch"
+          }
+          $replacement = ".package(url: `"https://github.com/brightdigit/$Repo.git`", $req)"
+          (Get-Content Package.swift) -replace $PathPattern, $replacement | Set-Content Package.swift
+        }
+
+        if ('${{ inputs.mistkit-branch }}' -ne '') {
+          Pin-Dep MistKit MistKit '${{ inputs.mistkit-branch }}' '\.package\(name: "MistKit", path: "\.\./\.\."\)'
+        }
+        if ('${{ inputs.mistkitconfiguration-branch }}' -ne '') {
+          Pin-Dep MistKitConfiguration MistKitConfiguration '${{ inputs.mistkitconfiguration-branch }}' '\.package\(path: "\.\./\.\./Packages/MistKitConfiguration"\)'
+        }
+        Remove-Item -Path Package.resolved -Force -ErrorAction SilentlyContinue

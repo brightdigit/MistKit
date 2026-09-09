@@ -84,15 +84,13 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
     // --record-names accepts a comma-separated list.
     // --record-name (singular) also works for a single name.
     let recordNames: [String]
-    if let raw = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordNames) {
+    if let raw = configReader.read(MistDemoKeys.Record.recordNames) {
       recordNames =
         raw
         .split(separator: ",")
         .map { String($0).trimmingCharacters(in: .whitespaces) }
         .filter { !$0.isEmpty }
-    } else if let single = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.recordName
-    ) {
+    } else if let single = configReader.read(MistDemoKeys.Record.recordName) {
       recordNames = [single]
     } else {
       recordNames = []
@@ -102,26 +100,18 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
       throw LookupError.recordNamesRequired
     }
 
-    let fieldsString = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
+    let fieldsString = configReader.read(MistDemoKeys.Record.fields)
     let fields = fieldsString?
       .split(separator: ",")
       .map { String($0).trimmingCharacters(in: .whitespaces) }
       .filter { !$0.isEmpty }
 
     let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     let batchSize =
-      configReader.int(
-        forKey: MistDemoConstants.ConfigKeys.batchSize,
-        default: CloudKitService.maxRecordsPerRequest
-      ) ?? CloudKitService.maxRecordsPerRequest
+      configReader.read(MistDemoKeys.Record.batchSize)
 
     self.init(
       base: baseConfig,

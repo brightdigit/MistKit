@@ -30,148 +30,27 @@
 internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
+internal import MistKitConfiguration
 
 /// Actor responsible for loading configuration from CLI arguments and environment variables
 public actor ConfigurationLoader {
-  private let configReader: ConfigReader
+  internal let configReader: ConfigReader
 
   /// Initialize the configuration loader with command-line and environment providers
   public init() {
-    var providers: [any ConfigProvider] = []
-
-    // Priority 1: Command-line arguments (automatically parses all --key value and --flag arguments)
-    providers.append(
-      CommandLineArgumentsProvider(
-        secretsSpecifier: .specific([
-          "--cloudkit-key-id",
-          "--cloudkit-private-key-path",
-          "--cloudkit-private-key",
-          "--virtualbuddy-api-key",
-        ])
-      )
+    self.configReader = ConfigurationSources.makeConfigReader(
+      secretCommandLineFlags: ConfigurationKeys.cloudKit.secretCommandLineFlags.union([
+        "--virtualbuddy-api-key"
+      ])
     )
-
-    // Priority 2: Environment variables
-    providers.append(EnvironmentVariablesProvider())
-
-    self.configReader = ConfigReader(providers: providers)
   }
 
-  #if DEBUG
-    /// Test-only initializer that accepts a pre-configured ConfigReader
-    ///
-    /// This allows tests to inject controlled configuration sources without
-    /// modifying process-global state (environment variables).
-    ///
-    /// - Parameter configReader: Pre-configured ConfigReader for testing
-    internal init(configReader: ConfigReader) {
-      self.configReader = configReader
-    }
-  #endif
-
-  // MARK: - Helper Methods
-
-  /// Read a string value from configuration
-  internal func readString(forKey key: String) -> String? {
-    configReader.string(forKey: ConfigKey(key))
-  }
-
-  /// Read an integer value from configuration
-  internal func readInt(forKey key: String) -> Int? {
-    guard let stringValue = configReader.string(forKey: ConfigKey(key)) else {
-      return nil
-    }
-    return Int(stringValue)
-  }
-
-  /// Read a double value from configuration
-  internal func readDouble(forKey key: String) -> Double? {
-    guard let stringValue = configReader.string(forKey: ConfigKey(key)) else {
-      return nil
-    }
-    return Double(stringValue)
-  }
-
-  // MARK: - Generic Helper Methods for ConfigKey (with defaults)
-
-  /// Read a string value with automatic CLI → ENV → default fallback
-  /// Returns non-optional since ConfigKey has a required default
-  internal func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readString(forKey: keyString) {
-        return value
-      }
-    }
-    return key.defaultValue  // Non-optional!
-  }
-
-  /// Read a boolean value with enhanced ENV variable parsing
+  /// Creates a loader over a pre-configured reader.
   ///
-  /// Returns non-optional since ConfigKey has a required default.
-  ///
-  /// Boolean parsing rules:
-  /// - CLI: Flag presence indicates true (e.g., --verbose)
-  /// - ENV: Accepts "true", "1", "yes" (case-insensitive)
-  /// - Empty string in ENV is treated as absent (falls back to default)
-  ///
-  /// - Parameter key: Configuration key with boolean type
-  /// - Returns: Boolean value from CLI/ENV or the key's default
-  internal func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
-    // Try CLI first (presence-based for flags)
-    if let cliKey = key.key(for: .commandLine),
-      configReader.string(forKey: ConfigKey(cliKey)) != nil
-    {
-      return true
-    }
-
-    // Try ENV (may have string value like VERBOSE=true)
-    if let envKey = key.key(for: .environment),
-      let envValue = configReader.string(forKey: ConfigKey(envKey))
-    {
-      let lowercased = envValue.lowercased().trimmingCharacters(in: .whitespaces)
-      return lowercased == "true" || lowercased == "1" || lowercased == "yes"
-    }
-
-    // Use default value (non-optional)
-    return key.defaultValue
-  }
-
-  // MARK: - Generic Helper Methods for OptionalConfigKey (without defaults)
-
-  /// Read a string value with automatic CLI → ENV fallback
-  /// Returns optional since OptionalConfigKey has no default
-  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<String>) -> String? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readString(forKey: keyString) {
-        return value
-      }
-    }
-    return nil  // No default available
-  }
-
-  /// Read an integer value with automatic CLI → ENV fallback
-  /// Returns optional since OptionalConfigKey has no default
-  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<Int>) -> Int? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readInt(forKey: keyString) {
-        return value
-      }
-    }
-    return nil  // No default available
-  }
-
-  /// Read a double value with automatic CLI → ENV fallback
-  /// Returns optional since OptionalConfigKey has no default
-  internal func read(_ key: ConfigKeyKit.OptionalConfigKey<Double>) -> Double? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readDouble(forKey: keyString) {
-        return value
-      }
-    }
-    return nil  // No default available
+  /// Lets tests inject controlled configuration sources instead of mutating
+  /// process-global state (environment variables).
+  /// - Parameter configReader: Pre-configured reader to read from.
+  internal init(configReader: ConfigReader) {
+    self.configReader = configReader
   }
 }

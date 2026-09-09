@@ -85,25 +85,24 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
     }
 
     // Get file path from configuration
-    guard let filePath = configReader.string(forKey: "file") else {
+    guard let filePath = configReader.read(MistDemoKeys.Asset.file) else {
       throw UploadAssetError.filePathRequired
     }
 
     // Get record type (defaults to "Note")
     let recordType =
-      configReader.string(forKey: "record-type") ?? "Note"
+      configReader.read(MistDemoKeys.Record.optionalRecordType) ?? "Note"
 
     // Get field name (defaults to "image")
     let fieldName =
-      configReader.string(forKey: "field-name") ?? "image"
+      configReader.read(MistDemoKeys.Asset.fieldName)
 
     // Parse optional record name
-    let recordName = configReader.string(forKey: "record-name")
+    let recordName = configReader.read(MistDemoKeys.Record.recordName)
 
     // Parse output format
     let outputString =
-      configReader.string(forKey: "output.format", default: "json")
-      ?? "json"
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

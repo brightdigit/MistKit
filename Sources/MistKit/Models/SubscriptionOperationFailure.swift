@@ -30,8 +30,8 @@
 /// A per-subscription failure returned inline in a CloudKit
 /// `modifySubscriptions` response.
 ///
-/// Surfaced via ``SubscriptionResult/failure(_:)`` from `modifySubscriptions`,
-/// and wrapped in ``CloudKitError/subscriptionOperationFailed(_:)`` (or
+/// Surfaced via ``OperationResult/failure(_:)`` on a ``SubscriptionResult`` from
+/// `modifySubscriptions`, and wrapped in ``CloudKitError/subscriptionOperationFailed(_:)`` (or
 /// ``CloudKitError/subscriptionLikelyDuplicate(_:)`` for the
 /// ``OperationFailure/isLikelyDuplicate`` case) when the single-subscription
 /// convenience `createSubscription` hits one.

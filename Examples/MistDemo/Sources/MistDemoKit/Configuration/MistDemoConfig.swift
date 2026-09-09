@@ -105,7 +105,7 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
     self.environment = core.environment
 
     let databaseString =
-      config.string(forKey: "database", default: "public") ?? "public"
+      config.read(MistDemoKeys.Server.database)
     guard let database = MistDemoConfig.parseDatabase(databaseString) else {
       throw ConfigurationError.invalidDatabase(databaseString)
     }

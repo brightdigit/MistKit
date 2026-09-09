@@ -46,7 +46,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
         syncToken: "zone-token-xyz"
       )
 
-      let result = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
+      let result = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.zones.count == 2)
       #expect(result.syncToken == "zone-token-xyz")
@@ -62,7 +65,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
         zoneCount: 1
       )
 
-      let result = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
+      let result = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.zones.first?.zoneName == "test-zone-0")
     }
@@ -77,7 +83,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
         zoneCount: 0
       )
 
-      let result = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
+      let result = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.zones.isEmpty)
       #expect(result.syncToken != nil)
@@ -94,7 +103,8 @@ extension CloudKitServiceTests.FetchZoneChanges {
         syncToken: "new-token"
       )
 
-      let result = try await service.fetchZoneChanges(
+      let result = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+        service,
         syncToken: "previous-token",
         database: .public(.prefers(.serverToServer))
       )
@@ -124,7 +134,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
         { _, _, _ in },
         operation: {
           await #expect(throws: CloudKitError.self) {
-            _ = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
+            _ = try await CloudKitServiceTests.FetchZoneChanges.fetchZoneChanges(
+              service,
+              database: .public(.prefers(.serverToServer))
+            )
           }
         }
       )

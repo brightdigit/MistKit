@@ -37,7 +37,7 @@ Raise `maxPages` when you know the result set is genuinely large. Narrow filters
 
 ## Batching writes
 
-CloudKit's `/records/modify` endpoint accepts a batch of operations in a single round-trip. The practical server-side cap is around 200 operations per request. ``CloudKitService/modifyRecords(_:atomic:database:)`` does not chunk for you — split larger batches yourself:
+CloudKit's `/records/modify` endpoint accepts a batch of operations in a single round-trip. The practical server-side cap is around 200 operations per request. ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` does not chunk for you — split larger batches yourself:
 
 ```swift
 let chunked = stride(from: 0, to: operations.count, by: 200).map {
@@ -58,9 +58,9 @@ for chunk in chunked {
 
 ## Asset upload transport
 
-Asset uploads are a two-step workflow: ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` PUTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:using:database:)`` chains both steps.
+Asset uploads are a two-step workflow: ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` PUTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` chains both steps.
 
-The CDN upload deliberately does **not** flow through the configured ``ClientTransport``. It uses `URLSession.shared` directly:
+The CDN upload deliberately does **not** flow through the service's `ClientTransport`. It uses `URLSession.shared` directly:
 
 > Warning: CloudKit's API host (`api.apple-cloudkit.com`) and asset CDN (`cvws.icloud-content.com`) are different origins. Reusing the same HTTP/2 connection across both produces 421 Misdirected Request errors. Asset uploads keep a separate connection pool to avoid this.
 
@@ -114,17 +114,18 @@ For custom transports, prefer one transport per `CloudKitService` and reuse the 
 
 - ``CloudKitError/paginationLimitExceeded(maxPages:records:)``
 - ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``
-- ``CloudKitService/modifyRecords(_:atomic:database:)``
+- ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
 
 ### Asset uploads
 
-- ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:using:database:)``
-- ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:database:)``
+- ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)``
+- ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)``
 - ``CloudKitService/uploadAssetData(_:to:using:)``
 - ``AssetUploader``
 
-### See Also
+## See Also
 
 - <doc:WorkingWithRecords>
+- <doc:WhatCloudKitGotWrong>
 - <doc:HandlingErrors>
 - <doc:ConfiguringMistKit>

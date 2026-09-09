@@ -37,7 +37,7 @@ public protocol APIProtocol: Sendable {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -145,9 +145,10 @@ public protocol APIProtocol: Sendable {
     /// Get the Caller (Current User)
     ///
     /// Fetch the authenticated caller's user information. This replaces the deprecated
-    /// `users/current` endpoint. Requires public database with a web-auth token
-    /// (user-context auth); server-to-server credentials and the private database
-    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+    /// `users/current` endpoint. MistKit routes `fetchCaller` against the public
+    /// database with web-auth; MistDemo's FetchCallerPhase and share phases exercise
+    /// it successfully against a live container. Server-to-server credentials are
+    /// rejected. MistKit does not exercise a private-database path for this endpoint.
     ///
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
@@ -308,7 +309,7 @@ extension APIProtocol {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -532,9 +533,10 @@ extension APIProtocol {
     /// Get the Caller (Current User)
     ///
     /// Fetch the authenticated caller's user information. This replaces the deprecated
-    /// `users/current` endpoint. Requires public database with a web-auth token
-    /// (user-context auth); server-to-server credentials and the private database
-    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+    /// `users/current` endpoint. MistKit routes `fetchCaller` against the public
+    /// database with web-auth; MistDemo's FetchCallerPhase and share phases exercise
+    /// it successfully against a live container. Server-to-server credentials are
+    /// rejected. MistKit does not exercise a private-database path for this endpoint.
     ///
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
@@ -765,23 +767,35 @@ public enum Components {
         public struct ZoneID: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ZoneID/zoneName`.
             public var zoneName: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/ZoneID/ownerName`.
-            public var ownerName: Swift.String?
+            /// The zone owner's user record name. Use this key to identify a zone owned by another user (e.g. a shared zone).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneID/ownerRecordName`.
+            public var ownerRecordName: Swift.String?
+            /// The zone's type. Live responses carry values such as `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneID/zoneType`.
+            public var zoneType: Swift.String?
             /// Creates a new `ZoneID`.
             ///
             /// - Parameters:
             ///   - zoneName:
-            ///   - ownerName:
+            ///   - ownerRecordName: The zone owner's user record name. Use this key to identify a zone owned by another user (e.g. a shared zone).
+            ///   - zoneType: The zone's type. Live responses carry values such as `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
             public init(
                 zoneName: Swift.String? = nil,
-                ownerName: Swift.String? = nil
+                ownerRecordName: Swift.String? = nil,
+                zoneType: Swift.String? = nil
             ) {
                 self.zoneName = zoneName
-                self.ownerName = ownerName
+                self.ownerRecordName = ownerRecordName
+                self.zoneType = zoneType
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneName
-                case ownerName
+                case ownerRecordName
+                case zoneType
             }
         }
         /// - Remark: Generated from `#/components/schemas/Filter`.
@@ -971,7 +985,7 @@ public enum Components {
             /// - Remark: Generated from `#/components/schemas/RecordRequest/forRecord`.
             public var forRecord: Components.Schemas.ShareTargetReference?
             /// The public read/write permissions to apply. Set when creating a
-            /// `cloudKit.share` record.
+            /// `cloudkit.share` record.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
@@ -982,12 +996,12 @@ public enum Components {
                 case UNKNOWN = "UNKNOWN"
             }
             /// The public read/write permissions to apply. Set when creating a
-            /// `cloudKit.share` record.
+            /// `cloudkit.share` record.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
             public var publicPermission: Components.Schemas.RecordRequest.publicPermissionPayload?
-            /// The participants to invite. Set when creating a `cloudKit.share`
+            /// The participants to invite. Set when creating a `cloudkit.share`
             /// record.
             ///
             ///
@@ -1003,7 +1017,7 @@ public enum Components {
             ///   - createShortGUID: Whether to create a short GUID so this record can be shared. The
             ///   - forRecord:
             ///   - publicPermission: The public read/write permissions to apply. Set when creating a
-            ///   - participants: The participants to invite. Set when creating a `cloudKit.share`
+            ///   - participants: The participants to invite. Set when creating a `cloudkit.share`
             public init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
@@ -1034,7 +1048,7 @@ public enum Components {
                 case participants
             }
         }
-        /// Identifies the record being shared when creating a `cloudKit.share`
+        /// Identifies the record being shared when creating a `cloudkit.share`
         /// record (the `forRecord` key).
         ///
         ///
@@ -1118,7 +1132,7 @@ public enum Components {
             /// - Remark: Generated from `#/components/schemas/RecordResponse/share`.
             public var share: Components.Schemas.ShareReference?
             /// The public read/write permissions of a shared record. Present on
-            /// `cloudKit.share` records.
+            /// `cloudkit.share` records.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
@@ -1129,12 +1143,12 @@ public enum Components {
                 case UNKNOWN = "UNKNOWN"
             }
             /// The public read/write permissions of a shared record. Present on
-            /// `cloudKit.share` records.
+            /// `cloudkit.share` records.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
             public var publicPermission: Components.Schemas.RecordResponse.publicPermissionPayload?
-            /// The participants in a shared record. Present on `cloudKit.share`
+            /// The participants in a shared record. Present on `cloudkit.share`
             /// records.
             ///
             ///
@@ -1157,7 +1171,7 @@ public enum Components {
             ///   - shortGUID: The short GUID of a shared record. Present only on records that
             ///   - share:
             ///   - publicPermission: The public read/write permissions of a shared record. Present on
-            ///   - participants: The participants in a shared record. Present on `cloudKit.share`
+            ///   - participants: The participants in a shared record. Present on `cloudkit.share`
             ///   - owner:
             ///   - currentUserParticipant:
             public init(
@@ -1205,7 +1219,11 @@ public enum Components {
                 case currentUserParticipant
             }
         }
-        /// A reference to the `cloudKit.share` record governing a shared record.
+        /// A reference to the `cloudkit.share` record governing a shared record.
+        /// Note the lowercase `k`: Apple's archived "Sharing Records" docs write
+        /// `cloudKit.share`, but the live `records/modify` API accepts and returns
+        /// only `cloudkit.share`. The camelCase spelling fails with
+        /// "Cannot share - no such record exists to share".
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/ShareReference`.
@@ -1641,14 +1659,17 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/recordName`.
             public var recordName: Swift.String
-            /// Action to perform on the referenced record
+            /// Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             @frozen public enum actionPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case NONE = "NONE"
                 case DELETE_SELF = "DELETE_SELF"
+                case VALIDATE = "VALIDATE"
             }
-            /// Action to perform on the referenced record
+            /// Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             public var action: Components.Schemas.ReferenceValue.actionPayload?
@@ -1656,7 +1677,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - recordName: The record name being referenced
-            ///   - action: Action to perform on the referenced record
+            ///   - action: Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
             public init(
                 recordName: Swift.String,
                 action: Components.Schemas.ReferenceValue.actionPayload? = nil
@@ -2254,7 +2275,7 @@ public enum Components {
                 case moreComing
             }
         }
-        /// A record zone as returned by the zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`). Matches the "Zone Dictionary" in Apple's archived CloudKit Web Services Reference, which documents exactly three keys: `zoneID`, `syncToken`, and `atomic`. `isEager` is deliberately absent — it appears in no primary Apple source (see issue #386).
+        /// A record zone as returned by the zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`). The archived "Zone Dictionary" documents `zoneID`, `syncToken`, and `atomic`; live change feeds also carry `deleted` (issue #444). `isEager` is deliberately absent — it appears in no primary Apple source (see issue #386).
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/Zone`.
@@ -2270,25 +2291,34 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Zone/atomic`.
             public var atomic: Swift.Bool?
+            /// When `true`, the zone was deleted. Present on change-feed responses (`zones/changes`); absent on list/lookup/modify success payloads.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Zone/deleted`.
+            public var deleted: Swift.Bool?
             /// Creates a new `Zone`.
             ///
             /// - Parameters:
             ///   - zoneID:
             ///   - syncToken: The current point in the zone's change history.
             ///   - atomic: A Boolean value indicating whether this zone supports atomic operations.
+            ///   - deleted: When `true`, the zone was deleted. Present on change-feed responses (`zones/changes`); absent on list/lookup/modify success payloads.
             public init(
                 zoneID: Components.Schemas.ZoneID? = nil,
                 syncToken: Swift.String? = nil,
-                atomic: Swift.Bool? = nil
+                atomic: Swift.Bool? = nil,
+                deleted: Swift.Bool? = nil
             ) {
                 self.zoneID = zoneID
                 self.syncToken = syncToken
                 self.atomic = atomic
+                self.deleted = deleted
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneID
                 case syncToken
                 case atomic
+                case deleted
             }
         }
         /// - Remark: Generated from `#/components/schemas/ZonesListResponse`.
@@ -2495,21 +2525,33 @@ public enum Components {
                 case moreComing
             }
         }
-        /// A zone that changed, as returned by `changes/database`.
+        /// A zone that changed, as returned by `changes/database`. Carries the same tombstone shape as `zones/changes` — `deleted: true` when the zone was removed (issue #444).
+        ///
         ///
         /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone`.
         public struct DatabaseChangedZone: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone/zoneID`.
             public var zoneID: Components.Schemas.ZoneID?
+            /// When `true`, the zone was deleted and should be removed from local storage.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone/deleted`.
+            public var deleted: Swift.Bool?
             /// Creates a new `DatabaseChangedZone`.
             ///
             /// - Parameters:
             ///   - zoneID:
-            public init(zoneID: Components.Schemas.ZoneID? = nil) {
+            ///   - deleted: When `true`, the zone was deleted and should be removed from local storage.
+            public init(
+                zoneID: Components.Schemas.ZoneID? = nil,
+                deleted: Swift.Bool? = nil
+            ) {
                 self.zoneID = zoneID
+                self.deleted = deleted
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneID
+                case deleted
             }
         }
         /// Per-zone error returned inline in the `zones` array of a 200 zone
@@ -5766,7 +5808,7 @@ public enum Operations {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -11050,9 +11092,10 @@ public enum Operations {
     /// Get the Caller (Current User)
     ///
     /// Fetch the authenticated caller's user information. This replaces the deprecated
-    /// `users/current` endpoint. Requires public database with a web-auth token
-    /// (user-context auth); server-to-server credentials and the private database
-    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+    /// `users/current` endpoint. MistKit routes `fetchCaller` against the public
+    /// database with web-auth; MistDemo's FetchCallerPhase and share phases exercise
+    /// it successfully against a live container. Server-to-server credentials are
+    /// rejected. MistKit does not exercise a private-database path for this endpoint.
     ///
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.

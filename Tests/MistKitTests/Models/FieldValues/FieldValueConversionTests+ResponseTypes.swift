@@ -60,7 +60,7 @@ extension FieldValueConversionTests {
         return
       }
       let value = try Self.decode(#"{"value": "aGVsbG8=", "type": "BYTES"}"#)
-      #expect(value == .bytes("aGVsbG8="))
+      #expect(value == .bytes(Data("hello".utf8)))
     }
 
     @Test("Whole-valued DOUBLE with type reads back as .double, not .int64")
@@ -169,8 +169,50 @@ extension FieldValueConversionTests {
         return
       }
       #expect(try Self.decode(#"{"value": "plain"}"#) == .string("plain"))
+      #expect(try Self.decode(#"{"value": "Chen"}"#) == .string("Chen"))
       #expect(try Self.decode(#"{"value": 42}"#) == .int64(42))
       #expect(try Self.decode(#"{"value": 3.5}"#) == .double(3.5))
+    }
+
+    @Test("Tagged BYTES that is not valid base64 throws typeValueMismatch with the raw string")
+    internal func taggedMalformedBytesThrows() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      expectTypeValueMismatch(
+        #"{"value": "not!valid!", "type": "BYTES"}"#,
+        value: "not!valid!"
+      )
+    }
+
+    @Test("Untagged malformed base64 infers as .string and does not throw")
+    internal func inferredUntaggedMalformedBytesIsString() throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      #expect(try Self.decode(#"{"value": "not!valid!"}"#) == .string("not!valid!"))
+      #expect(try Self.decode(#"{"value": "aGVsbG8="}"#) == .string("aGVsbG8="))
+    }
+
+    /// Expects decoding `json` to throw `typeValueMismatch` whose `value` is the
+    /// unwrapped string payload, with the DEBUG assertion trap suppressed.
+    private func expectTypeValueMismatch(_ json: String, value: String) {
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(
+            throws: ConversionError.typeValueMismatch(
+              fieldName: "field",
+              declaredType: "BYTES",
+              value: value
+            )
+          ) {
+            _ = try Self.decode(json)
+          }
+        }
+      )
     }
   }
 }

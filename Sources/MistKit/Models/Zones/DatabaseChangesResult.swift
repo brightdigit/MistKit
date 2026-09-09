@@ -29,6 +29,7 @@
 
 internal import MistKitOpenAPI
 
+// swiftlint:disable line_length - DocC symbol links cannot be wrapped
 /// Result from fetching database changes (`changes/database`).
 ///
 /// Reports which record zones in the database changed since the provided sync
@@ -36,9 +37,11 @@ internal import MistKitOpenAPI
 /// current replacement for the deprecated `zones/changes` operation modeled by
 /// ``ZoneChangesResult``.
 ///
-/// Follow up with ``CloudKitService/fetchRecordZoneChanges(zones:database:)``
+/// Follow up with
+/// ``CloudKitService/fetchRecordZoneChanges(zones:reverse:desiredKeys:resultsLimit:desiredRecordTypes:database:)``
 /// to fetch the record changes within each returned zone.
 public struct DatabaseChangesResult: Sendable {
+  // swiftlint:enable line_length
   /// The per-zone outcomes, in the order CloudKit returned them. Each entry is
   /// either a changed zone or a zone fetch error.
   public let zones: [ZoneChangeResult]

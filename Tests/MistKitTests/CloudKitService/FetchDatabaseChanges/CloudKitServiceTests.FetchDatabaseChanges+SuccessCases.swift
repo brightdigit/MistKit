@@ -106,9 +106,9 @@ extension CloudKitServiceTests.FetchDatabaseChanges {
       let service = try Harness.makeService(
         provider: ResponseProvider(
           defaultResponse: try .databaseChangesResponse(zones: [
-            ["zoneID": ["zoneName": "good-zone", "ownerName": "_defaultOwner"]],
+            ["zoneID": ["zoneName": "good-zone", "ownerRecordName": "_defaultOwner"]],
             [
-              "zoneID": ["zoneName": "bad-zone", "ownerName": "_defaultOwner"],
+              "zoneID": ["zoneName": "bad-zone", "ownerRecordName": "_defaultOwner"],
               "serverErrorCode": "ZONE_NOT_FOUND",
               "reason": "Zone does not exist",
             ],
@@ -137,7 +137,7 @@ extension CloudKitServiceTests.FetchDatabaseChanges {
         provider: ResponseProvider(
           defaultResponse: try .databaseChangesResponse(zones: [
             [
-              "zoneID": ["zoneName": "bad-zone", "ownerName": "_defaultOwner"],
+              "zoneID": ["zoneName": "bad-zone", "ownerRecordName": "_defaultOwner"],
               "serverErrorCode": "ZONE_NOT_FOUND",
             ]
           ])
@@ -150,7 +150,7 @@ extension CloudKitServiceTests.FetchDatabaseChanges {
       do {
         _ = try entry.get()
         Issue.record("expected .zoneOperationFailed")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return

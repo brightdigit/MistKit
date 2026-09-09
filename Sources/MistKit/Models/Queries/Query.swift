@@ -29,14 +29,17 @@
 
 internal import MistKitOpenAPI
 
+// swiftlint:disable line_length - DocC symbol links cannot be wrapped
 /// A CloudKit query — a `recordType` plus optional ``QueryFilter``
 /// predicates and ``QuerySort`` descriptors.
 ///
-/// The same value can be passed to ``CloudKitService/queryRecords`` for a
-/// one-off query and embedded in
-/// ``SubscriptionInfo/Kind/query(_:)`` to describe a query
+/// The same value can be passed to
+/// ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
+/// for a one-off query and embedded in
+/// ``SubscriptionInfo/Kind/query(_:firesOn:firesOnce:)`` to describe a query
 /// subscription's predicate — they share this single representation.
 public struct Query: Codable, Sendable {
+  // swiftlint:enable line_length
   // MARK: - Internal
 
   internal let schema: Components.Schemas.Query

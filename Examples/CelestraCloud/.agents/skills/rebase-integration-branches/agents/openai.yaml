@@ -1,0 +1,5 @@
+interface:
+  display_name: "Rebase Integration Branches"
+  short_description: "Squash mistkit/subrepo onto a release branch"
+policy:
+  allow_implicit_invocation: false

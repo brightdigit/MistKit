@@ -71,16 +71,10 @@ public struct ListZonesConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let includeDefault = configuration.bool(
-      forKey: "zones.include-default",
-      default: false
-    )
+    let includeDefault = configuration.read(MistDemoKeys.Query.zonesIncludeDefault)
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "table"
-      ) ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

@@ -29,17 +29,22 @@
 
 public import Foundation
 
-/// The result of creating a CloudKit share via ``CloudKitService/createShare``.
+// swiftlint:disable line_length - DocC symbol links cannot be wrapped
+/// The result of creating a CloudKit share via
+/// ``CloudKitService/createShare(rootRecordType:rootRecordName:rootFields:zoneID:publicPermission:participants:database:)``.
 ///
 /// Carries the generated short GUID and invite URL alongside the root record
 /// and share-specific metadata. Share keys stay here (and on ``ShareInfo``)
 /// rather than on ``RecordInfo``, which models a plain record.
 public struct CreatedShare: Sendable {
+  // swiftlint:enable line_length
   // swift-format-ignore: NeverForceUnwrap
+  // swiftlint:disable force_unwrapping
   /// Base URL for iCloud share invite links (`https://www.icloud.com/share`).
   ///
   /// Append a ``ShortGUID`` path component to build a full invite URL.
   public static let shareURLBase = URL(string: "https://www.icloud.com/share")!
+  // swiftlint:enable force_unwrapping
 
   /// The short GUID CloudKit assigned to the share (and shared root).
   public let shortGUID: ShortGUID

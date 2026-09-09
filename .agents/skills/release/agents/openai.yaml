@@ -1,0 +1,5 @@
+interface:
+  display_name: "Release"
+  short_description: "Run the MistKit release runbook"
+policy:
+  allow_implicit_invocation: false

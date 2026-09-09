@@ -43,8 +43,9 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A field value's structure matched no known `FieldValue` case.
   case unmappableFieldValue(fieldName: String, value: String, type: String?)
   /// A response declared a scalar `type` that the field's value cannot satisfy
-  /// (e.g. a `TIMESTAMP` tag over a string value). Such a response is internally
-  /// inconsistent and cannot be faithfully represented.
+  /// (e.g. a `TIMESTAMP` tag over a string value, or a `BYTES` tag over a string
+  /// that is not valid base64). Such a response is internally inconsistent and
+  /// cannot be faithfully represented.
   case typeValueMismatch(fieldName: String, declaredType: String, value: String)
   /// A list element matched no known `FieldValue` case.
   case unmappableListItem(fieldName: String, item: String)
@@ -62,6 +63,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case zoneMissingID
   /// A zone response was missing its `zoneName`.
   case zoneMissingName
+  /// A zone response carried an unrecognized `zoneType` wire value.
+  case unrecognizedZoneType(String)
   /// A user response was missing its `userRecordName`.
   case userMissingRecordName
   /// A subscription response was missing its `subscriptionID`.
@@ -113,6 +116,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Zone entry missing zoneID"
     case .zoneMissingName:
       return "Zone entry missing zoneName"
+    case .unrecognizedZoneType(let wireValue):
+      return "Zone entry has unrecognized zoneType '\(wireValue)'"
     case .userMissingRecordName:
       return "UserResponse missing userRecordName"
     case .subscriptionMissingID:

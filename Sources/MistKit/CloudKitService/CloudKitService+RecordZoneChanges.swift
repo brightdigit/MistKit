@@ -75,7 +75,7 @@ extension CloudKitService {
   /// ```
   ///
   /// - Note: Per-zone failures are surfaced as
-  ///   ``ZoneRecordChangesResult/failure(_:)`` entries rather than thrown.
+  ///   ``OperationResult/failure(_:)`` entries of ``ZoneRecordChangesResult`` rather than thrown.
   public func fetchRecordZoneChanges(
     zones: [ZoneChangesRequest],
     reverse: Bool? = nil,

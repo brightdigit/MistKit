@@ -40,11 +40,11 @@ internal enum BrowserFlagResolver {
     configReader: MistDemoConfiguration,
     default defaultValue: Bool
   ) -> Bool {
-    let noBrowser = configReader.bool(forKey: "no.browser", default: false)
+    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
     if noBrowser {
       return false
     }
-    let browser = configReader.bool(forKey: "browser", default: false)
+    let browser = configReader.read(MistDemoKeys.Server.browser)
     if browser {
       return true
     }

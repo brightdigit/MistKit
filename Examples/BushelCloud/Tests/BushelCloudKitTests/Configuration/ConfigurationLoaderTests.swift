@@ -30,6 +30,7 @@
 internal import Configuration
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 internal import Testing
 
 @testable import BushelCloudKit
@@ -148,15 +149,17 @@ internal struct ConfigurationLoaderTests {
       #expect(config.sync?.verbose == false)  // Default
     }
 
-    @Test("ENV var with whitespace is trimmed and parsed")
+    @Test("ENV var with surrounding whitespace is ignored (falls to default)")
     internal func testEnvWhitespace() async throws {
+      // ConfigKeyKit#8: only exact "true"/"1"/"yes" (case-insensitive) are truthy;
+      // padded values are unrecognized and fall through to the key's default.
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "  true  "]
       )
 
       let config = try await loader.loadConfiguration()
-      #expect(config.sync?.verbose == true)
+      #expect(config.sync?.verbose == false)
     }
   }
 
@@ -194,7 +197,7 @@ internal struct ConfigurationLoaderTests {
     @Test("String value from CLI arguments")
     internal func testStringFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["cloudkit.container_id=iCloud.com.test.App"],
+        cliArgs: ["cloudkit.container-id=iCloud.com.test.App"],
         env: [:]
       )
 
@@ -216,7 +219,7 @@ internal struct ConfigurationLoaderTests {
     @Test("CLI string overrides ENV string")
     internal func testStringCLIPrecedence() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["cloudkit.container_id=iCloud.com.cli.App"],
+        cliArgs: ["cloudkit.container-id=iCloud.com.cli.App"],
         env: ["CLOUDKIT_CONTAINER_ID": "iCloud.com.env.App"]
       )
 
@@ -243,7 +246,7 @@ internal struct ConfigurationLoaderTests {
     @Test("Valid integer from CLI")
     internal func testValidIntFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["sync.min_interval=3600"],
+        cliArgs: ["sync.min-interval=3600"],
         env: [:]
       )
 
@@ -343,7 +346,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
             // Missing CLOUDKIT_PRIVATE_KEY_PATH
         ]
       )
@@ -361,7 +364,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
       )
@@ -370,8 +373,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
-      #expect(validated.cloudKit.keyID == "test-key-id")
-      #expect(validated.cloudKit.privateKeyPath == "/path/to/key.pem")
+      #expect(validated.cloudKit.keyID == ConfigurationLoaderTests.validKeyID)
+      #expect(validated.cloudKit.privateKey.filePath == "/path/to/key.pem")
     }
 
     @Test("CloudKit privateKey from environment variable")
@@ -380,17 +383,20 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\nMIGH...\n-----END PRIVATE KEY-----",
+            ConfigurationLoaderTests.validPEM,
         ]
       )
 
       let config = try await loader.loadConfiguration()
       let validated = try config.validated()
 
-      #expect(validated.cloudKit.privateKey != nil)
-      #expect(validated.cloudKit.privateKey?.contains("BEGIN PRIVATE KEY") == true)
+      guard case .raw(let pem) = validated.cloudKit.privateKey else {
+        Issue.record("expected inline PEM material")
+        return
+      }
+      #expect(pem.contains("BEGIN PRIVATE KEY"))
     }
 
     @Test(
@@ -402,7 +408,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": environment,
         ]
@@ -420,7 +426,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": "staging",  // Invalid
         ]
@@ -439,7 +445,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
             // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
         ]
       )
@@ -457,9 +463,8 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
-          "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\nfrom-env\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
+          "CLOUDKIT_PRIVATE_KEY": ConfigurationLoaderTests.validPEM,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
       )
@@ -468,9 +473,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       // Both should be set in validated config
-      #expect(validated.cloudKit.privateKey != nil)
-      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
-      // SyncEngine will prefer privateKey when initializing
+      // Inline PEM wins over a path when both are supplied.
+      #expect(validated.cloudKit.privateKey.filePath == nil)
     }
 
     @Test("Empty CLOUDKIT_PRIVATE_KEY is treated as absent")
@@ -479,7 +483,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY": "   ",  // Whitespace only
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
@@ -488,9 +492,8 @@ internal struct ConfigurationLoaderTests {
       let config = try await loader.loadConfiguration()
       let validated = try config.validated()
 
-      // Should use privateKeyPath since privateKey is effectively empty
-      #expect(validated.cloudKit.privateKey == nil)
-      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+      // Falls back to the path, since the inline key is effectively empty.
+      #expect(validated.cloudKit.privateKey.filePath?.isEmpty == false)
     }
 
     @Test("Environment parsing is case-insensitive")
@@ -499,7 +502,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": "Production",  // Mixed case
         ]
@@ -517,9 +520,9 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----",
+            ConfigurationLoaderTests.validPEM,
           "CLOUDKIT_ENVIRONMENT": "production",
         ]
       )
@@ -528,8 +531,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
-      #expect(validated.cloudKit.keyID == "test-key-id")
-      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.keyID == ConfigurationLoaderTests.validKeyID)
+      #expect(validated.cloudKit.privateKey.filePath == nil)
       #expect(validated.cloudKit.environment == .production)
     }
   }
@@ -556,7 +559,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [
           "export.output=/tmp/export.json",
           "export.pretty",
-          "export.signed_only",
+          "export.signed-only",
         ],
         env: [:]
       )
@@ -574,7 +577,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [
           "sync.verbose",
           "export.pretty",
-          "list.restore_images",
+          "list.restore-images",
         ],
         env: [:]
       )
@@ -596,8 +599,8 @@ internal struct ConfigurationLoaderTests {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [
           "sync.verbose",
-          "sync.dry_run",
-          "sync.min_interval=3600",
+          "sync.dry-run",
+          "sync.min-interval=3600",
         ],
         env: [
           "BUSHEL_SYNC_NO_BETAS": "true",
@@ -642,42 +645,48 @@ internal struct ConfigurationLoaderTests {
 
   // MARK: - Test Utilities
 
-  /// Create a ConfigurationLoader with simulated CLI args and environment variables
+  /// Creates a loader backed by the same providers production uses, with
+  /// their inputs injected instead of read from the process.
+  ///
+  /// Using `CommandLineArgumentsProvider` and `EnvironmentVariablesProvider`
+  /// rather than `InMemoryProvider` keeps the double faithful on two behaviors
+  /// the tests depend on: the environment provider normalizes `-` and `.` to
+  /// `_` when encoding a key (so `CLOUDKIT_KEY-ID`, generated from the
+  /// dash-case base `cloudkit.key-id`, resolves from a `CLOUDKIT_KEY_ID`
+  /// variable), and both providers coerce their string-shaped input on demand
+  /// (so one variable answers `string`, `int` and `double` reads).
+  /// `InMemoryProvider` does neither — it matches keys literally and serves
+  /// only the stored case.
   ///
   /// - Parameters:
-  ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
-  ///   - env: Simulated environment variables
-  /// - Returns: ConfigurationLoader with controlled inputs
+  ///   - cliArgs: Simulated CLI arguments (format: "key=value", or "key" for flags).
+  ///   - env: Simulated environment variables.
+  /// - Returns: A loader reading from those inputs only.
   private static func createLoader(
     cliArgs: [String],
     env: [String: String]
   ) -> ConfigurationLoader {
-    // Parse CLI args: "key=value" or "key" for flags
-    var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    // Rebuild an argv from "key=value" / "key" (flag presence) entries.
+    //
+    // A bare `--flag` is spelled `--flag true` here. `CommandLineArgumentsProvider`
+    // reports a valueless flag through `bool(forKey:)` but not `string(forKey:)`,
+    // and ConfigKeyKit's boolean resolution detects flag presence via the string
+    // read — so a truly bare flag resolves to its default. That gap predates the
+    // `ConfigValueReading` migration (the hand-rolled `read(ConfigKey<Bool>)`
+    // these tests previously exercised used the same string-based check); it was
+    // masked because the former `InMemoryProvider` double stored flags as
+    // `.string("true")`. Passing the value explicitly keeps these tests on the
+    // path that works. See the follow-up issue on valueless-flag support.
+    var arguments: [String] = ["bushel-cloud"]
     for arg in cliArgs {
-      if arg.contains("=") {
-        let parts = arg.split(separator: "=", maxSplits: 1)
-        if parts.count == 2 {
-          let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
-          cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
-        }
-      } else {
-        // Flag presence (boolean)
-        let key = AbsoluteConfigKey(stringLiteral: arg)
-        cliValues[key] = .init(.string("true"), isSecret: false)
-      }
-    }
-
-    // ENV vars as-is
-    var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
-    for (key, value) in env {
-      let configKey = AbsoluteConfigKey(stringLiteral: key)
-      envValues[configKey] = .init(.string(value), isSecret: false)
+      let parts = arg.split(separator: "=", maxSplits: 1)
+      arguments.append("--" + parts[0].replacingOccurrences(of: ".", with: "-"))
+      arguments.append(parts.count == 2 ? String(parts[1]) : "true")
     }
 
     let providers: [any ConfigProvider] = [
-      InMemoryProvider(values: cliValues),  // Priority 1: CLI
-      InMemoryProvider(values: envValues),  // Priority 2: ENV
+      CommandLineArgumentsProvider(arguments: arguments),  // Priority 1: CLI
+      EnvironmentVariablesProvider(environmentVariables: env),  // Priority 2: ENV
     ]
 
     let configReader = ConfigReader(providers: providers)

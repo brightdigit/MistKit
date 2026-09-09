@@ -83,18 +83,15 @@ public struct RereferenceAssetConfig: Sendable, ConfigurationParseable {
     }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
       base: baseConfig,
-      sourceRecord: configuration.string(forKey: "source-record"),
-      assetField: configuration.string(forKey: "asset-field"),
-      targetRecord: configuration.string(forKey: "target-record"),
-      targetAssetField: configuration.string(forKey: "target-asset-field"),
+      sourceRecord: configuration.read(MistDemoKeys.Asset.sourceRecord),
+      assetField: configuration.read(MistDemoKeys.Asset.assetField),
+      targetRecord: configuration.read(MistDemoKeys.Asset.targetRecord),
+      targetAssetField: configuration.read(MistDemoKeys.Asset.targetAssetField),
       output: output
     )
   }

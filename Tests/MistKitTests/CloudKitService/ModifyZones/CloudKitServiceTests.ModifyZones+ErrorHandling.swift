@@ -44,9 +44,9 @@ extension CloudKitServiceTests.ModifyZones {
         return
       }
       let service = try Harness.makeService(zones: [
-        ["zoneID": ["zoneName": "good-zone", "ownerName": "_defaultOwner"]],
+        ["zoneID": ["zoneName": "good-zone", "ownerRecordName": "_defaultOwner"]],
         [
-          "zoneID": ["zoneName": "bad-zone", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "bad-zone", "ownerRecordName": "_defaultOwner"],
           "serverErrorCode": "ZONE_NOT_FOUND",
           "reason": "Zone does not exist",
         ],
@@ -77,7 +77,7 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try Harness.makeService(zones: [
         [
-          "zoneID": ["zoneName": "bad-zone", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "bad-zone", "ownerRecordName": "_defaultOwner"],
           "serverErrorCode": "ZONE_NOT_FOUND",
         ]
       ])
@@ -91,7 +91,7 @@ extension CloudKitServiceTests.ModifyZones {
       do {
         _ = try entry.get()
         Issue.record("expected .zoneOperationFailed")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return
@@ -108,7 +108,7 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try Harness.makeService(zones: [
         [
-          "zoneID": ["zoneName": "good-zone", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "good-zone", "ownerRecordName": "_defaultOwner"],
           "syncToken": "zone-token",
           "atomic": true,
         ]

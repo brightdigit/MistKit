@@ -57,8 +57,22 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
 
     // Distinct Apple IDs are required: inviting yourself is not a useful
     // create→accept roundtrip. Compare users/caller record names up front.
-    let sharerIdentity = try await context.service.fetchCaller()
-    let shareeIdentity = try await shareeService.fetchCaller()
+    let sharerIdentity: UserInfo
+    do {
+      sharerIdentity = try await context.service.fetchCaller()
+    } catch {
+      throw IntegrationTestError.verificationFailed(
+        "sharer users/caller failed: \(error)"
+      )
+    }
+    let shareeIdentity: UserInfo
+    do {
+      shareeIdentity = try await shareeService.fetchCaller()
+    } catch {
+      throw IntegrationTestError.verificationFailed(
+        "sharee users/caller failed: \(error)"
+      )
+    }
     if sharerIdentity.userRecordName == shareeIdentity.userRecordName {
       throw IntegrationTestError.shareeSameAsSharer(
         userRecordName: sharerIdentity.userRecordName

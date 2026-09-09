@@ -535,7 +535,7 @@ bushel-cloud sync
 
 ## Dependencies
 
-- **MistKit** - CloudKit Web Services client (local path dependency)
+- **MistKit** (1.0.0-beta.4+) - CloudKit Web Services client
 - **IPSWDownloads** - ipsw.me API wrapper
 - **SwiftSoup** - HTML parsing for web scraping
 - **ArgumentParser** - CLI argument parsing

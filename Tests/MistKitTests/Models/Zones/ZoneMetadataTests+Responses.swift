@@ -129,7 +129,7 @@ extension ZoneMetadataTests {
           {
             "zones": [
               {
-                "zoneID": { "zoneName": "Articles", "ownerName": "_defaultOwner" },
+                "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" },
                 "syncToken": "lookup-token",
                 "atomic": true
               }

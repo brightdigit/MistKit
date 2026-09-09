@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
 internal import Testing
@@ -35,18 +36,10 @@ internal import Testing
 
 @Suite("TestPrivateConfig Tests")
 internal struct TestPrivateConfigTests {
-  private static func key(_ path: String) -> AbsoluteConfigKey {
-    AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
-  }
-
   private static func configuration(
-    values: [String: ConfigValue]
+    values: [(key: any ConfigurationKey, value: String)]
   ) -> MistDemoConfiguration {
-    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
-    for (path, value) in values {
-      mapped[key(path)] = value
-    }
-    return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
+    MistDemoConfiguration.forTesting(values)
   }
 
   @Test("TestPrivateConfig retains sharee credentials")
@@ -65,16 +58,16 @@ internal struct TestPrivateConfigTests {
   internal func missingShareeTokenThrows() async throws {
     let base = try await MistDemoConfig(
       configuration: Self.configuration(values: [
-        "api.token": .init(stringLiteral: "api-tok"),
-        "web.auth.token": .init(stringLiteral: "sharer-tok"),
-        "sharee.email": .init(stringLiteral: "sharee@example.com"),
+        (MistDemoKeys.Auth.apiToken, "api-tok"),
+        (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
+        (MistDemoKeys.Auth.shareeEmail, "sharee@example.com"),
       ]),
       base: nil
     )
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "api-tok"),
-      "web.auth.token": .init(stringLiteral: "sharer-tok"),
-      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+      (MistDemoKeys.Auth.apiToken, "api-tok"),
+      (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
+      (MistDemoKeys.Auth.shareeEmail, "sharee@example.com"),
     ])
 
     await #expect(throws: ConfigurationError.self) {
@@ -86,16 +79,16 @@ internal struct TestPrivateConfigTests {
   internal func missingShareeEmailThrows() async throws {
     let base = try await MistDemoConfig(
       configuration: Self.configuration(values: [
-        "api.token": .init(stringLiteral: "api-tok"),
-        "web.auth.token": .init(stringLiteral: "sharer-tok"),
-        "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+        (MistDemoKeys.Auth.apiToken, "api-tok"),
+        (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
+        (MistDemoKeys.Auth.shareeWebAuthToken, "sharee-tok"),
       ]),
       base: nil
     )
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "api-tok"),
-      "web.auth.token": .init(stringLiteral: "sharer-tok"),
-      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+      (MistDemoKeys.Auth.apiToken, "api-tok"),
+      (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
+      (MistDemoKeys.Auth.shareeWebAuthToken, "sharee-tok"),
     ])
 
     await #expect(throws: ConfigurationError.self) {
@@ -107,16 +100,16 @@ internal struct TestPrivateConfigTests {
   internal func parsesShareeCredentials() async throws {
     let base = try await MistDemoConfig(
       configuration: Self.configuration(values: [
-        "api.token": .init(stringLiteral: "api-tok"),
-        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+        (MistDemoKeys.Auth.apiToken, "api-tok"),
+        (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
       ]),
       base: nil
     )
     let configuration = Self.configuration(values: [
-      "api.token": .init(stringLiteral: "api-tok"),
-      "web.auth.token": .init(stringLiteral: "sharer-tok"),
-      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
-      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+      (MistDemoKeys.Auth.apiToken, "api-tok"),
+      (MistDemoKeys.Auth.webAuthToken, "sharer-tok"),
+      (MistDemoKeys.Auth.shareeWebAuthToken, "sharee-tok"),
+      (MistDemoKeys.Auth.shareeEmail, "sharee@example.com"),
     ])
 
     let config = try await TestPrivateConfig(

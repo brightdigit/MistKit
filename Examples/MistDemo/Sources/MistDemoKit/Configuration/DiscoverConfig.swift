@@ -79,17 +79,11 @@ public struct DiscoverConfig: Sendable, ConfigurationParseable {
     let emails = Self.parseEmails(from: configuration)
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     let batchSize =
-      configuration.int(
-        forKey: MistDemoConstants.ConfigKeys.batchSize,
-        default: CloudKitService.maxRecordsPerRequest
-      ) ?? CloudKitService.maxRecordsPerRequest
+      configuration.read(MistDemoKeys.Record.batchSize)
 
     self.init(
       base: baseConfig,
@@ -104,7 +98,7 @@ public struct DiscoverConfig: Sendable, ConfigurationParseable {
   internal static func parseEmails(
     from configuration: MistDemoConfiguration
   ) -> [String] {
-    if let raw = configuration.string(forKey: "discover.emails"),
+    if let raw = configuration.read(MistDemoKeys.Integration.discoverEmails),
       !raw.isEmpty
     {
       return
@@ -114,10 +108,7 @@ public struct DiscoverConfig: Sendable, ConfigurationParseable {
         .filter { !$0.isEmpty }
     }
 
-    if configuration.bool(
-      forKey: MistDemoConstants.ConfigKeys.stdin,
-      default: false
-    ) {
+    if configuration.read(MistDemoKeys.Record.stdin) {
       let stdinData = FileHandle.standardInput.readDataToEndOfFile()
       guard let raw = String(data: stdinData, encoding: .utf8) else {
         return []

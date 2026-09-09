@@ -61,4 +61,27 @@ extension AdaptiveTokenManager {
 
     return authenticator
   }
+
+  /// Adopts a rotated web auth token from a CloudKit response header.
+  public func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError) {
+    guard webAuthToken != nil else {
+      return
+    }
+
+    let authenticator = try WebAuthTokenAuthenticator(
+      apiToken: apiToken,
+      webAuthToken: token
+    )
+    self.webAuthToken = token
+
+    if let storage = storage {
+      do {
+        try await storage.store(authenticator, identifier: apiToken)
+      } catch {
+        Logger(subsystem: .auth).warning(
+          "Failed to store credentials after token rotation: \(error.localizedDescription)"
+        )
+      }
+    }
+  }
 }

@@ -1013,7 +1013,7 @@ public struct Client: APIProtocol {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -3647,9 +3647,10 @@ public struct Client: APIProtocol {
     /// Get the Caller (Current User)
     ///
     /// Fetch the authenticated caller's user information. This replaces the deprecated
-    /// `users/current` endpoint. Requires public database with a web-auth token
-    /// (user-context auth); server-to-server credentials and the private database
-    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+    /// `users/current` endpoint. MistKit routes `fetchCaller` against the public
+    /// database with web-auth; MistDemo's FetchCallerPhase and share phases exercise
+    /// it successfully against a live container. Server-to-server credentials are
+    /// rejected. MistKit does not exercise a private-database path for this endpoint.
     ///
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
