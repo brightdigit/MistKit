@@ -1,6 +1,6 @@
 # Generated Code Structure Analysis
 
-What `swift-openapi-generator` produces from `openapi.yaml`, how those types are organised, and where the hand-written wrapper plugs in.
+What [`swift-openapi-generator`](https://github.com/apple/swift-openapi-generator) produces from `openapi.yaml`, how those types are organised, and where the hand-written wrapper plugs in.
 
 ## Overview
 
@@ -26,9 +26,9 @@ Both files begin with:
 ```
 
 - `do not modify` — manual edits are overwritten on the next regeneration.
-- `periphery:ignore:all` — `mise exec -- periphery` skips the file. Generated code legitimately has unreferenced members for unused operations.
-- `swift-format-ignore-file` — `mise exec -- swift-format` leaves the file untouched. The generator's output is already canonical.
-- `@_spi(Generated)` — pulls in SPI helpers from `OpenAPIRuntime` that aren't part of its public API.
+- `periphery:ignore:all` — [`mise exec -- periphery`](https://github.com/peripheryapp/periphery) skips the file. Generated code legitimately has unreferenced members for unused operations.
+- `swift-format-ignore-file` — [`mise exec -- swift-format`](https://github.com/swiftlang/swift-format) leaves the file untouched. The generator's output is already canonical.
+- `@_spi(Generated)` — pulls in SPI helpers from [`OpenAPIRuntime`](https://github.com/apple/swift-openapi-runtime) that aren't part of its public API.
 
 ## Client.swift
 

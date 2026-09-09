@@ -4,7 +4,7 @@ Where CloudKit Web Services itself was hard: the places Apple's documentation an
 
 ## Overview
 
-This is a field guide to the parts of CloudKit Web Services that cost real time, written from MistKit's issue tracker, its `openapi.yaml` annotations, and live runs against a development container. Its companion, <doc:WhatTheAIGotWrong>, asks the orthogonal question of how the *assistant* behaved while the library was being built; the two barely overlap.
+This is a field guide to the parts of [CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html) that cost real time, written from MistKit's issue tracker, its [`openapi.yaml`](https://github.com/brightdigit/MistKit/blob/main/openapi.yaml) annotations, and live runs against a development container. Its companion, <doc:WhatTheAIGotWrong>, asks the orthogonal question of how the *assistant* behaved while the library was being built; the two barely overlap.
 
 The thesis, stated once:
 
@@ -12,7 +12,7 @@ The thesis, stated once:
 
 Every significant finding below was settled by *running a request*, never by reading harder. The worst ones return **HTTP 200**: a wrong sync-token key is ignored rather than rejected, a mis-cased record type blames a different record, an unmodeled response key decodes to `nil`, a stale auth token keeps working. Nothing throws.
 
-Its corollary: **when the archived REST reference and observed behavior disagree, CloudKit JS's source is a primary oracle.** Reading `setApiModuleName("device")` in CloudKit JS is what cracked the APNs-token routing bug below, and CloudKit JS beat the archived reference more than once.
+Its corollary: **when the archived REST reference and observed behavior disagree, [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs)'s source is a primary oracle.** Reading `setApiModuleName("device")` in CloudKit JS is what cracked the APNs-token routing bug below, and CloudKit JS beat the archived reference more than once.
 
 ## Two kinds of hard
 
@@ -109,10 +109,10 @@ The conversion layer bets that a loud failure beats silently wrong data, but the
 | # | Finding | Receipt |
 | --- | --- | --- |
 | 1 | **`zones/changes` uses `metaSyncToken`, not `syncToken`.** The wrong key is *silently ignored* — page one replays forever, so pagination had **never** worked. Live proof: `syncToken` → 40 zones again; `metaSyncToken` → 0. Only this endpoint differs; `changes/database`, `changes/zone`, and `records/changes` genuinely use `syncToken`. | [#430](https://github.com/brightdigit/MistKit/issues/430) |
-| 2 | **APNs tokens live under `/device/`, not `/database/`.** The documented path answers only `OPTIONS` and returns `405` on POST, with no `{database}` segment. Auth was ruled out by elimination across four passing endpoints; the answer came from CloudKit JS's source. | [#382](https://github.com/brightdigit/MistKit/issues/382) |
+| 2 | **APNs tokens live under `/device/`, not `/database/`.** The documented path answers only `OPTIONS` and returns `405` on POST, with no `{database}` segment. Auth was ruled out by elimination across four passing endpoints; the answer came from [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs)'s source. | [#382](https://github.com/brightdigit/MistKit/issues/382) |
 | 3 | **`ownerRecordName` vs `ownerName` — zone owners never decoded.** Live `zones/list` returns `ownerRecordName`; the spec declared `ownerName`, so every zone read its owner back as `nil`. | [#444](https://github.com/brightdigit/MistKit/issues/444) |
 | 4 | **`cloudkit.share`, not `cloudKit.share`.** One letter's case. The error — *"Cannot share - no such record exists to share"* — blames the root record, not the type string. | [#437](https://github.com/brightdigit/MistKit/issues/437) |
-| 5 | **`GET users/discover` is broken server-side at Apple** — a 100% reproducible `500`. Proving it was Apple's bug took a five-rung ladder: `OPTIONS` returns 200; a typo'd path returns a clean 404; `POST` reaches body validation; and Apple's own CloudKit JS fails identically from a browser. Filed as Feedback FB22754466. | [#28](https://github.com/brightdigit/MistKit/issues/28) |
+| 5 | **[`GET users/discover`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/DiscoveringAllUserIdentities.html) is broken server-side at Apple** — a 100% reproducible `500`. Proving it was Apple's bug took a five-rung ladder: `OPTIONS` returns 200; a typo'd path returns a clean 404; `POST` reaches body validation; and Apple's own CloudKit JS fails identically from a browser. Filed as [Feedback FB22754466](https://feedbackassistant.apple.com/). | [#28](https://github.com/brightdigit/MistKit/issues/28) |
 
 On #1: the recommendation *from documents alone* had been to close the issue as not planned, on a two-versus-one documentation count. Five words — "Can we run a quick test for this?" — reversed it. <doc:WhatTheAIGotWrong> tells the same episode from the collaboration side.
 
@@ -126,7 +126,7 @@ The whole thesis in one arc. Docs wrong → `404` → "fix" applied per the docs
 - **The query index is eventually consistent; `lookup` is not.** Create → immediate query returns **0 records**; three seconds later it returns them; `lookup` by name returns them immediately.
 - **A read gives you an asset you cannot re-attach.** Three of six fields come back; the writable ones come only from the upload step or `assets/rereference`, which is absent from the current documentation entirely.
 - **Subscription uniqueness is keyed on `(recordType, firesOn)`, not `subscriptionID`.** The same ID twice *succeeds*; uniqueness is exact-set match, not overlap; and a duplicate surfaces as a generic `INTERNAL_ERROR` with no `CONFLICT` code. MistKit detects it by matching Apple's prose string, which breaks silently if Apple rewords it — see <doc:HandlingErrors>.
-- **Per-zone partial failure.** `changes/database`, `changes/zone`, and `zones/modify` return success-or-failure *per zone*, and the failure variant must be listed **first** in each `oneOf` or the permissive success schema swallows it.
+- **Per-zone partial failure.** `changes/database`, `changes/zone`, and [`zones/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyZones.html) return success-or-failure *per zone*, and the failure variant must be listed **first** in each `oneOf` or the permissive success schema swallows it.
 - **`modifyRecords` never reports create-versus-update.** The only workable approach is a pre-fetch plus client-side classification — roughly 600 ms extra per sync in BushelCloud's measured case.
 
 ## Still open
@@ -135,7 +135,7 @@ Live-verified through MistDemo (the web UI plus `test-public` / `test-private`) 
 
 Still open on Apple's side, or as research gaps:
 
-- `GET users/discover` still returns `500`. The MistKit issue is closed as a Feedback Assistant filing; the operation is generated from the spec but not surfaced by ``CloudKitService``.
+- `GET users/discover` still returns `500`. The MistKit issue is closed as a [Feedback Assistant](https://feedbackassistant.apple.com/) filing; the operation is generated from the spec but not surfaced by ``CloudKitService``.
 - Whether a `database` subscription type exists; the full `zoneType` enum; and the fact that subscriptions cannot configure alert, badge, or sound at all (no `NotificationInfo` schema in the reference).
 
 ## Limitations

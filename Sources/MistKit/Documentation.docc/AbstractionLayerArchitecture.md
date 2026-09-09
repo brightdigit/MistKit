@@ -167,7 +167,7 @@ Every type that crosses a task boundary is `Sendable`. The wrapper enforces this
 - ``Authenticator`` declares a `Sendable` constraint on the protocol itself.
 - ``TokenManager`` likewise.
 
-Token-manager *implementations* that need mutable state (``AdaptiveTokenManager``, anything that caches a refreshed token) are `actor`s — the only `Sendable` shape that owns mutable state safely under Swift 6 strict concurrency. The middleware never reaches into those actors directly; it only calls `currentAuthenticator()`, which is `async`.
+Token-manager *implementations* that need mutable state (``AdaptiveTokenManager``, anything that caches a refreshed token) are `actor`s — the only `Sendable` shape that owns mutable state safely under [Swift 6 strict concurrency](https://www.swift.org/migration/documentation/swift-6-concurrency-migration-guide/). The middleware never reaches into those actors directly; it only calls `currentAuthenticator()`, which is `async`.
 
 ## Typed throws
 
@@ -231,9 +231,9 @@ Sync endpoints follow the same shape: ``RecordChangesResult`` and ``ZoneChangesR
 
 ## Asset upload: separate URLSession by design
 
-Asset upload is a two-step dance: ask CloudKit for a CDN URL, then PUT the bytes to the CDN. The two steps target **different hosts** (`api.apple-cloudkit.com` and `cvws.icloud-content.com`).
+Asset upload is a two-step dance: ask CloudKit for a CDN URL, then PUT the bytes to the CDN. The two steps target **[different hosts](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html)** (`api.apple-cloudkit.com` and `cvws.icloud-content.com`).
 
-URLSession (and any HTTP/2 client) will happily reuse a connection between hosts when it can, and CloudKit's CDN responds with `421 Misdirected Request` if the wrong host is reached over a reused HTTP/2 connection. To avoid that, asset upload uses `URLSession.shared.upload(_:to:)` directly via a dedicated ``AssetUploader`` closure — **not** the injected `ClientTransport`. The two connection pools stay separate.
+URLSession (and any HTTP/2 client) will happily reuse a connection between hosts when it can, and CloudKit's CDN responds with `421 Misdirected Request` if the wrong host is reached over a reused HTTP/2 connection. To avoid that, asset upload uses [`URLSession.shared.upload(_:to:)`](https://developer.apple.com/documentation/foundation/urlsession) directly via a dedicated ``AssetUploader`` closure — **not** the injected `ClientTransport`. The two connection pools stay separate.
 
 The closure shape (`(Data, URL) async throws -> (statusCode: Int?, data: Data)`) is a dependency-injection seam: tests pass in a stub uploader without touching the network. Custom uploaders in production code must preserve the connection-pool separation, or the same 421 errors will return.
 
@@ -260,5 +260,5 @@ A few intentional non-features that show up in many wrapper libraries but not th
 - <doc:OpenAPICodeGeneration>
 - <doc:GeneratedCodeAnalysis>
 - <doc:GeneratedCodeWorkflow>
-- [Swift Concurrency Documentation](https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html)
+- [Swift Concurrency Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)
 - [swift-openapi-runtime](https://github.com/apple/swift-openapi-runtime)

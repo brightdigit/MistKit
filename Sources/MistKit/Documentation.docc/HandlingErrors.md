@@ -13,7 +13,7 @@ Every MistKit failure is one of a small set of typed errors thrown at a specific
 | Token storage | ``TokenStorageError`` | Custom ``TokenStorage`` implementations |
 | Request | ``CloudKitError`` | Every ``CloudKitService`` operation |
 
-Operation methods declare typed throws — `async throws(CloudKitError)` — so the compiler enforces exhaustive switching at the call site if you choose to switch.
+Operation methods declare [typed throws](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0413-typed-throws.md) — `async throws(CloudKitError)` — so the compiler enforces exhaustive switching at the call site if you choose to switch.
 
 ## Construction-time validation
 
@@ -109,7 +109,7 @@ do {
 
 ### Every documented `serverErrorCode` has its own case
 
-CloudKit's top-level failure body carries a `serverErrorCode`. Rather than hand
+CloudKit's top-level failure body carries a [`serverErrorCode`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html). Rather than hand
 callers that string to match on, MistKit maps each of the fourteen codes the
 OpenAPI spec enumerates onto a dedicated case:
 
@@ -181,7 +181,7 @@ do {
 
 ### Subscription duplicates surface as `INTERNAL_ERROR`
 
-CloudKit Web Services enforces subscription uniqueness on the **`(recordType, firesOn)`** tuple, *not* on `subscriptionID`. A second subscription that repeats an existing `(recordType, firesOn)` pair under a *different* ID is rejected — but the rejection arrives as a generic ``CloudKitError/internalServerError(reason:)`` (`serverErrorCode` `INTERNAL_ERROR`) with the misleading reason `"could not find subscription we just created"`. CloudKit does not use its `CONFLICT`/`EXISTS` server codes for this case.
+CloudKit Web Services enforces [subscription uniqueness](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifySubscriptions.html) on the **`(recordType, firesOn)`** tuple, *not* on `subscriptionID`. A second subscription that repeats an existing `(recordType, firesOn)` pair under a *different* ID is rejected — but the rejection arrives as a generic ``CloudKitError/internalServerError(reason:)`` (`serverErrorCode` `INTERNAL_ERROR`) with the misleading reason `"could not find subscription we just created"`. CloudKit does not use its `CONFLICT`/`EXISTS` server codes for this case.
 
 MistKit infers the duplicate from that reason string and surfaces it through two hedged hints:
 
@@ -205,7 +205,7 @@ do {
 
 ## Under the hood: from HTTP response to CloudKitError
 
-CloudKit returns every failure as JSON with the same shape, whatever the status code:
+CloudKit returns every failure as JSON with [the same shape](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html), whatever the status code:
 
 ```json
 {
@@ -215,7 +215,7 @@ CloudKit returns every failure as JSON with the same shape, whatever the status 
 }
 ```
 
-`openapi.yaml` models that as one `Failure` response, and swift-openapi-generator turns each operation's status codes into an `Output` enum with a case per status plus `.undocumented`. Turning that into a ``CloudKitError`` is a short, fully typed pipeline:
+`openapi.yaml` models that as one `Failure` response, and [swift-openapi-generator](https://github.com/apple/swift-openapi-generator) turns each operation's status codes into an `Output` enum with a case per status plus `.undocumented`. Turning that into a ``CloudKitError`` is a short, fully typed pipeline:
 
 ```
 Operations.queryRecords.Output          (generated: .ok / .badRequest / … / .undocumented)

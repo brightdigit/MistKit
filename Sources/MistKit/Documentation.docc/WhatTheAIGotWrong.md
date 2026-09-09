@@ -4,7 +4,7 @@ An evidence-backed catalogue of the recurring failure modes of AI-assisted devel
 
 ## Overview
 
-MistKit was rebuilt with heavy use of AI coding assistants — first to translate Apple's archived CloudKit Web Services reference into `openapi.yaml`, then to build the wrapper, tests, and example projects on top. The published narrative is in *Rebuilding MistKit with Claude Code* ([part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/), [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)), written from memory. This article is written from the transcripts and the pull-request record: 191 closed PRs, 229 closed issues, six years of git history, 46 editor-assistant conversations, eight days of Claude Code transcripts, and 956 typed prompts spanning July 2025 to September 2026. In three places the transcripts sharpen or complicate the published article.
+MistKit was rebuilt with heavy use of AI coding assistants — first to translate Apple's archived CloudKit Web Services reference into `openapi.yaml`, then to build the wrapper, tests, and example projects on top. The published narrative is in *Rebuilding MistKit with Claude Code* ([part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/), [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)), written from memory. This article is written from the transcripts and the pull-request record: 191 closed PRs, 229 closed issues, six years of git history, 46 editor-assistant conversations, eight days of [Claude Code](https://claude.com/claude-code) transcripts, and 956 typed prompts spanning July 2025 to September 2026. In three places the transcripts sharpen or complicate the published article.
 
 Its companion, <doc:WhatCloudKitGotWrong>, asks the orthogonal question — which parts of *CloudKit Web Services itself* were hard. The two barely overlap, for a structural reason this article opens with. **Read the limitations at the end before quoting any number.**
 
@@ -71,7 +71,7 @@ Introduced unprompted: `SecureMemory`, `RegexCache`, `RetryPolicy`, token-refres
 > **Human:** **"Could not retrieve session token: TypeError: container.getSession is not a function"**
 > **AI:** *"I see the issue. The `getSession()` method doesn't exist in the CloudKit JS API."*
 
-Also invented: Swift Testing `.tags()` syntax, `swift-format:disable:all`, a non-existent Docker tag, test parameters that did not exist, and a claim to have read a GitHub URL it never fetched.
+Also invented: Swift Testing [`.tags()`](https://developer.apple.com/documentation/testing/traits) syntax, `swift-format:disable:all`, a non-existent Docker tag, test parameters that did not exist, and a claim to have read a GitHub URL it never fetched.
 
 **The inverse case is the most expensive.** The AI invented an *impossibility*:
 
@@ -92,7 +92,7 @@ The cleanest instance: after arguing at length against a new package (*"most of 
 
 **4 / 3 · high**
 
-Reclassified remaining failures as out of scope, then declared completion. In one session it did this three times consecutively — Core Data errors "separate from this task", then OSLog "isn't available on Linux", then *"Build succeeded. Only a warning remains"* while SwiftUI errors were still present.
+Reclassified remaining failures as out of scope, then declared completion. In one session it did this three times consecutively — [Core Data](https://developer.apple.com/documentation/coredata) errors "separate from this task", then [OSLog](https://developer.apple.com/documentation/oslog) "isn't available on Linux", then *"Build succeeded. Only a warning remains"* while SwiftUI errors were still present.
 
 > **AI:** *"Many warnings in generated files, but these are expected and acceptable for generated code"*
 > **Human:** **"No that's incorrect we should not receive any warnings or errors."**
@@ -108,7 +108,7 @@ Hunted for a Makefile when `lint.sh` was documented. Ran the OpenAPI generator a
 > **Human:** **"just run @lint.sh"**
 > **Human:** **"Instead of commenting out the disabled tests use the new TestTrait `disabledOniOSWithXcode16_2OrOlder()`"**
 
-This is the direct ancestor of the current instruction: *"do NOT invoke them from PATH directly. Run them THROUGH mise."*
+This is the direct ancestor of the current instruction: *"do NOT invoke them from PATH directly. Run them THROUGH [mise](https://mise.jdx.dev)."*
 
 ### 7. Partial application — doing the sweep on a sample
 
@@ -142,7 +142,7 @@ New test files immediately violated `file_length`; five files were all named `Ba
 
 - **Fix the root cause, not the instance** — told CI was green despite a lint violation, it began splitting the offending file. *"Don't fix the error. Fix the workflow to fail on linting failure."* The project's "fix `openapi.yaml`, not the Swift" rule is the domain-specific form of the same reflex.
 - **Deleting working coverage while adding new coverage** — asked to *add* Swift versions to a CI matrix, it replaced the matrix and silently dropped the nightlies, describing the result as "comprehensive". It had been rewriting whole YAML files rather than editing them.
-- **Unnecessary conditional-compilation ceremony** — added `import FoundationNetworking`, `import Crypto` and `#if canImport(Crypto)` guards it didn't need, then wrote a confident defense before reversing one turn later.
+- **Unnecessary conditional-compilation ceremony** — added `import FoundationNetworking`, [`import Crypto`](https://github.com/apple/swift-crypto) and `#if canImport(Crypto)` guards it didn't need, then wrote a confident defense before reversing one turn later.
 - **Wrong granularity for suppressions and guards** — per-line annotations where a file-level one was right. Persisted ten weeks across two codebases with near-identical human phrasing: *"put the ignores on the entire block"* → *"just gate the whole type or file."*
 - **Hand-editing generated files** — asked to get ignore directives onto generated output, it opened `Client.swift` and typed them in. The earliest boundary correction in the corpus.
 

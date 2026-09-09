@@ -4,7 +4,7 @@ How MistKit turns `openapi.yaml` into a type-safe Swift client at development ti
 
 ## Overview
 
-MistKit ships a hand-written wrapper layer on top of code generated from Apple's CloudKit Web Services OpenAPI specification by [`swift-openapi-generator`](https://github.com/apple/swift-openapi-generator). The generator runs at development time — not at consumer build time — so library users get a working package without having to install any generation tooling.
+MistKit ships a hand-written wrapper layer on top of code generated from [Apple's CloudKit Web Services OpenAPI specification](https://github.com/brightdigit/MistKit/blob/main/openapi.yaml) by [`swift-openapi-generator`](https://github.com/apple/swift-openapi-generator). The generator runs at development time — not at consumer build time — so library users get a working package without having to install any generation tooling.
 
 This article documents the toolchain (mise + the generator), the configuration file, and the request/response asymmetry that drives MistKit's custom type setup.
 
@@ -41,7 +41,7 @@ Hand-written wrapper (Sources/MistKit/, committed)
 
 ## Toolchain: mise
 
-MistKit pins build-time tools in `mise.toml`:
+MistKit pins build-time tools in [`mise.toml`](https://mise.jdx.dev):
 
 ```toml
 [tools]
@@ -59,7 +59,7 @@ mise exec -- swiftlint --fix
 mise exec -- swift-openapi-generator --version
 ```
 
-`./Scripts/generate-openapi.sh` puts mise's `$PATH` shims in front of the user's shell and calls `swift-openapi-generator generate`. When the generator is not on `$PATH` (CI containers, remote sessions) it falls back to `swift run --package-path Scripts/OpenAPITools swift-openapi-generator`, a tiny package that pins the same generator version, so regeneration works without mise. There is no Mintfile; references in older documentation to `mint`/`Mintfile` are out of date.
+`./Scripts/generate-openapi.sh` puts mise's `$PATH` shims in front of the user's shell and calls `swift-openapi-generator generate`. When the generator is not on `$PATH` (CI containers, remote sessions) it falls back to `swift run --package-path Scripts/OpenAPITools swift-openapi-generator`, a tiny package that pins the same generator version, so regeneration works without mise. There is no Mintfile; references in older documentation to [`mint`](https://github.com/yonaskolb/Mint)/`Mintfile` are out of date.
 
 ## Generation script
 
@@ -135,7 +135,7 @@ The runtime dependencies pulled in by the generated client:
 .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
 ```
 
-Plus MistKit's other dependencies: `swift-crypto` (server-to-server signing) and `swift-log`. `HTTPTypes` arrives transitively through `swift-openapi-runtime`.
+Plus MistKit's other dependencies: [`swift-crypto`](https://github.com/apple/swift-crypto) (server-to-server signing) and [`swift-log`](https://github.com/apple/swift-log). [`HTTPTypes`](https://github.com/apple/swift-http-types) arrives transitively through `swift-openapi-runtime`.
 
 ## Swift language settings
 
@@ -215,4 +215,4 @@ Never edit anything under `Sources/MistKitOpenAPI/` by hand — change `openapi.
 - <doc:AbstractionLayerArchitecture>
 - [`swift-openapi-generator` documentation](https://swiftpackageindex.com/apple/swift-openapi-generator/documentation/swift-openapi-generator)
 - [OpenAPI Specification 3.0.3](https://spec.openapis.org/oas/v3.0.3)
-- [CloudKit Web Services API](https://developer.apple.com/documentation/cloudkitwebservices)
+- [CloudKit Web Services API](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html)

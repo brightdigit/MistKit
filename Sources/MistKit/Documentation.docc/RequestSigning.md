@@ -47,7 +47,7 @@ The `init(decoding:)` / `encoded()` pair is the on-disk format used by ``TokenSt
 
 ## The middleware
 
-`AuthenticationMiddleware` conforms to OpenAPIRuntime's `ClientMiddleware` and intercepts every outgoing request:
+`AuthenticationMiddleware` conforms to OpenAPIRuntime's [`ClientMiddleware`](https://swiftpackageindex.com/apple/swift-openapi-runtime/documentation/openapiruntime/clientmiddleware) and intercepts every outgoing request:
 
 ```swift
 internal struct AuthenticationMiddleware: ClientMiddleware {
@@ -161,7 +161,7 @@ This scheme grants access to the private and shared databases for the authentica
 
 ### Rotation
 
-Every CloudKit response carries an `X-Apple-CloudKit-Web-Auth-Token` header with a fresh token, and Apple documents the previous token as invalid once the response is received. The middleware forwards the header to the manager; ``WebAuthTokenManager`` validates and stores it, and ``AdaptiveTokenManager`` additionally persists it to its ``TokenStorage``:
+Every CloudKit response carries an `X-Apple-CloudKit-Web-Auth-Token` header with a fresh token, and [Apple documents the previous token as invalid](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html) once the response is received. The middleware forwards the header to the manager; ``WebAuthTokenManager`` validates and stores it, and ``AdaptiveTokenManager`` additionally persists it to its ``TokenStorage``:
 
 ```swift
 public func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError) {
@@ -242,13 +242,13 @@ internal struct RequestSignature: Sendable {
 It is a transport-format value, not a domain value, and two storage choices follow from that:
 
 - **The date is stored as a `String`, not a `Date`.** The ISO 8601 string is part of the signed payload. Re-formatting a `Date` on every header access risks a wire string that differs from what was signed (formatter options, fractional seconds), and every such mismatch is an indistinguishable `401`. Storing the string locks the wire form to the signed form.
-- **The signature is stored as DER `Data`, not a base64 `String`.** The bytes are the natural form; base64 is computed on demand, and the struct stays free of the `@available` constraints that come with `P256.Signing.ECDSASignature`.
+- **The signature is stored as DER `Data`, not a base64 `String`.** The bytes are the natural form; base64 is computed on demand, and the struct stays free of the `@available` constraints that come with [`P256.Signing.ECDSASignature`](https://github.com/apple/swift-crypto).
 
 ### Signing process
 
 The convenience initializer `init(keyID:privateKey:requestBody:webServiceSubpath:date:)` does:
 
-1. **Format the ISO 8601 date.** `Date.ISO8601FormatStyle` on macOS 12 / iOS 15 / tvOS 15 / watchOS 8 and later; a shared `ISO8601DateFormatter` (documented thread-safe for `string(from:)`) on older systems.
+1. **Format the ISO 8601 date.** `Date.ISO8601FormatStyle` on macOS 12 / iOS 15 / tvOS 15 / watchOS 8 and later; a shared [`ISO8601DateFormatter`](https://developer.apple.com/documentation/foundation/iso8601dateformatter) (documented thread-safe for `string(from:)`) on older systems.
 2. **Hash the body.** `SHA256.cloudKitBodyHash(of:)` returns `base64(SHA256(body))`, or the **empty string** when the body is `nil` — not the hash of empty data. Both are defensible; only one is what CloudKit accepts.
 3. **Build the payload:** `"<iso8601Date>:<bodyHash>:<webServiceSubpath>"`.
 4. **Sign with P-256.** `privateKey.signature(for: Data(payload.utf8))` → DER bytes.
@@ -283,7 +283,7 @@ X-Apple-CloudKit-Request-ISO8601Date: 2026-05-15T14:30:00Z
 X-Apple-CloudKit-Request-SignatureV1: <base64-of-DER-signature>
 ```
 
-There is no `Authorization` header. The `HTTPField.Name` constants for these three headers — and for the `X-Apple-CloudKit-Web-Auth-Token` response header — live in `Sources/MistKit/Authentication/HTTPField.Name+CloudKit.swift`.
+There is no `Authorization` header. The [`HTTPField.Name`](https://github.com/apple/swift-http-types) constants for these three headers — and for the `X-Apple-CloudKit-Web-Auth-Token` response header — live in `Sources/MistKit/Authentication/HTTPField.Name+CloudKit.swift`.
 
 ## AdaptiveTokenManager
 
