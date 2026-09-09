@@ -54,7 +54,9 @@ extension CloudKitServiceTests.SizeLimits {
       )
     }
 
-    @Test("modifyRecords enriches QUOTA_EXCEEDED with recordExceedsSizeLimit hint")
+    @Test(
+      "modifyRecords enriches QUOTA_EXCEEDED with recordExceedsSizeLimit hint",
+      .disabled(if: Platform.isWasm))
     internal func recordHintAttachedOnOversizedBatch() async throws {
       let service = try Self.makeService()
 

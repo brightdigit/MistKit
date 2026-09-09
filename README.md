@@ -693,21 +693,6 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Create `MistKitConfiguration` package for shared CloudKit config glue](https://github.com/brightdigit/MistKit/issues/407) ✅
 - [x] [Complete iOSDevUK talk material — talk article and guides in DocC, `docs/` removed](https://github.com/brightdigit/MistKit/issues/447) ✅
 
-### Backlog / Post-beta
-
-- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
-- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-
-### v1.0.0
-
-- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116)
-- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/38)
-- [ ] [Add architecture diagrams to Bushel documentation](https://github.com/brightdigit/MistKit/issues/140)
-- [ ] [Add comprehensive test suite for Bushel demo](https://github.com/brightdigit/MistKit/issues/136)
-- [ ] [Implement incremental sync with change tracking for Bushel](https://github.com/brightdigit/MistKit/issues/137)
-- [ ] [Migrate Bushel Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/183)
-- [ ] [Migrate Celestra Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/184)
-
 ### v1.1.0
 
 - [ ] [Add CloudKit Schema Management APIs (cktool/cktooljs functionality)](https://github.com/brightdigit/MistKit/issues/135)
