@@ -33,19 +33,29 @@ internal import Testing
 @testable import MistKit
 
 extension FieldValueConvenienceTests {
-  @Test("typed *ListValue accessors unwrap homogeneous lists")
-  internal func typedListValueAccessors() {
-    #expect(FieldValue.int64(.list([1, 2])).int64ListValue == [1, 2])
-    #expect(FieldValue.double(.list([1.5])).doubleListValue == [1.5])
-    let date = Date(timeIntervalSince1970: 0)
-    #expect(FieldValue.date(.list([date])).dateListValue == [date])
-    let data = Data([0x01])
-    #expect(FieldValue.bytes(.list([data])).bytesListValue == [data])
-    let location = Location(latitude: 1, longitude: 2, horizontalAccuracy: 3)
-    #expect(FieldValue.location(.list([location])).locationListValue == [location])
-    let reference = Reference(recordName: "r")
-    #expect(FieldValue.reference(.list([reference])).referenceListValue == [reference])
-    let asset = Asset(fileChecksum: "c", size: 1, downloadURL: "https://example.com")
-    #expect(FieldValue.asset(.list([asset])).assetListValue == [asset])
+  @Suite("List Accessors", .disabled(if: Platform.isWindowsSwift62))
+  internal struct ListAccessors {
+    @Test("typed *ListValue accessors unwrap homogeneous lists")
+    internal func typedListValueAccessors() {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+        #expect(FieldValue.string(.list(["a"])).stringListValue == ["a"])
+        #expect(FieldValue.string(.value("a")).stringListValue == nil)
+        #expect(FieldValue.int64(.list([1, 2])).int64ListValue == [1, 2])
+        #expect(FieldValue.double(.list([1.5])).doubleListValue == [1.5])
+        let date = Date(timeIntervalSince1970: 0)
+        #expect(FieldValue.date(.list([date])).dateListValue == [date])
+        let data = Data([0x01])
+        #expect(FieldValue.bytes(.list([data])).bytesListValue == [data])
+        let location = Location(latitude: 1, longitude: 2, horizontalAccuracy: 3)
+        #expect(FieldValue.location(.list([location])).locationListValue == [location])
+        let reference = Reference(recordName: "r")
+        #expect(FieldValue.reference(.list([reference])).referenceListValue == [reference])
+        let asset = Asset(fileChecksum: "c", size: 1, downloadURL: "https://example.com")
+        #expect(FieldValue.asset(.list([asset])).assetListValue == [asset])
+        #expect(FieldValue.string(.value("x")).assetListValue == nil)
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
+    }
   }
 }
