@@ -364,7 +364,9 @@ The public database accepts two methods and they are **not interchangeable**: th
 
 ### OpenAPI middleware
 
-swift-openapi-generator does not know how to sign CloudKit requests, but it has middleware: `ServerMiddleware` runs before a request is received and `ClientMiddleware` runs before one is sent. Apple's own example shows a bearer-token middleware. MistKit's version is one small type whose only job is to ask a ``TokenManager`` for the current ``Authenticator`` and let it modify the request:
+swift-openapi-generator does not know how to sign CloudKit requests, but it has middleware: `ServerMiddleware` runs before a request is received and `ClientMiddleware` runs before one is sent. Apple's own example shows a bearer-token middleware, and the generator's [example projects](https://github.com/apple/swift-openapi-generator/tree/main/Examples) include authentication, logging, and retrying middlewares to copy from.
+
+This is the same slot the server-side Swift authentication libraries plug into, and a question at iOSDevUK asked how they fit. They sit on the *server* side of the picture: [Imperial](https://github.com/vapor-community/Imperial) federates sign-in through Apple, Google, GitHub, and other OAuth providers for Vapor, [JWTKit](https://github.com/vapor/jwt-kit) verifies the identity tokens Sign in with Apple hands back, and [Hummingbird Auth](https://github.com/hummingbird-project/hummingbird-auth) covers sessions and bearer tokens for Hummingbird. Any of them can authenticate the *users* of your service. What none of them can do is mint a CloudKit web auth token — that only comes from an iCloud sign-in through CloudKit JS or `CKFetchWebAuthTokenOperation` — so a third-party identity sits alongside the CloudKit credential, the way Heartwitch's Postgres accounts do, rather than replacing it. MistKit's middleware is the client-side counterpart: it holds the CloudKit credential and signs the outgoing request. MistKit's version is one small type whose only job is to ask a ``TokenManager`` for the current ``Authenticator`` and let it modify the request:
 
 ```swift
 internal struct AuthenticationMiddleware: ClientMiddleware {
@@ -488,7 +490,7 @@ where the body hash is `SHA256.cloudKitBodyHash(of:)` — `base64(SHA256(body))`
 
 ## Field type polymorphism
 
-If you have handled JSON from a JavaScript-flavored API you know the problem: a field's value can be any of nine types, and the JSON does not always say which. MistKit models the domain side as one enum:
+If you have handled JSON from a JavaScript-flavored API you know the problem. On stage it took the audience a moment to supply the name of the best-known example — not REST, not gRPC, the one Facebook uses: GraphQL — where the shape of a response is decided by the query and the client has to decode values whose types it does not know in advance. Swift's `Codable` wants those types at compile time, so a Swift client needs an explicit way to model "one of several". CloudKit has the same need in miniature: a field's value can be any of nine types, and the JSON does not always say which. A number, for instance, could be an `INT64` or a `DOUBLE`, because JavaScript does not distinguish them. MistKit models the domain side as one enum:
 
 ```swift
 public enum FieldValue: Codable, Equatable, Sendable {
@@ -686,7 +688,7 @@ The payoff is visible in Bushel: each scheduled run checks whether Apple has pos
 
 Every endpoint in the CloudKit Web Services reference is implemented — records, zones, changes, subscriptions, users, sharing, assets, and APNs tokens — and exercised live by MistDemo. What the project needs now is people using it: try it against your own container and file what you find on the [issue tracker](https://github.com/brightdigit/MistKit/issues).
 
-And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers, on the Mac App Store with larger updates planned around macOS 27, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch, in TestFlight for watchOS 26. Leo runs [BrightDigit](https://brightdigit.com), hosts the [Empower Apps](https://www.empowerapps.show) podcast, and is available for Swift work of any kind.
+And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers, on the Mac App Store with larger updates planned around macOS 27, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch, in TestFlight for watchOS 26.
 
 ## Links
 
@@ -699,7 +701,6 @@ And one more thing: Leo's apps, both backed by patterns from this talk — [Bush
 - [AtLeast](https://atleast.app) — Passive Timer for Apple Watch
 - [Heartwitch](https://heartwitch.app) — Apple Watch heart-rate streaming; [App Store](https://apps.apple.com/us/app/heartwitch/id1480031203)
 - [BrightDigit](https://brightdigit.com)
-- [Empower Apps podcast](https://www.empowerapps.show)
 - [linktr.ee/leogdion](https://linktr.ee/leogdion)
 - [iOSDevUK](https://www.iosdevuk.com)
 
@@ -794,8 +795,6 @@ And one more thing: Leo's apps, both backed by patterns from this talk — [Bush
 ## Questions
 
 Questions asked during rehearsals and at the talks, with the answers as they stand today.
-
-**Can sign-in go through a third-party provider instead of iCloud?** (asked at iOSDevUK) For your own site's accounts, yes — Sign in with Apple, Google, and the rest all have libraries. But a CloudKit web auth token only ever comes from an iCloud sign-in, through CloudKit JS or `CKFetchWebAuthTokenOperation`. A third-party identity can sit alongside it, the way Heartwitch's Postgres accounts do; it cannot replace it.
 
 **How much does CloudKit cost?** There is no separate CloudKit fee beyond the Apple Developer Program. Quotas for storage, transfer, and requests scale with active users; exceeding them returns `QUOTA_EXCEEDED` or throttling. Apple does not publish a clear overage price list.
 

@@ -484,7 +484,6 @@ Links from the talk:
 - [AtLeast](https://atleast.app) — Passive Timer for Apple Watch
 - [Heartwitch](https://heartwitch.app) — Apple Watch heart-rate streaming; [App Store](https://apps.apple.com/us/app/heartwitch/id1480031203)
 - [BrightDigit](https://brightdigit.com)
-- [Empower Apps podcast](https://www.empowerapps.show)
 - [linktr.ee/leogdion](https://linktr.ee/leogdion)
 - [iOSDevUK](https://www.iosdevuk.com)
 
