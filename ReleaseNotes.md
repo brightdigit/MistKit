@@ -1,16 +1,19 @@
-## Unreleased
+## 1.0.0-beta.5
 
 * Represent `FieldValue.bytes` as `Data` instead of a base64 `String` (#467)
-* Verify downloaded asset bytes against `fileChecksum`, and add `Asset.download(using:)` that refuses unverified data (#466)
+* Add `Asset.download(using:)`, which fetches an asset's `downloadURL` from the CDN and returns the bytes, plus `CloudKitError.missingAssetDownloadURL`. `fileChecksum` turned out to be a server-minted identity token rather than a digest of the file, so no client-side checksum verification is offered — check `Asset.size` to guard against truncation (#466, #473)
 * Add `VALIDATE` to `Reference.Action` for CloudKit Web Services reference dictionaries (#464)
 * Consume rotated web auth tokens from the `X-Apple-CloudKit-Web-Auth-Token` response header via a new `TokenManager.didReceiveRotatedWebAuthToken(_:)` requirement, defaulted to a no-op so existing conformances keep compiling (#462, #463)
 * Model the zone payload fields confirmed live in #444: `ZoneInfo.zoneType` (a closed `ZoneType` enum that throws `ConversionError.unrecognizedZoneType` on unknown wire values) and `ZoneInfo.deleted`, so change feeds surface tombstones (#444)
 * Fix `ownerRecordName` never decoding on zone payloads — `ZoneID` read the wire key as `ownerName`, so shared-zone owners were always `nil` (#444)
 * Add an optional `zoneID:` parameter to `createRecord`, `updateRecord`, `deleteRecord`, and `uploadAssets`, so writes and asset uploads can target custom and shared zones (#454)
-* Add `CloudKitError.missingAssetDownloadURL`, `.missingAssetChecksum`, and `.assetChecksumMismatch` for the asset download path (#466)
-* Extract the shared CloudKit credential configuration glue into a separate `MistKitConfiguration` package and converge the examples on typed configuration keys (#455)
+* Round `[Date]` list elements and nested `Location.timestamp` values to whole milliseconds on the way out, matching the scalar path, and make the list conversion an exhaustive `default`-free switch so a new `FieldValue` case fails the build instead of writing an empty list
+* Extract the shared CloudKit credential configuration glue into a separate `MistKitConfiguration` package and converge the examples on typed configuration keys (#407, #455)
 * MistDemo: expose `zoneName`/`zoneOwner` on the web query panel and add zone-aware writes plus a live shared-zone round-trip phase (#438, #453, #454)
-* Add a repeatable release runbook, and address code review fixes, coverage, and lint tooling (#460, #461)
+* Documentation: add the "CloudKit as Your Backend" talk as a DocC article with its screenshots, plus new guides for request signing, field type polymorphism, deploying MistKit, and the two retrospectives (What CloudKit Got Wrong, What the AI Got Wrong); re-verify every existing catalog article against current source; link the guides and talk resources from the README; remove the top-level `docs/` directory (#447)
+* Add a repeatable release runbook, address code review fixes, coverage, and lint tooling, and fix the MistDemo Integration static build for Swift 6.4 (#460, #461, #475)
+
+**Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-beta.4...1.0.0-beta.5
 
 ## 1.0.0-beta.4
 

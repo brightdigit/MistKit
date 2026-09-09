@@ -44,7 +44,7 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 
 ## Key Features
 
-- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, and Linux
+- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, Linux, and Windows
 - **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
 - **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
 - **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
@@ -70,7 +70,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.2")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.4")
 ]
 ```
 
@@ -686,10 +686,12 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Zone payloads: `deleted`, `zoneType`, and `ownerRecordName` decoding](https://github.com/brightdigit/MistKit/issues/444) ✅
 - [x] [Zone-aware writes (CRUD + assets)](https://github.com/brightdigit/MistKit/issues/454) ✅
 - [x] [Consume web auth token rotation (`X-Apple-CloudKit-Web-Auth-Token`)](https://github.com/brightdigit/MistKit/issues/462) ✅
-- [x] [Verify downloaded asset bytes against `Asset.fileChecksum`](https://github.com/brightdigit/MistKit/issues/466) ✅
+- [x] [Add `Asset.download(using:)`](https://github.com/brightdigit/MistKit/issues/466) ✅ — checksum verification turned out to be impossible: `fileChecksum` is an opaque server-minted token ([#473](https://github.com/brightdigit/MistKit/pull/473))
 - [x] [Change `FieldValue.bytes` from `String` to `Data`](https://github.com/brightdigit/MistKit/issues/467) ✅
 - [x] [Add `VALIDATE` to `Reference.Action`](https://github.com/brightdigit/MistKit/issues/464) ✅
 - [x] [MistDemo web UI: `zoneName`/`zoneOwner` inputs on the query panel](https://github.com/brightdigit/MistKit/issues/438) ✅
+- [x] [Create `MistKitConfiguration` package for shared CloudKit config glue](https://github.com/brightdigit/MistKit/issues/407) ✅
+- [x] [Complete iOSDevUK talk material — talk article and guides in DocC, `docs/` removed](https://github.com/brightdigit/MistKit/issues/447) ✅
 
 ### Backlog / Post-beta
 
