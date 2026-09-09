@@ -219,7 +219,7 @@ A side effect worth pointing out: the spec is not Swift-specific. [`openapi.yaml
 
 ### Three layers
 
-The generated client was the next thing that needed work. As Honza Dvorsky, one of the generator's maintainers, will tell you, the generated code works — but it is not the API you would want to hand to the users of a Swift library. So MistKit is layered so callers never see the generated code:
+The generated client was the next thing that needed work. After talking it over with Honza Dvorsky, one of the generator's maintainers, the conclusion was the same one anyone who has read the generated code reaches: it works, but it is not the API you would want to hand to the users of a Swift library. So MistKit is layered so callers never see the generated code:
 
 ```
 Your code            service.queryRecords(recordType: "Note", database: .private)
@@ -342,7 +342,7 @@ openssl ec -in eckey.pem -pubout
 
 Paste the public key into step 3, save, and copy the **Key ID**. The private key never leaves your server.
 
-Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is everything between the host and the query string, for example `/database/1/iCloud.com.example.App/development/public/records/modify`:
+Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is the request URL with the scheme and host removed — everything from `/database/` onward, for example `/database/1/iCloud.com.example.App/development/public/records/modify` — which is exactly what MistKit signs as the request's path:
 
 | Header | Value |
 | --- | --- |
@@ -690,7 +690,7 @@ The payoff is visible in Bushel: each scheduled run checks whether Apple has pos
 
 Every endpoint in the CloudKit Web Services reference is implemented — records, zones, changes, subscriptions, users, sharing, assets, and APNs tokens — and exercised live by MistDemo. What the project needs now is people using it: try it against your own container and file what you find on the [issue tracker](https://github.com/brightdigit/MistKit/issues).
 
-And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers, on the Mac App Store with larger updates planned around macOS 27, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch, in TestFlight for watchOS 26.
+And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers on the Mac, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch.
 
 ## Links
 
