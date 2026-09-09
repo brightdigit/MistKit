@@ -6,7 +6,7 @@ From iOS to server-side Swift — the talk behind MistKit, consolidated into one
 
 CloudKit is great for iOS apps. How about backend services? This article is the written form of a conference talk by Leo Dion ([@leogdion@c.im](https://c.im/@leogdion)) that walks from "what is CloudKit" to a scheduled GitHub Actions job writing to a CloudKit public database from a stock Ubuntu runner, and explains the three problems that shaped MistKit along the way: authentication, field-type polymorphism, and error handling.
 
-The talk was given in 2026 at Swift Craft, Swift Rockies (Calgary), and iOSDevUK (Aberystwyth). The abstract:
+The talk was given in 2026 at Swift Craft and iOSDevUK (Aberystwyth). The abstract:
 
 > CloudKit has excellent documentation for iOS and macOS client development. But backend services — podcast aggregation, RSS readers, data processing — face APIs that Apple barely documents. I rebuilt a comprehensive CloudKit library using AI-generated OpenAPI specifications. The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling, and production deployments.
 

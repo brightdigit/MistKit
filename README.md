@@ -470,7 +470,7 @@ Articles on brightdigit.com: [Rebuilding MistKit with Claude Code, part 1](https
 
 ### CloudKit as Your Backend (talk)
 
-*From iOS to Server-Side Swift* — given in 2026 at Swift Craft, Swift Rockies, and iOSDevUK by Leo Dion ([@leogdion@c.im](https://c.im/@leogdion)). The full article, following the slide order with screenshots and code from this repository, is in the DocC catalog: **[CloudKit as Your Backend](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/cloudkitasyourbackend)** (source: [`CloudKitAsYourBackend.md`](Sources/MistKit/Documentation.docc/CloudKitAsYourBackend.md)).
+*From iOS to Server-Side Swift* — given in 2026 at Swift Craft and iOSDevUK by Leo Dion ([@leogdion@c.im](https://c.im/@leogdion)). The full article, following the slide order with screenshots and code from this repository, is in the DocC catalog: **[CloudKit as Your Backend](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/cloudkitasyourbackend)** (source: [`CloudKitAsYourBackend.md`](Sources/MistKit/Documentation.docc/CloudKitAsYourBackend.md)).
 
 > CloudKit has excellent documentation for iOS and macOS client development. But backend services — podcast aggregation, RSS readers, data processing — face APIs that Apple barely documents. I rebuilt a comprehensive CloudKit library using AI-generated OpenAPI specifications. The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling, and production deployments.
 
