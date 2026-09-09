@@ -4,7 +4,7 @@ Configure ``CloudKitService`` once with the credentials it needs, then pick a ``
 
 ## Overview
 
-CloudKit Web Services accepts three authentication schemes, and only some scheme/database combinations are legal:
+[CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html) accepts three authentication schemes, and only some scheme/database combinations are legal:
 
 | Database | API token | Web auth | Server-to-server |
 | --- | :-: | :-: | :-: |
@@ -12,7 +12,7 @@ CloudKit Web Services accepts three authentication schemes, and only some scheme
 | `.private` | — | ✓ | — |
 | `.shared` | — | ✓ | — |
 
-The same backend legitimately needs both attribution paths — server-attributed writes against the public database (catalog seeds, moderation actions) and user-attributed reads against `users/caller` (knowing which iCloud user a session belongs to). MistKit models this by:
+The same backend legitimately needs both attribution paths — server-attributed writes against the public database (catalog seeds, moderation actions) and user-attributed reads against [`users/caller`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/GetCurrentUser.html) (knowing which iCloud user a session belongs to). MistKit models this by:
 
 1. Letting ``CloudKitService`` hold a ``Credentials`` value that carries either or both credential sets.
 2. Making the target ``Database`` an argument on each operation, with `.public` carrying a ``PublicAuthPreference`` that picks the signing method *for that call*.
@@ -38,7 +38,7 @@ let credentials = try Credentials(
 
 ### Server-to-server (developer-attributed)
 
-Provide a CloudKit key ID and an ECDSA P-256 private key. ``PrivateKeyMaterial`` accepts either raw key bytes, PEM data, or a path to a PEM file.
+Provide a CloudKit key ID and an [ECDSA P-256 private key](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6). ``PrivateKeyMaterial`` accepts either raw key bytes, PEM data, or a path to a PEM file.
 
 ```swift
 let credentials = try Credentials(
@@ -136,7 +136,7 @@ There is no default on the `database:` parameter. Every call picks explicitly.
 
 ## User-identity routes
 
-A handful of routes (`/users/caller`, `/users/discover`, `/users/lookup/email`, `/users/lookup/id`) only work against the public database with web-auth credentials — CloudKit rejects server-to-server signing on these endpoints. MistKit's user-identity methods (``CloudKitService/fetchCaller()``, ``CloudKitService/lookupUsersByEmail(_:)``, ``CloudKitService/lookupUsersByRecordName(_:)``) pass `.public(.requires(.webAuth))` internally — they will throw ``CloudKitError/missingCredentials(database:availability:reason:)`` if your ``Credentials`` lack ``APICredentials/webAuthToken``.
+A handful of routes ([`/users/caller`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/GetCurrentUser.html), [`/users/discover`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/DiscoveringUserIdentities%28usersdiscover%29.html), `/users/lookup/email`, `/users/lookup/id`) only work against the public database with web-auth credentials — CloudKit rejects server-to-server signing on these endpoints. MistKit's user-identity methods (``CloudKitService/fetchCaller()``, ``CloudKitService/lookupUsersByEmail(_:)``, ``CloudKitService/lookupUsersByRecordName(_:)``) pass `.public(.requires(.webAuth))` internally — they will throw ``CloudKitError/missingCredentials(database:availability:reason:)`` if your ``Credentials`` lack ``APICredentials/webAuthToken``.
 
 ## Where the signing happens
 
@@ -180,14 +180,14 @@ Under **API Tokens**, press `+`, name the token, and pick a **Sign-in Callback**
 The sign-in callback decides how a web auth token comes back to you later:
 
 - **URL Redirect** — Apple's sign-in page redirects the browser to a URL you supply with the token appended as the `ckSession` query parameter. Pick this when your backend handles the callback directly.
-- **Post Message** — Apple's sign-in window posts a JavaScript `message` event to your page with the token in `e.data.ckWebAuthToken`. This is what CloudKit JS uses by default.
+- **Post Message** — Apple's sign-in window posts a JavaScript `message` event to your page with the token in `e.data.ckWebAuthToken`. This is what [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs) uses by default.
 
 An API token alone cannot reach the private or shared database. Its main job is to identify the container for the flows below.
 
 ### Web auth token via browser redirect
 
 1. Your service makes a request with only `ckAPIToken` set.
-2. CloudKit replies `401` with `serverErrorCode` `AUTHENTICATION_REQUIRED` and a `redirectURL` pointing at Apple's sign-in page.
+2. CloudKit replies `401` with `serverErrorCode` [`AUTHENTICATION_REQUIRED`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html) and a `redirectURL` pointing at Apple's sign-in page.
 3. Your service redirects the browser there; the user signs in with their Apple ID.
 4. Apple redirects back to your registered callback with `ckSession=…` (the web auth token).
 5. Your service stores that token next to the API token and uses both for every subsequent request — MistKit sends it as the `ckWebAuthToken` query item.
@@ -207,7 +207,7 @@ The token is valid for 30 minutes by default, or two weeks if the user ticks *Ke
 
 ### Web auth token from an iOS app
 
-If your backend acts on behalf of a user who is already signed in to your iOS app, skip the browser. `CKFetchWebAuthTokenOperation` exchanges the device's iCloud session for a web auth token your server can use:
+If your backend acts on behalf of a user who is already signed in to your iOS app, skip the browser. [`CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation) exchanges the device's iCloud session for a web auth token your server can use:
 
 ```swift
 extension CKDatabase {
@@ -228,7 +228,7 @@ Run it against the **private** database — on the public database it fails or r
 
 ### Server-to-server key
 
-Under **Server-to-Server Keys**, press `+`. The console shows the exact commands; the key pair is yours, and only the public half is uploaded:
+Under **[Server-to-Server Keys](https://icloud.developer.apple.com/dashboard/)**, press `+`. The console shows the exact commands; the key pair is yours, and only the public half is uploaded:
 
 ```bash
 # Step 1: generate a P-256 private key
@@ -240,7 +240,7 @@ openssl ec -in eckey.pem -pubout
 
 Name the key, paste the public key, save, and copy the **Key ID** into `CLOUDKIT_KEY_ID`. Keep `eckey.pem` on the server — never commit it — and hand it to MistKit as ``PrivateKeyMaterial/file(path:)`` or, when a secret store injects the PEM contents, ``PrivateKeyMaterial/raw(_:)``.
 
-Every request is then signed with the key: MistKit builds the payload `<iso8601Date>:<base64 SHA-256 of body>:<subpath>`, signs it with ECDSA P-256, and sends the `X-Apple-CloudKit-Request-KeyID`, `X-Apple-CloudKit-Request-ISO8601Date`, and `X-Apple-CloudKit-Request-SignatureV1` headers. There is no `Authorization` header. <doc:RequestSigning> walks through the implementation.
+Every request is then signed with the key: MistKit builds the payload `<iso8601Date>:<base64 SHA-256 of body>:<subpath>`, signs it with [ECDSA P-256](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6), and sends the `X-Apple-CloudKit-Request-KeyID`, `X-Apple-CloudKit-Request-ISO8601Date`, and `X-Apple-CloudKit-Request-SignatureV1` headers. There is no `Authorization` header. <doc:RequestSigning> walks through the implementation.
 
 ### Rotating a server-to-server key
 
@@ -253,7 +253,7 @@ Keys do not expire on their own, but the console allows several active keys per 
 
 ### Environment variables
 
-The conventional variable names used by MistDemo, BushelCloud, and CelestraCloud:
+The conventional variable names used by MistDemo, [BushelCloud](https://github.com/brightdigit/BushelCloud), and [CelestraCloud](https://github.com/brightdigit/CelestraCloud):
 
 | Variable | Method |
 | --- | --- |

@@ -8,7 +8,7 @@ CRUD, batch, and lookup against CloudKit records — the operations you'll reach
 
 ## Querying
 
-Use ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)`` for a single page of results. Filters are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
+Use ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)`` for a single page of results. [Filters](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/QueryingRecords.html) are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
 
 ```swift
 let result = try await service.queryRecords(
@@ -162,7 +162,7 @@ for result in results {
 
 Choose `atomic: true` when the operations are semantically linked (paired updates, a transactional rename) and `false` when independent operations are batched purely for throughput.
 
-> Note: CloudKit caps batch size around 200 operations per request. See <doc:CloudKitLimitsAndPerformance> for batching guidance.
+> Note: CloudKit caps batch size [around 200 operations per request](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html). See <doc:CloudKitLimitsAndPerformance> for batching guidance.
 
 ## Looking up
 

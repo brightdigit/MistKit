@@ -95,7 +95,7 @@ git commit -m "feat(records): add /records/lookupChanges endpoint"
 
 ## Commit message style
 
-MistKit follows the conventional-commits flavour visible in `git log`:
+MistKit follows the [conventional-commits](https://www.conventionalcommits.org/) flavour visible in `git log`:
 
 ```
 <type>(<scope>): <subject>
@@ -129,7 +129,7 @@ When reviewing a PR that touches `openapi.yaml`:
 2. **Check that generated code matches the spec.** A regenerated `Client.swift` / `Types.swift` should follow mechanically from the spec change. If the diff looks larger than the spec change explains, suspect either an unintended spec edit or a stale generator version.
 3. **Review the wrapper.** This is where reviewer effort pays off: ergonomic API shape, error mapping, conversion correctness, test coverage.
 
-Avoid review comments that target generated code style — that's the generator's output, not the author's choice. If the generated shape is genuinely problematic, file an issue against `swift-openapi-generator` or change the spec.
+Avoid review comments that target generated code style — that's the generator's output, not the author's choice. If the generated shape is genuinely problematic, file an issue against [`swift-openapi-generator`](https://github.com/apple/swift-openapi-generator/issues) or change the spec.
 
 ## Breaking changes
 
@@ -142,7 +142,7 @@ A change is "breaking" when it requires consumers of MistKit to update their cod
 | Enum case removed or renamed | Switches in consumer code stop compiling |
 | Parameter type changed | Existing call sites break |
 
-For MistKit-API breaking changes, prefer the `feat!` / `BREAKING CHANGE:` convention in the commit body, and document the migration in `CHANGELOG.md`. While the package is pre-1.0 (currently 1.0.0-alpha/beta), some flexibility is acceptable — but the wrapper team has been careful to flag user-visible breakage explicitly.
+For MistKit-API breaking changes, prefer the `feat!` / `BREAKING CHANGE:` convention in the commit body, and note the migration in `ReleaseNotes.md`. While the package is pre-1.0 (currently 1.0.0-alpha/beta), some flexibility is acceptable — but the wrapper team has been careful to flag user-visible breakage explicitly.
 
 If only the generated layer changes and the wrapper preserves its public shape, the change is *not* breaking for consumers — they never see the generated types.
 
@@ -183,7 +183,7 @@ unaffected.
 
 ## CI verification
 
-`.github/workflows/check-generated-openapi.yml` runs on every push to `main` and every pull request. It regenerates inside a `swift:latest` container — using the generator fallback built from `Scripts/OpenAPITools`, so no mise is needed on the runner — and fails if the committed output differs:
+[`.github/workflows/check-generated-openapi.yml`](https://github.com/brightdigit/MistKit/blob/main/.github/workflows/check-generated-openapi.yml) runs on every push to `main` and every pull request. It regenerates inside a `swift:latest` container — using the generator fallback built from `Scripts/OpenAPITools`, so no mise is needed on the runner — and fails if the committed output differs:
 
 ```yaml
 jobs:

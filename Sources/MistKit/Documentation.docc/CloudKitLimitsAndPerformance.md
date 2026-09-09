@@ -8,7 +8,7 @@ CloudKit Web Services is a remote API with per-request size limits and per-accou
 
 | Concern | Enforced where | Notes |
 | --- | --- | --- |
-| Records per query response | CloudKit | Max 200; the `limit` parameter is validated 1–200. |
+| Records per query response | CloudKit | [Max 200](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/QueryingRecords.html); the `limit` parameter is validated 1–200. |
 | Pages per auto-paginated query | MistKit | `maxPages: 1_000` on ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``. |
 | Records per modify batch | CloudKit | Practical cap around 200; chunk larger batches client-side. |
 | Asset upload size / connection pool | MistKit (transport separation) | `URLSession.shared` used for CDN uploads to avoid HTTP/2 reuse with the API host. |
@@ -37,7 +37,7 @@ Raise `maxPages` when you know the result set is genuinely large. Narrow filters
 
 ## Batching writes
 
-CloudKit's `/records/modify` endpoint accepts a batch of operations in a single round-trip. The practical server-side cap is around 200 operations per request. ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` does not chunk for you — split larger batches yourself:
+CloudKit's [`/records/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html) endpoint accepts a batch of operations in a single round-trip. The practical server-side cap is around 200 operations per request. ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` does not chunk for you — split larger batches yourself:
 
 ```swift
 let chunked = stride(from: 0, to: operations.count, by: 200).map {
@@ -58,7 +58,7 @@ for chunk in chunked {
 
 ## Asset upload transport
 
-Asset uploads are a two-step workflow: ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` PUTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` chains both steps.
+Asset uploads are a [two-step workflow](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html): ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` PUTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` chains both steps.
 
 The CDN upload deliberately does **not** flow through the service's `ClientTransport`. It uses `URLSession.shared` directly:
 
@@ -88,7 +88,7 @@ let receipt = try await service.uploadAssets(
 )
 ```
 
-CloudKit imposes a per-asset size cap (in the tens of megabytes, exact figure documented in [CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)). Oversized uploads surface as a bare ``CloudKitError/httpError(statusCode:)`` from the CDN, which returns raw HTTP errors rather than CloudKit's JSON failure body; the upload path upgrades a 413 to ``CloudKitError/quotaExceeded(reason:hint:)`` with the byte count attached.
+CloudKit imposes a per-asset size cap (in the tens of megabytes, exact figure documented in [CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html)). Oversized uploads surface as a bare ``CloudKitError/httpError(statusCode:)`` from the CDN, which returns raw HTTP errors rather than CloudKit's JSON failure body; the upload path upgrades a 413 to ``CloudKitError/quotaExceeded(reason:hint:)`` with the byte count attached.
 
 ## Rate limiting
 
@@ -104,7 +104,7 @@ See <doc:HandlingErrors> for the retry helper pattern. Read ``CloudKitError/http
 
 ## Connection reuse for the API host
 
-By default ``CloudKitService`` uses `URLSessionTransport` from `swift-openapi-urlsession`, which gives you HTTP/2 multiplexing against `api.apple-cloudkit.com` automatically. There is no per-call session — every operation through one ``CloudKitService`` shares the underlying URLSession's connection pool, so a burst of operations does not pay TCP/TLS setup per call.
+By default ``CloudKitService`` uses `URLSessionTransport` from [`swift-openapi-urlsession`](https://github.com/apple/swift-openapi-urlsession), which gives you HTTP/2 multiplexing against `api.apple-cloudkit.com` automatically. There is no per-call session — every operation through one ``CloudKitService`` shares the underlying URLSession's connection pool, so a burst of operations does not pay TCP/TLS setup per call.
 
 For custom transports, prefer one transport per `CloudKitService` and reuse the same `CloudKitService` across calls. Creating a fresh service per request defeats connection reuse.
 

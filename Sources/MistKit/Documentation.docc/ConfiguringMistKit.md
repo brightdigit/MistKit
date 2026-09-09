@@ -30,7 +30,7 @@ Everything else — which ``Database`` to use, which signing method on the publi
 
 ## Container identifier
 
-The container identifier is the iCloud container your records live in. It is the same string you see in the CloudKit Dashboard under **Container ID**, prefixed with `iCloud.`:
+The container identifier is the iCloud container your records live in. It is the same string you see in the [CloudKit Console](https://icloud.developer.apple.com/dashboard/) under **Container ID**, prefixed with `iCloud.`:
 
 ```swift
 "iCloud.com.example.MyApp"
@@ -38,7 +38,7 @@ The container identifier is the iCloud container your records live in. It is the
 
 A single container has separate `development` and `production` schemas, separate record stores, and separate user data. You do not switch containers between environments — you switch ``Environment``.
 
-> Tip: Containers are configured in the [CloudKit Dashboard](https://icloud.developer.apple.com). The container identifier is also visible in your Xcode app target's CloudKit capability.
+> Tip: Containers are configured in the [CloudKit Console](https://icloud.developer.apple.com/dashboard/). The container identifier is also visible in your Xcode app target's CloudKit capability.
 
 ## Environment selection
 
@@ -60,7 +60,7 @@ let environment: Environment = ProcessInfo.processInfo
 
 ``Environment/init(caseInsensitive:)`` accepts `"development"` / `"production"` regardless of letter case and returns `nil` on anything else, so a misspelled env var fails closed at startup rather than silently shipping a dev build to prod.
 
-> Warning: CloudKit promotes schema from `development` to `production` explicitly via the Dashboard. Code referencing fields that exist only in dev will succeed against `.development` and fail against `.production` with ``CloudKitError/badRequest(reason:)`` or ``CloudKitError/notFound(reason:)``, depending on which lookup misses.
+> Warning: CloudKit promotes schema from `development` to `production` explicitly via the [CloudKit Console](https://icloud.developer.apple.com/dashboard/). Code referencing fields that exist only in dev will succeed against `.development` and fail against `.production` with ``CloudKitError/badRequest(reason:)`` or ``CloudKitError/notFound(reason:)``, depending on which lookup misses.
 
 ## Database scope at configuration time
 
@@ -79,7 +79,7 @@ The configuration question for your app is: which credentials does the deploymen
 
 ## Custom transport
 
-The public initializers use `URLSessionTransport` from `swift-openapi-urlsession` and are available on every platform except WASI (`#if !os(WASI)`). ``CloudKitService`` stores its `ClientTransport` internally, but the initializers that accept a transport are not part of the public surface today — MistKit's own tests use them to substitute a mock transport that asserts on outgoing requests and returns canned responses.
+The public initializers use `URLSessionTransport` from [`swift-openapi-urlsession`](https://github.com/apple/swift-openapi-urlsession) and are available on every platform except WASI (`#if !os(WASI)`). ``CloudKitService`` stores its `ClientTransport` internally, but the initializers that accept a transport are not part of the public surface today — MistKit's own tests use them to substitute a mock transport that asserts on outgoing requests and returns canned responses.
 
 Consequences for consumers:
 
@@ -87,7 +87,7 @@ Consequences for consumers:
 - **Instrumentation** — configure the `middleware` logging subsystem (below) rather than wrapping the transport.
 - **WASI** — has no public ``CloudKitService`` initializer yet, and the web-services API needs ECDSA signing and an HTTP transport that WASI lacks. For CloudKit access from a browser, use [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs).
 
-A public transport-accepting initializer (for AsyncHTTPClient on the server, for example) is tracked on the project roadmap in the README.
+A public transport-accepting initializer (for AsyncHTTPClient on the server, for example) is tracked on the [project roadmap in the README](https://github.com/brightdigit/MistKit#roadmap).
 
 > Warning: Asset uploads do **not** flow through the configured `transport`. They use `URLSession.shared` directly to avoid HTTP/2 connection reuse between CloudKit's API host and the CDN, which surfaces as 421 Misdirected Request errors. See <doc:CloudKitLimitsAndPerformance> for the full rationale.
 

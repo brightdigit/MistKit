@@ -4,7 +4,7 @@ From a local CLI to a scheduled CloudKit job in CI — building a static Linux b
 
 ## Overview
 
-The hard part of using MistKit on a backend is not writing the code. It is deciding where the code runs, how the credentials get there, and what happens when nobody is watching. This article picks up where <doc:AuthenticationAndDatabases> leaves off and covers the operational side, using two production deployments as worked examples: [BushelCloud](https://github.com/brightdigit/BushelCloud) and [CelestraCloud](https://github.com/brightdigit/CelestraCloud). Both live in this repository under `Examples/`, and both ship today as scheduled GitHub Actions jobs writing to a CloudKit public database from stock Ubuntu runners.
+The hard part of using MistKit on a backend is not writing the code. It is deciding where the code runs, how the credentials get there, and what happens when nobody is watching. This article picks up where <doc:AuthenticationAndDatabases> leaves off and covers the operational side, using two production deployments as worked examples: [BushelCloud](https://github.com/brightdigit/BushelCloud) and [CelestraCloud](https://github.com/brightdigit/CelestraCloud). Both live in this repository under `Examples/`, and both ship today as scheduled [GitHub Actions](https://docs.github.com/en/actions) jobs writing to a CloudKit public database from stock Ubuntu runners.
 
 "Deploying" a MistKit-based service means one of three things:
 
@@ -17,7 +17,7 @@ The first is a normal web-app deployment where MistKit is just another HTTP clie
 | Concern | Long-running service | Scheduled job |
 | --- | --- | --- |
 | **Auth** | Web auth token (per user), API token (public reads), or server-to-server | Server-to-server (or API token for read-only public sync) |
-| **Runtime** | Vapor/Hummingbird host, kept warm | Container or `runs-on:` runner, exits on completion |
+| **Runtime** | [Vapor](https://vapor.codes)/[Hummingbird](https://hummingbird.codes) host, kept warm | Container or `runs-on:` runner, exits on completion |
 | **Credentials** | Long-lived secrets in the process environment | Injected per run from CI secrets |
 | **Idempotency** | Per request | Per run — "what if this fires twice?" |
 | **Observability** | Existing APM / logs | Job summary, artifacts, optional notification |
@@ -49,15 +49,15 @@ MistKit targets cross-platform Swift, so the deployment artifact for Linux is a 
 swift build -c release --static-swift-stdlib
 ```
 
-Both examples build inside the official Swift container image so the binary is portable across any modern Ubuntu runner. BushelCloud's build workflow runs the job in `container: swiftlang/swift:nightly-6.4.x-noble`; its sync action's fallback path does the same with `docker run` inside a `runs-on: ubuntu-latest` step. CelestraCloud sets the container at the job level. Either works; the job-level form is slightly cleaner when every step needs the toolchain. (Both currently pin a Swift 6.4 nightly because their manifests declare `swift-tools-version: 6.4`; move to a release image when one ships.)
+Both examples build inside the [official Swift container image](https://hub.docker.com/_/swift) so the binary is portable across any modern Ubuntu runner. BushelCloud's build workflow runs the job in `container: swiftlang/swift:nightly-6.4.x-noble`; its sync action's fallback path does the same with `docker run` inside a `runs-on: ubuntu-latest` step. CelestraCloud sets the container at the job level. Either works; the job-level form is slightly cleaner when every step needs the toolchain. (Both currently pin a Swift 6.4 nightly because their manifests declare `swift-tools-version: 6.4`; move to a release image when one ships.)
 
-The same binary drops into a distroless or `ubuntu:noble` image for Kubernetes, Fly.io, or a plain `systemd` unit on a VPS.
+The same binary drops into a distroless or `ubuntu:noble` image for [Kubernetes](https://kubernetes.io), [Fly.io](https://fly.io), or a plain `systemd` unit on a VPS.
 
 ### Binary caching in CI
 
 A release build from scratch takes a couple of minutes on a stock runner. For a job that fires three times a day that is wasted time — and time during which a transient toolchain or network hiccup can fail a scheduled production run. Both repos build once and reuse:
 
-- **CelestraCloud** caches the binary with `actions/cache@v4`, keyed on the hash of `Sources/**/*.swift` and `Package.swift`, and passes it to each downstream tier job through `actions/upload-artifact@v4` / `download-artifact@v4`.
+- **CelestraCloud** caches the binary with [`actions/cache@v4`](https://github.com/actions/cache), keyed on the hash of `Sources/**/*.swift` and `Package.swift`, and passes it to each downstream tier job through [`actions/upload-artifact@v4`](https://github.com/actions/upload-artifact) / `download-artifact@v4`.
 - **BushelCloud** publishes the binary from a separate `bushel-cloud-build.yml` workflow and has the sync action download that artifact, falling back to an inline build when the artifact has expired:
 
 ```yaml
@@ -150,7 +150,7 @@ let service = CloudKitService(
     CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
   ```
 
-- **File path** (`CLOUDKIT_PRIVATE_KEY_PATH`) is what you want when the platform mounts the credential as a file — Kubernetes secrets, `systemd`'s `LoadCredential=`, Docker secrets, a secrets-manager CSI driver — because you inherit its encryption-at-rest and rotation. CelestraCloud writes the PEM to a temp file first:
+- **File path** (`CLOUDKIT_PRIVATE_KEY_PATH`) is what you want when the platform mounts the credential as a file — [Kubernetes secrets](https://kubernetes.io/docs/concepts/configuration/secret/), `systemd`'s [`LoadCredential=`](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#LoadCredential=), [Docker secrets](https://docs.docker.com/engine/swarm/secrets/), a secrets-manager CSI driver — because you inherit its encryption-at-rest and rotation. CelestraCloud writes the PEM to a temp file first:
 
   ```yaml
   env:
@@ -203,15 +203,15 @@ For a long-running service the same check belongs in the startup health check �
 ### Wiring it up in different runtimes
 
 - **Local development** — a `.env` file in the project root (add it to `.gitignore`), loaded by MistKitConfiguration or `source`d into the shell.
-- **GitHub Actions / GitLab CI** — the project's secret store, exposed through `env:` blocks or `${{ secrets.NAME }}`.
+- **[GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) / [GitLab CI](https://docs.gitlab.com/ci/variables/)** — the project's secret store, exposed through `env:` blocks or `${{ secrets.NAME }}`.
 - **Docker / Compose** — `environment:`, `env_file:`, or `--env-file`.
 - **Kubernetes** — `Secret` resources projected as env vars (`envFrom: secretRef:`) or files (`volumeMounts` + `secret:`); the file form pairs with `CLOUDKIT_PRIVATE_KEY_PATH`.
 - **systemd on a VPS** — `EnvironmentFile=` for plain variables; `LoadCredential=` for keys that should stay encrypted at rest.
-- **Managed platforms** (Fly.io, Railway, Render, Lambda) — each has a secrets tab; the values land in `ProcessInfo.processInfo.environment` the same way.
+- **Managed platforms** ([Fly.io](https://fly.io), Railway, [Render](https://render.com), [Lambda](https://aws.amazon.com/lambda/)) — each has a secrets tab; the values land in `ProcessInfo.processInfo.environment` the same way.
 
 ## Scheduling strategies
 
-`on: schedule:` is the easy part. The design decisions are *what* to schedule and *how often*.
+[`on: schedule:`](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule) is the easy part. The design decisions are *what* to schedule and *how often*.
 
 ### Single cron: BushelCloud
 
@@ -227,7 +227,7 @@ on:
   workflow_dispatch:  # Manual trigger for testing
 ```
 
-The offsets give roughly eight-hour spacing, aligned with the twelve-hour cache of one upstream source (the VirtualBuddy TSS API). `workflow_dispatch` stays on for ad-hoc reruns.
+The offsets give roughly eight-hour spacing, aligned with the twelve-hour cache of one upstream source (the [VirtualBuddy](https://github.com/insidegui/VirtualBuddy) TSS API). `workflow_dispatch` stays on for ad-hoc reruns.
 
 The **production** sync (`cloudkit-sync-prod.yml`) is `workflow_dispatch` only: the live production container is updated when a human clicks the button, after the development environment has had a clean run. Commit to that policy early.
 
@@ -260,7 +260,7 @@ Those `--update-*` flags map straight onto ``QueryFilter`` values in the CLI. Th
 
 ### Avoiding the thundering herd
 
-BushelCloud schedules at `:17`, `:43`, and `:29`. GitHub documents that scheduled workflows can be delayed during periods of high load, particularly at the top of the hour when half the world's crons fire. A non-zero minute typically lands closer to the intended time.
+BushelCloud schedules at `:17`, `:43`, and `:29`. [GitHub documents that scheduled workflows can be delayed](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule) during periods of high load, particularly at the top of the hour when half the world's crons fire. A non-zero minute typically lands closer to the intended time.
 
 ## Concurrency, idempotency, and retries
 
@@ -276,7 +276,7 @@ This is safe **only because the job is idempotent**. BushelCloud uses determinis
 
 If your job is not idempotent — it appends to a log, or increments a counter — keep the default `cancel-in-progress: false` and add an application-level lock (a CloudKit record acting as a leader-election token, for instance).
 
-MistKit deliberately does **not** retry transient errors for you. For `THROTTLED` (429) and `TRY_AGAIN_LATER` (503) the pattern is a small wrapper at the operation site with exponential backoff:
+MistKit deliberately does **not** retry transient errors for you. For [`THROTTLED`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html) (429) and `TRY_AGAIN_LATER` (503) the pattern is a small wrapper at the operation site with exponential backoff:
 
 ```swift
 func withBackoff<T>(_ operation: () async throws -> T) async throws -> T {
@@ -300,7 +300,7 @@ func withBackoff<T>(_ operation: () async throws -> T) async throws -> T {
 
 The hardest part of a quiet scheduled job is knowing whether it ran and what it did. Both repos use two-step reporting: the CLI writes a structured JSON report, and a CI step turns it into the workflow's summary page via `$GITHUB_STEP_SUMMARY`.
 
-CelestraCloud passes `--update-json-output-path ./feed-update-standard.json` to the CLI and a `summary` job `jq`s the results into Markdown:
+CelestraCloud passes `--update-json-output-path ./feed-update-standard.json` to the CLI and a `summary` job [`jq`](https://jqlang.github.io/jq/)s the results into Markdown:
 
 ```bash
 total_feeds=$(jq -r '.summary.totalFeeds // 0' "$json_file")
@@ -311,17 +311,17 @@ echo "- **Successful:** $success_count" >> $GITHUB_STEP_SUMMARY
 
 BushelCloud does the same through the `BUSHEL_SYNC_JSON_OUTPUT_FILE` environment variable, with a per-record-type table of created / updated / failed counts. Both retain the JSON as a workflow artifact (`actions/upload-artifact@v4`, 7–30 days) so a separate process — a daily digest, a dashboard scrape, a manual audit — can read historical results without re-running the job.
 
-For a long-running service the equivalent is the request logging you already have (MistKit emits through swift-log — see <doc:ConfiguringMistKit>) plus a health-check endpoint that exercises a representative MistKit call so auth or schema drift shows up before users notice.
+For a long-running service the equivalent is the request logging you already have (MistKit emits through [swift-log](https://github.com/apple/swift-log) — see <doc:ConfiguringMistKit>) plus a health-check endpoint that exercises a representative MistKit call so auth or schema drift shows up before users notice.
 
 ## Development vs. production environments
 
 CloudKit containers expose two parallel environments, and ``Environment`` on ``CloudKitService`` (or `CLOUDKIT_ENVIRONMENT` in the example CLIs) selects one. The pattern that works:
 
 1. **Two workflows or deployments**, one per environment. BushelCloud has `cloudkit-sync-dev.yml` (scheduled) and `cloudkit-sync-prod.yml` (`workflow_dispatch` only).
-2. **Two sets of secrets**, suffixed `_DEV` and `_PROD`, referenced explicitly. No shared default that one environment can accidentally cross-contaminate. Server-to-server keys are created per environment in the CloudKit Console, so the production key is a different key.
-3. **Schema changes go through development first**, deployed with `cktool` and verified by the next scheduled dev sync. Once dev has been clean for a day, promote the schema to production and trigger the prod deployment.
+2. **Two sets of secrets**, suffixed `_DEV` and `_PROD`, referenced explicitly. No shared default that one environment can accidentally cross-contaminate. Server-to-server keys are created per environment in the [CloudKit Console](https://icloud.developer.apple.com/dashboard/), so the production key is a different key.
+3. **Schema changes go through development first**, deployed with [`cktool`](https://developer.apple.com/documentation/cloudkit/integrating-a-text-based-schema-into-your-workflow) and verified by the next scheduled dev sync. Once dev has been clean for a day, promote the schema to production and trigger the prod deployment.
 
-This is ordinary dev/prod hygiene with one CloudKit-specific quirk: the schema lives on Apple's infrastructure and must be promoted explicitly, from the console or with `xcrun cktool`.
+This is ordinary dev/prod hygiene with one CloudKit-specific quirk: the schema lives on Apple's infrastructure and must be promoted explicitly, from the console or with [`xcrun cktool`](https://developer.apple.com/icloud/ck-tool/).
 
 ## Topics
 

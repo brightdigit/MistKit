@@ -4,7 +4,7 @@ How MistKit maps CloudKit's nine dynamically-typed field values onto one Swift e
 
 ## Overview
 
-A CloudKit field value is a JSON object with a `value` and an optional `type`:
+A CloudKit [field value](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/Types.html) is a JSON object with a `value` and an optional `type`:
 
 ```json
 { "value": 1747999812347, "type": "TIMESTAMP" }
@@ -36,7 +36,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
 }
 ```
 
-``Location``, ``Reference``, and ``Asset`` are MistKit's own value types, so the package has no dependency on Core Location or the CloudKit framework. There is no boolean case: CloudKit stores booleans as `INT64` `0`/`1`, and ``FieldValue/init(booleanValue:)`` / ``FieldValue/boolValue`` bridge that convention.
+``Location``, ``Reference``, and ``Asset`` are MistKit's own value types, so the package has no dependency on [Core Location](https://developer.apple.com/documentation/corelocation) or the [CloudKit framework](https://developer.apple.com/documentation/cloudkit). There is no boolean case: CloudKit stores booleans as `INT64` `0`/`1`, and ``FieldValue/init(booleanValue:)`` / ``FieldValue/boolValue`` bridge that convention.
 
 ## Request and response are different schemas
 
@@ -80,7 +80,7 @@ CloudKit infers a field's type from the JSON shape of `value`, so most values ar
 | `.bytes` (`BYTES`) | base64 string | `STRING` |
 | `.double` (`DOUBLE`) | whole-valued number (`3.0` serializes as `3`) | `INT64` |
 
-Untagged, CloudKit infers the wrong type and rejects the write with `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`. The request conversion is a single `default`-free switch that tags exactly these three:
+Untagged, CloudKit infers the wrong type and rejects the write with [`BAD_REQUEST "Invalid value, expected type TIMESTAMP"`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html). The request conversion is a single `default`-free switch that tags exactly these three:
 
 ```swift
 internal init(from fieldValue: FieldValue) {
@@ -127,7 +127,7 @@ The eight `*_LIST` request tags exist for one caller: ``QueryFilter`` `IN`/`NOT_
 
 ## Reads: recovering the type from an undiscriminated oneOf
 
-The response `value` is an undiscriminated `oneOf`. swift-openapi-generator decodes such a union by trying each case in declaration order and keeping the first that succeeds:
+The response `value` is an undiscriminated `oneOf`. [swift-openapi-generator](https://github.com/apple/swift-openapi-generator) decodes such a union by trying each case in declaration order and keeping the first that succeeds:
 
 ```
 String → Int64 → Double → Bytes → Date → Location → Reference → Asset → List
@@ -200,7 +200,7 @@ The payload is semantically asymmetric even though the type is not:
 | `downloadURL` | Ignored if sent | Where to fetch the bytes |
 | `fileChecksum`, `size` | Optional metadata | Returned by CloudKit |
 
-The service layer contains the asymmetry instead of the type system: ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` returns an ``AssetUploadReceipt`` after the two-step upload, from which the write-side `Asset` is built, and reads construct an `Asset` from only what CloudKit returned. Splitting the schema would either break the nine-case symmetry of ``FieldValue`` or force a read/write distinction into the public API that nothing else needs.
+The service layer contains the asymmetry instead of the type system: ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` returns an ``AssetUploadReceipt`` after the [two-step upload](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html), from which the write-side `Asset` is built, and reads construct an `Asset` from only what CloudKit returned. Splitting the schema would either break the nine-case symmetry of ``FieldValue`` or force a read/write distinction into the public API that nothing else needs.
 
 `fileChecksum` is an opaque, server-minted identity token — a version byte plus a 20-byte digest — not a SHA-256 of the plaintext. It cannot be recomputed client-side to verify a download; use ``Asset/size`` as a guard against truncation.
 
