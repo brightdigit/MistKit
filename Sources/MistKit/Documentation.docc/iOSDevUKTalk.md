@@ -2,6 +2,6 @@
 
 Slides from **CloudKit as Your Backend: From iOS to Server-Side Swift** (iOSDevUK 2026).
 
-**[Download PDF](CloudKit-Backend-iOSDevUK.pdf)** (~12 MB)
+The written form of this talk is <doc:CloudKitAsYourBackend>.
 
-Also available in the repository at `Sources/MistKit/Documentation.docc/Resources/slides/CloudKit-Backend-iOSDevUK.pdf`.
+**[Download PDF](https://github.com/brightdigit/MistKit/releases/download/1.0.0-beta.5/CloudKit-Backend-iOSDevUK.pdf)** (~12 MB)
