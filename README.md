@@ -484,6 +484,7 @@ Links from the talk:
 - [AtLeast](https://atleast.app) — Passive Timer for Apple Watch
 - [Heartwitch](https://heartwitch.app) — Apple Watch heart-rate streaming; [App Store](https://apps.apple.com/us/app/heartwitch/id1480031203)
 - [BrightDigit](https://brightdigit.com)
+- [Empower Apps podcast](https://www.empowerapps.show)
 - [linktr.ee/leogdion](https://linktr.ee/leogdion)
 - [iOSDevUK](https://www.iosdevuk.com)
 
@@ -555,6 +556,7 @@ Links from the talk:
 - [actions/checkout](https://github.com/actions/checkout)
 - [dawidd6/action-download-artifact](https://github.com/dawidd6/action-download-artifact)
 - [Swift Docker images](https://hub.docker.com/_/swift) — the sync action builds with `swiftlang/swift:nightly-6.4.x-noble`
+- [swift-configuration](https://github.com/apple/swift-configuration) — how the BushelCloud CLI reads credentials from environment variables or arguments
 
 #### Other tools mentioned
 

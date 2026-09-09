@@ -10,7 +10,7 @@ The talk was given in 2026 at Swift Craft and iOSDevUK (Aberystwyth). The abstra
 
 > CloudKit has excellent documentation for iOS and macOS client development. But backend services — podcast aggregation, RSS readers, data processing — face APIs that Apple barely documents. I rebuilt a comprehensive CloudKit library using AI-generated OpenAPI specifications. The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling, and production deployments.
 
-The sections below follow the slide order. Every code sample is taken from the current MistKit source or its example projects, so the article stays accurate as the library evolves. A complete list of the links shown during the talk is at the end, in <doc:CloudKitAsYourBackend#Links>.
+The sections below follow the slide order and were revised against the recording of the iOSDevUK session, so the emphasis matches what was said on stage. Every code sample is taken from the current MistKit source or its example projects, so the article stays accurate as the library evolves. A complete list of the links shown during the talk is at the end, in <doc:CloudKitAsYourBackend#Links>.
 
 ## Table of Contents
 
@@ -56,7 +56,9 @@ Records are the main way data is stored. Think of a record as a table row with t
 
 There is no boolean type — CloudKit stores booleans as `INT64` `0`/`1`, which is why MistKit offers ``FieldValue/init(booleanValue:)`` and ``FieldValue/boolValue``.
 
-If you would rather script the schema than click through the console, CloudKit has a text-based schema language and the `cktool` command-line tool ([Integrating a text-based schema into your workflow](https://developer.apple.com/documentation/cloudkit/integrating-a-text-based-schema-into-your-workflow)):
+`BYTES` and `ASSET` both hold binary data; the difference is intent. `BYTES` is a small blob stored inline in the record. `ASSET` is for files: the bytes are uploaded separately and the record holds a reference that comes back with a download URL.
+
+If you would rather script the schema than click through the console, CloudKit has a text-based schema language, much like SQL DDL, and the `cktool` command-line tool ([Integrating a text-based schema into your workflow](https://developer.apple.com/documentation/cloudkit/integrating-a-text-based-schema-into-your-workflow)). With a management token from the console, the whole schema workflow can be scripted:
 
 ```text
 RECORD TYPE Note (
@@ -159,7 +161,7 @@ The two stories above generalize into four families:
 | **Web app ↔ Apple device bridge** | A browser portal for a CloudKit-backed app, a webhook handler (Stripe, GitHub, forms) that writes straight into a user's records |
 | **Data aggregation** | Anonymized telemetry read via `records/changes`, crowdsourced data cleaned and written back by a background steward |
 
-Apple's CloudKit framework only runs on Apple platforms. MistKit wraps CloudKit Web Services so server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
+Apple's CloudKit framework only runs on Apple platforms. The one-line description of MistKit from the talk: it is the CloudKit framework for the places the CloudKit framework does not go — Linux, Windows, and anything else that can only reach CloudKit through Web Services — so server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
 
 ## Building MistKit
 
@@ -211,11 +213,13 @@ The generator ships transports for `URLSession` and `AsyncHTTPClient`, plus serv
 
 ### Turning the documentation into a spec
 
-The remaining problem was producing an OpenAPI document for an API that only exists as 2016-era prose. That is where AI-assisted development came in: each documented endpoint was fed to an LLM and translated into `openapi.yaml`, then abstractions were built on top. It was not automatic — hallucinated APIs, context-window limits, and unrequested scaffolding (retries, caches, "secure memory") were constant, and the assistant regularly declared success before running the build. The catalog of what went wrong, with evidence, is <doc:WhatTheAIGotWrong>; the narrative version is in the two *Rebuilding MistKit with Claude Code* articles ([part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/), [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)).
+The remaining problem was producing an OpenAPI document for an API that only exists as 2016-era prose. That is where AI-assisted development came in: each documented endpoint was fed to an LLM — a little Claude, a little Cursor — and translated into `openapi.yaml`, then abstractions were built on top. Converting one format of documentation into another is a job these tools are genuinely good at. It was not automatic — hallucinated APIs, context-window limits, and unrequested scaffolding (retries, caches, "secure memory") were constant, and the assistant regularly declared success before running the build. The catalog of what went wrong, with evidence, is <doc:WhatTheAIGotWrong>; the narrative version is in the two *Rebuilding MistKit with Claude Code* articles ([part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/), [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)).
+
+A side effect worth pointing out: the spec is not Swift-specific. [`openapi.yaml`](https://github.com/brightdigit/MistKit/blob/main/openapi.yaml) documents every call and every schema of CloudKit Web Services, so someone who wants the same client in Java, Python, PHP, Go, Dart, or Smalltalk can feed the same file to their own generator.
 
 ### Three layers
 
-The result is layered so callers never see the generated code:
+The generated client was the next thing that needed work. As Honza Dvorsky, one of the generator's maintainers, will tell you, the generated code works — but it is not the API you would want to hand to the users of a Swift library. So MistKit is layered so callers never see the generated code:
 
 ```
 Your code            service.queryRecords(recordType: "Note", database: .private)
@@ -238,11 +242,11 @@ Unit tests were not enough — the assistant would report success on code that f
 
 ![The MistKit web demo, switching between MistKit and CloudKit JS backends](talk-mistdemo-web)
 
-MistDemo is the live-verification oracle for everything in this article that describes CloudKit's wire behavior.
+MistDemo is the live-verification oracle for everything in this article that describes CloudKit's wire behavior. The lesson generalizes beyond MistKit: if an assistant wrote it, run it yourself against the real thing before believing the summary.
 
 ## Authentication
 
-On a device, authentication is invisible: the user is signed in to iCloud and the framework does the rest. On a server you have to prove who you are with credentials you manage. Apple documents three methods; it is more honest to call it **two and a half**, because the first one is a prerequisite for the second rather than a peer.
+On a device, authentication is invisible: the user is signed in to iCloud and the framework does the rest. Outside the Apple ecosystem you either put a sign-in button on a web page or manage credentials yourself, and on a server you have to prove who you are with credentials you manage. Apple documents three methods; it is more honest to call it **two and a half**, because the first one is a prerequisite for the second rather than a peer.
 
 All of them start in the CloudKit Console under **Tokens & Keys** for your container.
 
@@ -338,7 +342,7 @@ openssl ec -in eckey.pem -pubout
 
 Paste the public key into step 3, save, and copy the **Key ID**. The private key never leaves your server.
 
-Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers:
+Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is everything between the host and the query string, for example `/database/1/iCloud.com.example.App/development/public/records/modify`:
 
 | Header | Value |
 | --- | --- |
@@ -500,7 +504,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
 }
 ```
 
-``Location``, ``Reference``, and ``Asset`` are MistKit's own structs so the package does not depend on Core Location or CloudKit on the server. A reference is a record name plus an action; an asset is what CloudKit returns for a file, including the download URL:
+``Location``, ``Reference``, and ``Asset`` are MistKit's own structs so the package does not depend on Core Location or CloudKit on the server — Core Location in particular changes often enough that a server library is better off without it. A reference is a record name plus an action; an asset is what CloudKit returns for a file, including the download URL:
 
 ```swift
 public struct Reference: Codable, Equatable, Sendable {
@@ -541,7 +545,7 @@ The thirty-second version hides a lot: the `oneOf` has no discriminator, so a wh
 
 ## Error handling
 
-CloudKit documents its HTTP status codes and a JSON error body that is the same for all of them:
+This is the best-documented corner of the API: a table of every `serverErrorCode` alongside the HTTP status it pairs with, as easy for an assistant to work from as for a person. The JSON error body is the same shape for all of them:
 
 ```json
 {
@@ -568,11 +572,11 @@ and the generator produces a matching enum and struct. MistKit maps each of the 
 
 ### The endpoint that returns HTTP 500
 
-One documented call does not work at all: `GET users/discover` ("discover all user identities") returns `500 INTERNAL_ERROR` from both the REST API and Apple's own CloudKit JS, reproducibly, after authentication succeeds. It appears to have been retired server-side — possibly for privacy reasons — without the documentation changing. MistKit generates the operation from `openapi.yaml` but does not surface it in ``CloudKitService``; the `POST users/discover` form, which takes lookup infos, works and is what ``CloudKitService/discoverUserIdentities(lookupInfos:)`` calls. The details are tracked in [MistKit issue #28](https://github.com/brightdigit/MistKit/issues/28) and Apple Feedback FB22754466.
+One documented call does not work at all: `GET users/discover` ("discover all user identities") returns `500 INTERNAL_ERROR` from both the REST API and Apple's own CloudKit JS, reproducibly, after authentication succeeds. It appears to have been retired server-side — possibly for privacy reasons — without the documentation changing; the framework's equivalent, `CKDiscoverAllUserIdentitiesOperation`, is deprecated as well, so the archived web-services page is the only place the feature still looks alive. MistKit generates the operation from `openapi.yaml` but does not surface it in ``CloudKitService``; the `POST users/discover` form, which takes lookup infos, works and is what ``CloudKitService/discoverUserIdentities(lookupInfos:)`` calls. The details are tracked in [MistKit issue #28](https://github.com/brightdigit/MistKit/issues/28) and Apple Feedback FB22754466.
 
 ## Deployment
 
-Bushel's sync job runs entirely in GitHub Actions. The key ID and private key (or a base64-encoded copy of it) live in repository secrets:
+Bushel's sync job runs entirely in GitHub Actions. The key ID and private key (pasted as-is, or as a base64-encoded copy if that is easier to handle) live in repository secrets. The API token and web auth token in the screenshot are there for the integration tests, not for the sync job:
 
 ![Repository secrets: CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY, CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN](talk-github-secrets)
 
@@ -674,13 +678,15 @@ runs:
           --container-identifier "$CLOUDKIT_CONTAINER_ID"
 ```
 
-The CLI writes a JSON report that the action turns into the workflow's summary page. Static builds, credential injection on other platforms, tiered scheduling, idempotency, and observability are covered in <doc:DeployingMistKit>.
+The CLI reads its credentials through [swift-configuration](https://github.com/apple/swift-configuration), which accepts the same keys as environment variables or command-line arguments, so the action passes secrets through the environment while a developer can pass flags locally. The CLI writes a JSON report that the action turns into the workflow's summary page.
+
+The payoff is visible in Bushel: each scheduled run checks whether Apple has posted a new restore image, a bug-fix release, or a new beta, and the app shows every version with a signed or unsigned flag — an unsigned image cannot be installed, so that flag is the one users care about. Static builds, credential injection on other platforms, tiered scheduling, idempotency, and observability are covered in <doc:DeployingMistKit>.
 
 ## What's next
 
 Every endpoint in the CloudKit Web Services reference is implemented — records, zones, changes, subscriptions, users, sharing, assets, and APNs tokens — and exercised live by MistDemo. What the project needs now is people using it: try it against your own container and file what you find on the [issue tracker](https://github.com/brightdigit/MistKit/issues).
 
-And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers, and [AtLeast](https://atleast.app), a passive timer for Apple Watch.
+And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers, on the Mac App Store with larger updates planned around macOS 27, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch, in TestFlight for watchOS 26. Leo runs [BrightDigit](https://brightdigit.com), hosts the [Empower Apps](https://www.empowerapps.show) podcast, and is available for Swift work of any kind.
 
 ## Links
 
@@ -693,6 +699,7 @@ And one more thing: Leo's apps, both backed by patterns from this talk — [Bush
 - [AtLeast](https://atleast.app) — Passive Timer for Apple Watch
 - [Heartwitch](https://heartwitch.app) — Apple Watch heart-rate streaming; [App Store](https://apps.apple.com/us/app/heartwitch/id1480031203)
 - [BrightDigit](https://brightdigit.com)
+- [Empower Apps podcast](https://www.empowerapps.show)
 - [linktr.ee/leogdion](https://linktr.ee/leogdion)
 - [iOSDevUK](https://www.iosdevuk.com)
 
@@ -776,6 +783,7 @@ And one more thing: Leo's apps, both backed by patterns from this talk — [Bush
 - [actions/checkout](https://github.com/actions/checkout)
 - [dawidd6/action-download-artifact](https://github.com/dawidd6/action-download-artifact)
 - [Swift Docker images](https://hub.docker.com/_/swift) — the sync action builds with `swiftlang/swift:nightly-6.4.x-noble`
+- [swift-configuration](https://github.com/apple/swift-configuration) — how the BushelCloud CLI reads credentials from environment variables or arguments
 
 ### Other tools mentioned
 
@@ -786,6 +794,8 @@ And one more thing: Leo's apps, both backed by patterns from this talk — [Bush
 ## Questions
 
 Questions asked during rehearsals and at the talks, with the answers as they stand today.
+
+**Can sign-in go through a third-party provider instead of iCloud?** (asked at iOSDevUK) For your own site's accounts, yes — Sign in with Apple, Google, and the rest all have libraries. But a CloudKit web auth token only ever comes from an iCloud sign-in, through CloudKit JS or `CKFetchWebAuthTokenOperation`. A third-party identity can sit alongside it, the way Heartwitch's Postgres accounts do; it cannot replace it.
 
 **How much does CloudKit cost?** There is no separate CloudKit fee beyond the Apple Developer Program. Quotas for storage, transfer, and requests scale with active users; exceeding them returns `QUOTA_EXCEEDED` or throttling. Apple does not publish a clear overage price list.
 
