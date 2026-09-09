@@ -161,7 +161,7 @@ The two stories above generalize into four families:
 | **Web app ↔ Apple device bridge** | A browser portal for a CloudKit-backed app, a webhook handler (Stripe, GitHub, forms) that writes straight into a user's records |
 | **Data aggregation** | Anonymized telemetry read via `records/changes`, crowdsourced data cleaned and written back by a background steward |
 
-Apple's CloudKit framework only runs on Apple platforms. The one-line description of MistKit from the talk: it is the CloudKit framework for the places the CloudKit framework does not go — Linux, Windows, and anything else that can only reach CloudKit through Web Services — so server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
+Apple's CloudKit framework only runs on Apple platforms. MistKit is the CloudKit framework for the places the CloudKit framework does not go — Linux, Windows, and anything else by wrapping the CloudKit Web Services — server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps.
 
 ## Building MistKit
 
@@ -219,7 +219,7 @@ A side effect worth pointing out: the spec is not Swift-specific. [`openapi.yaml
 
 ### Three layers
 
-The generated client was the next thing that needed work. After talking it over with Honza Dvorsky, one of the generator's maintainers, the conclusion was the same one anyone who has read the generated code reaches: it works, but it is not the API you would want to hand to the users of a Swift library. So MistKit is layered so callers never see the generated code:
+The generated client was the next thing that needed work. After talking it over with [Honza Dvorsky](https://github.com/czechboy0), one of the generator's maintainers, the conclusion was the same one anyone who has read the generated code reaches: it works, but it is not the API you would want to hand to the users of a Swift library. So MistKit is layered so callers never see the generated code:
 
 ```
 Your code            service.queryRecords(recordType: "Note", database: .private)
@@ -242,7 +242,7 @@ Unit tests were not enough — the assistant would report success on code that f
 
 ![The MistKit web demo, switching between MistKit and CloudKit JS backends](talk-mistdemo-web)
 
-MistDemo is the live-verification oracle for everything in this article that describes CloudKit's wire behavior. The lesson generalizes beyond MistKit: if an assistant wrote it, run it yourself against the real thing before believing the summary.
+[MistDemo](https://github.com/brightdigit/MistKit/tree/main/Examples/MistDemo) is the live-verification oracle for everything in this article that describes CloudKit's wire behavior. The lesson generalizes beyond MistKit: if an assistant wrote it, run it yourself against the real thing before believing the summary.
 
 ## Authentication
 
@@ -366,7 +366,7 @@ The public database accepts two methods and they are **not interchangeable**: th
 
 swift-openapi-generator does not know how to sign CloudKit requests, but it has middleware: `ServerMiddleware` runs after the transport receives a request and before it reaches your handler; `ClientMiddleware` runs before a request is sent. Apple's own example shows a bearer-token middleware, and the generator's [example projects](https://github.com/apple/swift-openapi-generator/tree/main/Examples) include authentication, logging, and retrying middlewares to copy from.
 
-This is the same slot the server-side Swift authentication libraries plug into. A question at iOSDevUK asked whether there is a Swift library for signing in with a third-party service, and what other authentication implementations exist. There are several, and they sit on the *server* side of the picture: [Imperial](https://github.com/vapor-community/Imperial) federates sign-in through Apple, Google, GitHub, and other OAuth providers for Vapor, [JWTKit](https://github.com/vapor/jwt-kit) verifies the identity tokens Sign in with Apple hands back, and [Hummingbird Auth](https://github.com/hummingbird-project/hummingbird-auth) covers sessions and bearer tokens for Hummingbird. Any of them can authenticate the *users* of your service. What none of them can do is mint a CloudKit web auth token — that only comes from an iCloud sign-in through CloudKit JS or `CKFetchWebAuthTokenOperation` — so a third-party identity sits alongside the CloudKit credential, the way Heartwitch's Postgres accounts do, rather than replacing it.
+This is the same slot the server-side Swift authentication libraries plug into. There are several Swift libraries for signing in with third-party services, such as [Imperial](https://github.com/vapor-community/Imperial), which federates sign-in through Apple, Google, GitHub, and other OAuth providers for Vapor, and [JWTKit](https://github.com/vapor/jwt-kit), which verifies the identity tokens Sign in with Apple hands back; [Hummingbird Auth](https://github.com/hummingbird-project/hummingbird-auth) covers sessions and bearer tokens for Hummingbird. They sit on the *server* side of the picture, and any of them can authenticate the *users* of your service. What none of them can do is mint a CloudKit web auth token — that only comes from an iCloud sign-in through CloudKit JS or `CKFetchWebAuthTokenOperation` — so a third-party identity sits alongside the CloudKit credential, the way Heartwitch's Postgres accounts do, rather than replacing it.
 
 MistKit's middleware is the client-side counterpart: it holds the CloudKit credential and signs the outgoing request. MistKit's version is one small type whose main job is to ask a ``TokenManager`` for the current ``Authenticator`` and let it modify the request; on the way back it also hands any rotated web auth token in the response to the token manager:
 
@@ -576,7 +576,7 @@ and the generator produces a matching enum and struct. MistKit maps each of the 
 
 ### The endpoint that returns HTTP 500
 
-One documented call does not work at all: `GET users/discover` ("discover all user identities") returns `500 INTERNAL_ERROR` from both the REST API and Apple's own CloudKit JS, reproducibly, after authentication succeeds. It appears to have been retired server-side — possibly for privacy reasons — without the documentation changing; the framework's equivalent, `CKDiscoverAllUserIdentitiesOperation`, is deprecated as well, so the archived web-services page is the only place the feature still looks alive. MistKit generates the operation from `openapi.yaml` but does not surface it in ``CloudKitService``; the `POST users/discover` form, which takes lookup infos, works and is what ``CloudKitService/discoverUserIdentities(lookupInfos:)`` calls. The details are tracked in [MistKit issue #28](https://github.com/brightdigit/MistKit/issues/28) and Apple Feedback FB22754466.
+One documented call does not work at all: `GET users/discover` ("discover all user identities") returns `500 INTERNAL_ERROR` from both the REST API and Apple's own CloudKit JS, reproducibly, after authentication succeeds. It appears to have been retired server-side — possibly for privacy reasons — without the documentation changing; the framework's equivalent, `CKDiscoverAllUserIdentitiesOperation`, is deprecated as well, so the archived web-services page is the only place the feature still looks alive. MistKit generates the operation from `openapi.yaml` but does not surface it in ``CloudKitService``; the `POST users/discover` form, which takes lookup infos, works and is what ``CloudKitService/discoverUserIdentities(lookupInfos:)`` calls. The details are tracked in [MistKit issue #28](https://github.com/brightdigit/MistKit/issues/28) and Apple Feedback FB22754466 ([Open Radar](https://openradar.appspot.com/FB22754466)).
 
 ## Deployment
 
@@ -690,7 +690,7 @@ The payoff is visible in Bushel: each scheduled run checks whether Apple has pos
 
 Every endpoint in the CloudKit Web Services reference is implemented — records, zones, changes, subscriptions, users, sharing, assets, and APNs tokens — and exercised live by MistDemo. What the project needs now is people using it: try it against your own container and file what you find on the [issue tracker](https://github.com/brightdigit/MistKit/issues).
 
-And one more thing: Leo's apps, both backed by patterns from this talk — [Bushel](https://getbushel.app), virtualization for app developers on the Mac, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch.
+And one more thing: Leo's apps — [Bushel](https://getbushel.app), virtualization for app developers on the Mac, backed by the patterns in this talk, and [AtLeast](https://atleast.app), a passive timer for breathing and meditation on Apple Watch.
 
 ## Links
 
