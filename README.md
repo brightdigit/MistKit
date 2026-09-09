@@ -556,6 +556,7 @@ Links from the talk:
 - [dawidd6/action-download-artifact](https://github.com/dawidd6/action-download-artifact)
 - [Swift Docker images](https://hub.docker.com/_/swift) — the sync action builds with `swiftlang/swift:nightly-6.4.x-noble`
 - [swift-configuration](https://github.com/apple/swift-configuration) — how the BushelCloud CLI reads credentials from environment variables or arguments
+- [MistKitConfiguration](https://github.com/brightdigit/MistKitConfiguration) — the shared credential-configuration package built on it (also at [`Packages/MistKitConfiguration`](Packages/MistKitConfiguration/))
 
 #### Other tools mentioned
 
