@@ -35,6 +35,25 @@ internal struct RecordInfoTests {
     #expect(recordInfo.recordName == "rec-1")
     #expect(recordInfo.recordType == "Article")
     #expect(recordInfo.fields.isEmpty)
+    #expect(recordInfo.encryptedFields.isEmpty)
+  }
+
+  @Test("RecordInfo collects encryptedFields when isEncrypted is echoed")
+  internal func recordInfoCollectsEncryptedFields() throws {
+    let mockRecord = Components.Schemas.RecordResponse(
+      recordName: "rec-enc",
+      recordType: "Note",
+      fields: .init(
+        additionalProperties: [
+          "title": .init(value: .StringValue("plain")),
+          "secret": .init(value: .StringValue("hidden"), isEncrypted: true),
+        ]
+      )
+    )
+    let recordInfo = try RecordInfo(from: mockRecord)
+
+    #expect(recordInfo.fields.count == 2)
+    #expect(recordInfo.encryptedFields == ["secret"])
   }
 
   /// CloudKit omits `recordType` for tombstones (deleted records) and other

@@ -35,6 +35,7 @@ extension CloudKitService {
   ///   - recordType: The type of record to create
   ///   - recordName: Optional unique record name
   ///   - fields: Dictionary of field names to FieldValue
+  ///   - encryptedFields: Field names to write with `isEncrypted: true`
   ///   - zoneID: Optional target zone (defaults to the request's zone /
   ///     `_defaultZone` when omitted)
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
@@ -53,13 +54,15 @@ extension CloudKitService {
     recordType: String,
     recordName: String? = nil,
     fields: [String: FieldValue],
+    encryptedFields: Set<String> = [],
     zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.create(
       recordType: recordType,
       recordName: recordName,
-      fields: fields
+      fields: fields,
+      encryptedFields: encryptedFields
     )
 
     let results = try await modifyRecords(
@@ -77,6 +80,7 @@ extension CloudKitService {
   ///   - recordName: The unique record name
   ///   - fields: Dictionary of field names to FieldValue
   ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - encryptedFields: Field names to write with `isEncrypted: true`
   ///   - zoneID: Optional target zone (defaults to the request's zone /
   ///     `_defaultZone` when omitted)
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
@@ -98,6 +102,7 @@ extension CloudKitService {
     recordName: String,
     fields: [String: FieldValue],
     recordChangeTag: String? = nil,
+    encryptedFields: Set<String> = [],
     zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordInfo {
@@ -105,7 +110,8 @@ extension CloudKitService {
       recordType: recordType,
       recordName: recordName,
       fields: fields,
-      recordChangeTag: recordChangeTag
+      recordChangeTag: recordChangeTag,
+      encryptedFields: encryptedFields
     )
 
     let results = try await modifyRecords(

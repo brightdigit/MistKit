@@ -31,6 +31,9 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 /// Public wrapper for CloudKit query sort descriptors
+///
+/// - Important: Encrypted fields cannot be sorted. CloudKit does not index
+///   `ENCRYPTED` schema fields, so sorts against them fail at the server.
 public struct QuerySort: Sendable {
   // MARK: - Internal
 

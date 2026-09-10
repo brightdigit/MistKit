@@ -103,4 +103,71 @@ internal struct RecordOperationConversionTests {
     let apiOperation = try Components.Schemas.RecordOperation(from: operation)
     #expect(apiOperation.record?.recordChangeTag == "abc123")
   }
+
+  @Test("Conversion sets isEncrypted on named encrypted fields")
+  internal func conversionSetsIsEncrypted() throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
+    let operation = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-1",
+      fields: [
+        "title": .string("plain"),
+        "secret": .string("hidden"),
+      ],
+      encryptedFields: ["secret"]
+    )
+
+    let apiOperation = try Components.Schemas.RecordOperation(from: operation)
+    let fields = apiOperation.record?.fields?.additionalProperties
+    #expect(fields?["secret"]?.isEncrypted == true)
+    #expect(fields?["title"]?.isEncrypted == nil)
+  }
+
+  @Test("validateEncryptedFields rejects public database writes")
+  internal func validateRejectsPublicDatabase() throws {
+    let operation = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-1",
+      fields: ["secret": .string("hidden")],
+      encryptedFields: ["secret"]
+    )
+
+    #expect(throws: CloudKitError.self) {
+      try operation.validateEncryptedFields(for: .public(.prefers(.serverToServer)))
+    }
+  }
+
+  @Test("validateEncryptedFields rejects reference and asset fields")
+  internal func validateRejectsReferenceAndAsset() throws {
+    let referenceOp = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-ref",
+      fields: [
+        "link": .reference(Reference(recordName: "other", action: Reference.Action.none))
+      ],
+      encryptedFields: ["link"]
+    )
+    #expect(throws: CloudKitError.self) {
+      try referenceOp.validateEncryptedFields(for: .private)
+    }
+
+    let assetOp = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-asset",
+      fields: [
+        "file": .asset(Asset(fileChecksum: "abc", size: 1, referenceChecksum: "def"))
+      ],
+      encryptedFields: ["file"]
+    )
+    #expect(throws: CloudKitError.self) {
+      try assetOp.validateEncryptedFields(for: .private)
+    }
+  }
 }
