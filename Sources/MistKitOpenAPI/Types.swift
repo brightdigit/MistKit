@@ -1245,6 +1245,8 @@ public enum Components {
         /// The type field is optional. It is required for the scalar types whose JSON
         /// representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
         /// IN/NOT_IN list filters (the *_LIST types specify the list element type).
+        /// Set isEncrypted to true when writing a field declared ENCRYPTED in the
+        /// container schema (private/shared databases only; web-auth required).
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueRequest`.
@@ -1388,25 +1390,39 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
             public var _type: Components.Schemas.FieldValueRequest._typePayload?
+            /// When true, CloudKit encrypts the field value server-side using the
+            /// authenticated user's CloudKit Service key. Only valid for private or
+            /// shared databases with web-auth credentials, against fields declared
+            /// ENCRYPTED in the schema. The value is still sent as plaintext over TLS;
+            /// encryption happens on Apple's servers.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/isEncrypted`.
+            public var isEncrypted: Swift.Bool?
             /// Creates a new `FieldValueRequest`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - _type: Optional CloudKit field type. Sent for scalar values whose JSON form is
+            ///   - isEncrypted: When true, CloudKit encrypts the field value server-side using the
             public init(
                 value: Components.Schemas.FieldValueRequest.valuePayload,
-                _type: Components.Schemas.FieldValueRequest._typePayload? = nil
+                _type: Components.Schemas.FieldValueRequest._typePayload? = nil,
+                isEncrypted: Swift.Bool? = nil
             ) {
                 self.value = value
                 self._type = _type
+                self.isEncrypted = isEncrypted
             }
             public enum CodingKeys: String, CodingKey {
                 case value
                 case _type = "type"
+                case isEncrypted
             }
         }
         /// A CloudKit field value from API responses.
         /// May include optional type field for explicit type information.
+        /// May echo isEncrypted when the field was stored encrypted.
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueResponse`.
@@ -1537,21 +1553,32 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueResponse/type`.
             public var _type: Components.Schemas.FieldValueResponse._typePayload?
+            /// Present when CloudKit echoes that the field is encrypted. The value
+            /// in the response is still plaintext (decrypted server-side under
+            /// standard data protection).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueResponse/isEncrypted`.
+            public var isEncrypted: Swift.Bool?
             /// Creates a new `FieldValueResponse`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - _type: The CloudKit field type (optional, may be inferred from value)
+            ///   - isEncrypted: Present when CloudKit echoes that the field is encrypted. The value
             public init(
                 value: Components.Schemas.FieldValueResponse.valuePayload,
-                _type: Components.Schemas.FieldValueResponse._typePayload? = nil
+                _type: Components.Schemas.FieldValueResponse._typePayload? = nil,
+                isEncrypted: Swift.Bool? = nil
             ) {
                 self.value = value
                 self._type = _type
+                self.isEncrypted = isEncrypted
             }
             public enum CodingKeys: String, CodingKey {
                 case value
                 case _type = "type"
+                case isEncrypted
             }
         }
         /// A text string value

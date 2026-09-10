@@ -1529,6 +1529,8 @@ components:
         The type field is optional. It is required for the scalar types whose JSON
         representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
         IN/NOT_IN list filters (the *_LIST types specify the list element type).
+        Set isEncrypted to true when writing a field declared ENCRYPTED in the
+        container schema (private/shared databases only; web-auth required).
       properties:
         value:
           oneOf:
@@ -1548,6 +1550,14 @@ components:
             Optional CloudKit field type. Sent for scalar values whose JSON form is
             ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
             wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
+        isEncrypted:
+          type: boolean
+          description: |
+            When true, CloudKit encrypts the field value server-side using the
+            authenticated user's CloudKit Service key. Only valid for private or
+            shared databases with web-auth credentials, against fields declared
+            ENCRYPTED in the schema. The value is still sent as plaintext over TLS;
+            encryption happens on Apple's servers.
       required:
         - value
 
@@ -1556,6 +1566,7 @@ components:
       description: |
         A CloudKit field value from API responses.
         May include optional type field for explicit type information.
+        May echo isEncrypted when the field was stored encrypted.
       properties:
         value:
           oneOf:
@@ -1572,6 +1583,12 @@ components:
           type: string
           enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
           description: The CloudKit field type (optional, may be inferred from value)
+        isEncrypted:
+          type: boolean
+          description: |
+            Present when CloudKit echoes that the field is encrypted. The value
+            in the response is still plaintext (decrypted server-side under
+            standard data protection).
       required:
         - value
 

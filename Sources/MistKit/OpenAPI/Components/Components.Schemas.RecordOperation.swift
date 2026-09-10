@@ -51,10 +51,16 @@ extension Components.Schemas.RecordOperation {
       throw CloudKitError.unsupportedOperationType("\(recordOperation.operationType)")
     }
 
-    // Convert fields to OpenAPI FieldValueRequest format (for requests)
-    let apiFields = recordOperation.fields.mapValues {
-      fieldValue -> Components.Schemas.FieldValueRequest in
-      Components.Schemas.FieldValueRequest(from: fieldValue)
+    // Convert fields to OpenAPI FieldValueRequest format (for requests),
+    // tagging encrypted field names with isEncrypted: true.
+    var apiFields: [String: Components.Schemas.FieldValueRequest] = [:]
+    apiFields.reserveCapacity(recordOperation.fields.count)
+    for (fieldName, fieldValue) in recordOperation.fields {
+      var request = Components.Schemas.FieldValueRequest(from: fieldValue)
+      if recordOperation.encryptedFields.contains(fieldName) {
+        request.isEncrypted = true
+      }
+      apiFields[fieldName] = request
     }
 
     // Build the OpenAPI record operation

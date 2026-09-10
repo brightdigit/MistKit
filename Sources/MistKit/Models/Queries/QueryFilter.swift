@@ -31,6 +31,9 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 /// Public wrapper for CloudKit query filters
+///
+/// - Important: Encrypted fields cannot be filtered. CloudKit does not index
+///   `ENCRYPTED` schema fields, so filters against them fail at the server.
 public struct QueryFilter: Sendable {
   // MARK: - Internal
 

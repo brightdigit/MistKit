@@ -84,6 +84,11 @@ public enum CloudKitError: LocalizedError, Sendable {
   case validatingReferenceError(reason: String?)
   /// HTTP 404 / `ZONE_NOT_FOUND`. The named custom zone does not exist in the
   /// target database.
+  ///
+  /// When the zone previously held encrypted fields, the same code may also
+  /// indicate permanent data loss after an iCloud Keychain reset under Advanced
+  /// Data Protection. The web-services `reason` string has not been observed to
+  /// carry a distinct reset marker, so MistKit does not model a separate case.
   case zoneNotFound(reason: String?)
   /// A `serverErrorCode` MistKit does not model — Apple added a code after this
   /// release. `code` is the raw wire string and `statusCode` the status that

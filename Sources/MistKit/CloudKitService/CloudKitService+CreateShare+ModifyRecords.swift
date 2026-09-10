@@ -48,6 +48,9 @@ extension CloudKitService {
     database: Database,
     atomic: Bool
   ) async throws -> [Components.Schemas.RecordResponse] {
+    for operation in operations {
+      try operation.validateEncryptedFields(for: database)
+    }
     let apiOperations = try operations.map {
       try Components.Schemas.RecordOperation(from: $0)
     }
