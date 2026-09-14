@@ -104,6 +104,7 @@ swift run mistdemo demo-in-filter
 swift run mistdemo demo-errors
 swift run mistdemo test-public
 swift run mistdemo test-private
+swift run mistdemo probe-encrypted   # issue #392: encrypted-field probe for one web-auth user
 
 # Configuration (no config-file flag — MistDemo uses Swift Configuration):
 # highest priority first — (1) CLI args, (2) CLOUDKIT_-prefixed env vars,
@@ -139,6 +140,8 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 - `TIMESTAMP` (`.date(.value)`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
 - `BYTES` (`.bytes(.value)`) — domain `Data`, encoded as a base64 string on the wire, otherwise read as `STRING`
 - `DOUBLE` (`.double(.value)`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
+
+**Encrypted fields must also be tagged (issue #392).** A field named in `RecordOperation.encryptedFields` is sent with `isEncrypted: true`, and CloudKit will not infer the type of an encrypted value. Verified live on 2026-09-14 (`iCloud.com.brightdigit.MistDemo`/development/private, web-auth): `{"value":"…","isEncrypted":true}` with no `type` is rejected with `BAD_REQUEST "invalid attempt to set value type ENCRYPTED_BYTES for field 'secret' for type 'Note', defined to be: ENCRYPTED_STRING"`, while `{"value":"…","type":"STRING","isEncrypted":true}` succeeds and CloudKit echoes `"type":"STRING","isEncrypted":true` with the plaintext value on the modify response, `records/lookup` and `records/query`. Since #481 every list arity already carries its `*_LIST` tag and `.double`/`.bytes`/`.date` scalars carry theirs, so `Components.Schemas.RecordOperation.explicitType(for:)` only has to supply `STRING`, `INT64` and `LOCATION` for untagged `.value` scalars — it fills in `_type` only when the request conversion left it `nil`. Use `swift run mistdemo probe-encrypted` (Examples/MistDemo) to re-verify against a live account.
 
 Object-shaped values (`REFERENCE`, `ASSET`, `LOCATION`) and scalar `STRING`/`INT64` stay untagged. **List arities always tag** `STRING_LIST` / `INT64_LIST` / … (including record-field writes, not only IN/NOT_IN). Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
 
@@ -326,6 +329,8 @@ logger.error("…")
 **For consumers:** install a `LogHandler` (e.g. `StreamLogHandler.standardOutput`) via `LoggingSystem.bootstrap` and set the level per-subsystem. Protocol traces — request/response bodies, headers, query params — are emitted at `.debug`. The middleware guards expensive work (1 MiB body collection, query-param parsing) behind `logger.logLevel <= .debug`, so the default `.info` level pays no overhead.
 
 There is no built-in redaction. Sensitive data (tokens, raw bodies) appears only at `.debug`; control exposure via `logLevel`.
+
+At `.debug` the middleware logs only the first 64 KiB of a JSON response body (`responseBodyLogCap`). A body over the cap is **not** dropped: the consumed prefix is replayed ahead of the untouched remainder through `ReplayingBodyIterator` (`Sources/MistKit/OpenAPI/ReplayingBodyIterator.swift`). Before that helper existed, every debug-level response over 64 KiB failed with "HTTPBody attempted to create a second iterator" — found live when `records/query` on a private default zone with a few hundred KB of records broke only under `--verbose`.
 
 ### Asset Upload Transport Design
 

@@ -48,6 +48,9 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
   public let recordName: String?
   /// The fields to set on the record.
   public let fields: [Field]
+  /// Names in ``fields`` to write with `isEncrypted: true`. The field must be
+  /// declared `ENCRYPTED` in the container schema.
+  public let encryptedFields: Set<String>
   /// The output format.
   public let output: OutputFormat
 
@@ -58,6 +61,7 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     recordType: String = "Note",
     recordName: String? = nil,
     fields: [Field] = [],
+    encryptedFields: Set<String> = [],
     output: OutputFormat = .json
   ) {
     self.base = base
@@ -65,6 +69,7 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     self.recordType = recordType
     self.recordName = recordName
     self.fields = fields
+    self.encryptedFields = encryptedFields
     self.output = output
   }
 
@@ -93,6 +98,12 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
 
     // Parse fields from various sources
     let fields = try Self.parseFieldsFromSources(configReader)
+    let encryptedFields = Set(
+      (configReader.read(MistDemoKeys.Record.encryptedFields) ?? "")
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty }
+    )
 
     // Parse output format
     let outputString =
@@ -105,6 +116,7 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
       recordType: recordType,
       recordName: recordName,
       fields: fields,
+      encryptedFields: encryptedFields,
       output: output
     )
   }

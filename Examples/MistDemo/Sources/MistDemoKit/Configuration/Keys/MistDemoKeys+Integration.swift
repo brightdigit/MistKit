@@ -48,6 +48,18 @@ extension MistDemoKeys {
       "skip.cleanup", envPrefix: MistDemoKeys.envPrefix, default: false
     )
 
+    /// `--skip-write` / `CLOUDKIT_SKIP_WRITE` — `probe-encrypted` only reads
+    /// back records written by an earlier run.
+    internal static let skipWrite = ConfigKey<Bool>(
+      "skip.write", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--cleanup` / `CLOUDKIT_CLEANUP` — `probe-encrypted` deletes its probe
+    /// records at the end of the run (default leaves them for a later read).
+    internal static let cleanup = ConfigKey<Bool>(
+      "cleanup", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
     /// `--lookup-email` / `CLOUDKIT_LOOKUP_EMAIL`.
     internal static let lookupEmail = OptionalConfigKey<String>(
       "lookup.email", envPrefix: MistDemoKeys.envPrefix

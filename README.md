@@ -25,6 +25,7 @@ A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Service
     - [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Authentication](#authentication)
+    - [Advanced Data Protection](#advanced-data-protection)
     - [Error Handling](#error-handling)
     - [Advanced Usage](#advanced-usage)
     - [Examples](#examples)
@@ -213,6 +214,20 @@ let service = CloudKitService(
     credentials: credentials
 )
 ```
+
+### Advanced Data Protection
+
+**An iCloud account with [Advanced Data Protection](https://support.apple.com/en-us/102651) (ADP) turned on cannot obtain a web auth token for a third-party container.** This is a consequence of the ADP key model, not a bug or a missing feature in MistKit, and there is no workaround other than the user turning ADP off. Server-to-server access to the **public** database is unaffected.
+
+Three things Apple documents combine to close the door:
+
+1. **The keys leave Apple's servers.** A container's private database is rooted in a CloudKit Service key. Under standard protection those keys live in Apple's hardware security modules, which is exactly what lets a web service decrypt your data. Turning on ADP deletes them from the HSMs and keeps them in the account's iCloud Keychain, so Apple "can no longer access any of the data protected by the user's service keys."
+2. **The web-access window is allow-listed to iCloud.com.** Enabling web access opens a one-hour window in which a trusted device re-uploads individual service keys — but "only those corresponding to an allow list of services normally accessible on iCloud.com," each encrypted to the specific web session the user authorized. A third-party developer container is not on that list and is not party to that session.
+3. **It fails inside CloudKit's own session setup.** Apple ID sign-in and the trusted-device approval both succeed and hand CloudKit an OAuth token; CloudKit's `oauth/validateToken` then returns a status its own sign-in page has no handler for, and the popup ends on a generic "Authentication Error" (or "iCloud Data Web Access is Off" while web access is disabled).
+
+Because the failure happens during sign-in, **no request ever reaches the CloudKit API — there is no `CloudKitError` for your code to catch.** Treat it as a user-account precondition, not a runtime error path: if a user reports that token capture never completes, ADP is the first thing to check.
+
+For the full causal chain and the verification against a live container, see [Authentication and Databases](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/authenticationanddatabases). Encrypted record fields have their own constraints — see [Working with Records](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/workingwithrecords).
 
 #### Server-to-Server Authentication
 

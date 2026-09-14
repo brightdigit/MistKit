@@ -134,6 +134,12 @@ jobs:
     needs: configure
     runs-on: ${{ matrix.runs-on }}
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    # Swift 6.2 on Windows silently aborts while emitting MistKitTests once the test
+    # module crosses a size threshold: no `error:`, no stack dump, just exit 1 with
+    # `Emitting module MistKitTests` absent from the log. It is a toolchain bug — 6.1
+    # and 6.3 build the same commit — so it is reported but does not gate merges.
+    # Tracked in #488; remove this once that is resolved (or 6.2 is dropped).
+    continue-on-error: ${{ matrix.swift.version == 'swift-6.2-release' }}
     strategy:
       fail-fast: false
       matrix:

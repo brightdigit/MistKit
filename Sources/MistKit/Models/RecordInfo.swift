@@ -49,6 +49,12 @@ public struct RecordInfo: Codable, Sendable {
   public let recordChangeTag: String?
   /// The record fields
   public let fields: [String: FieldValue]
+  /// Field names CloudKit echoed with `isEncrypted: true` on the response.
+  ///
+  /// Empty when the server omits the flag (Apple does not document whether
+  /// read-back always echoes it). Values in ``fields`` are still plaintext
+  /// under standard data protection — decryption happens server-side.
+  public let encryptedFields: Set<String>
   /// Information about when the record was created
   public let created: RecordTimestamp?
   /// Information about when the record was last modified
@@ -78,14 +84,39 @@ public struct RecordInfo: Codable, Sendable {
 
     // Convert fields to FieldValue representation
     var convertedFields: [String: FieldValue] = [:]
+    var encrypted = Set<String>()
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
         convertedFields[fieldName] = try FieldValue(fieldData, fieldName: fieldName)
+        if fieldData.isEncrypted == true {
+          encrypted.insert(fieldName)
+        }
       }
     }
 
     self.fields = convertedFields
+    self.encryptedFields = encrypted
+  }
+
+  /// Decodes a `RecordInfo` previously encoded with `Codable`.
+  ///
+  /// `encryptedFields` is optional on the wire so JSON written before the
+  /// property existed (and hand-written stubs) still decodes; it defaults to
+  /// an empty set.
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.recordName = try container.decode(String.self, forKey: .recordName)
+    self.recordType = try container.decodeIfPresent(String.self, forKey: .recordType)
+    self.recordChangeTag = try container.decodeIfPresent(
+      String.self, forKey: .recordChangeTag
+    )
+    self.fields = try container.decode([String: FieldValue].self, forKey: .fields)
+    self.encryptedFields =
+      try container.decodeIfPresent(Set<String>.self, forKey: .encryptedFields) ?? []
+    self.created = try container.decodeIfPresent(RecordTimestamp.self, forKey: .created)
+    self.modified = try container.decodeIfPresent(RecordTimestamp.self, forKey: .modified)
+    self.deleted = try container.decodeIfPresent(Bool.self, forKey: .deleted) ?? false
   }
 
   /// Public initializer for creating RecordInfo instances
@@ -98,6 +129,7 @@ public struct RecordInfo: Codable, Sendable {
   ///   - recordType: The CloudKit record type, or `nil` for a tombstone
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
+  ///   - encryptedFields: Field names marked encrypted on the response
   ///   - created: Optional timestamp when the record was created
   ///   - modified: Optional timestamp when the record was last modified
   ///   - deleted: Whether the record has been deleted
@@ -106,6 +138,7 @@ public struct RecordInfo: Codable, Sendable {
     recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],
+    encryptedFields: Set<String> = [],
     created: RecordTimestamp? = nil,
     modified: RecordTimestamp? = nil,
     deleted: Bool = false
@@ -114,6 +147,7 @@ public struct RecordInfo: Codable, Sendable {
     self.recordType = recordType
     self.recordChangeTag = recordChangeTag
     self.fields = fields
+    self.encryptedFields = encryptedFields
     self.created = created
     self.modified = modified
     self.deleted = deleted

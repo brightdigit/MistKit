@@ -1529,6 +1529,8 @@ components:
         The type field is optional. It is required for the scalar types whose JSON
         representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
         IN/NOT_IN list filters (the *_LIST types specify the list element type).
+        Set isEncrypted to true when writing a field declared ENCRYPTED in the
+        container schema (private/shared databases only; web-auth required).
       properties:
         value:
           oneOf:
@@ -1548,6 +1550,18 @@ components:
             Optional CloudKit field type. Sent for scalar values whose JSON form is
             ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
             wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
+        isEncrypted:
+          type: boolean
+          description: |
+            When true, CloudKit encrypts the field value using the authenticated
+            user's CloudKit Service key. Only valid for private or shared databases
+            with web-auth credentials, against fields declared ENCRYPTED in the
+            schema. The value is sent as plaintext over TLS; under standard data
+            protection encryption happens on Apple's servers, which can also decrypt
+            it on read. Under Advanced Data Protection the service keys leave Apple's
+            servers entirely, making these fields end-to-end encrypted and
+            undecryptable by CloudKit Web Services — but web-auth sign-in cannot
+            complete for an ADP account, so this API is unreachable there.
       required:
         - value
 
@@ -1558,6 +1572,7 @@ components:
         May include optional type field for explicit type information.
         List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
         live CloudKit responses — not a flat LIST tag.
+        May echo isEncrypted when the field was stored encrypted.
       properties:
         value:
           oneOf:
@@ -1576,6 +1591,15 @@ components:
           description: |
             The CloudKit field type (optional). List responses use STRING_LIST,
             INT64_LIST, etc. (verified live against MistDemo, 2026-09-09).
+        isEncrypted:
+          type: boolean
+          description: |
+            Present when CloudKit echoes that the field is encrypted. Under
+            standard data protection the value in the response is plaintext,
+            decrypted server-side. Under Advanced Data Protection the field is
+            end-to-end encrypted and CloudKit Web Services cannot decrypt it —
+            though in practice web-auth sign-in cannot complete for such an
+            account, so these routes are unreachable there.
       required:
         - value
 

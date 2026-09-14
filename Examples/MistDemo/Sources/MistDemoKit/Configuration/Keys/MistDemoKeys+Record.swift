@@ -58,6 +58,12 @@ extension MistDemoKeys {
       "record-name", envPrefix: MistDemoKeys.envPrefix
     )
 
+    /// `--encrypted-fields` / `CLOUDKIT_ENCRYPTED_FIELDS`, comma separated field
+    /// names to send with `isEncrypted: true` (private/shared + web-auth only).
+    internal static let encryptedFields = OptionalConfigKey<String>(
+      "encrypted.fields", envPrefix: MistDemoKeys.envPrefix
+    )
+
     /// `--record-names` / `CLOUDKIT_RECORD_NAMES`, comma separated.
     internal static let recordNames = OptionalConfigKey<String>(
       "record.names", envPrefix: MistDemoKeys.envPrefix
