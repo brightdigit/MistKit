@@ -60,3 +60,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [List responses use `*_LIST`, empty lists round-trip as `[]`](project_cloudkit_list_response_type_is_star_list.md) — live S2S: `STRING_LIST`+`[]` present on read; openapi `FieldValueResponse` flat `LIST` is wrong (#481)
 - [FieldValue lists use Arity](project_fieldvalue_arity_homogeneous_lists.md) — `#481`: `Arity<T>` on each kind; no `case list`; scalar deprecations only; response `*_LIST`
 - [Docs live in the DocC catalog](project_docs_live_in_docc.md) — top-level `docs/` removed 2026-09-08; prose guides, the talk article, and retrospectives are DocC articles; verify with the symbol-graph + `docc convert` recipe
+- [Encrypted fields ADP probe](encrypted-fields-adp-probe.md) — ADP test account exists (2026-09-14); characterize #392 with `mistdemo probe-encrypted`, not test-private
+- [Use xcrun for Swift](reference_use_xcrun_for_swift.md) — the swiftly-managed `swift` crashes swift-frontend here; `xcrun swift build/test` works and also fixes MistDemo's 6.4 pin
+- [Lint needs mise trust](reference_lint_needs_mise_trust.md) — an untrusted `mise.toml` silently downgrades SwiftLint and skips Periphery, inventing phantom findings
+- [Android emulator flake](reference_android_emulator_flake.md) — an Android job that fails with `adb ... TCP port 5554` after emitting the test modules is a flake; re-run, don't edit source

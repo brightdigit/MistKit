@@ -8,6 +8,7 @@ RECORD TYPE Note (
     "index"                  INT64 QUERYABLE SORTABLE,
     "image"                  ASSET,
     "tags"                   LIST<STRING>,
+    "secret"                 ENCRYPTED STRING,
 
     GRANT READ, CREATE, WRITE TO "_creator",
     GRANT READ, CREATE, WRITE TO "_icloud",

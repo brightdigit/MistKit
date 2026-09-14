@@ -40,6 +40,7 @@ swift run mistdemo auth-token              # capture a web-auth token
 swift run mistdemo auth-tokens             # capture sharer + sharee tokens
 swift run mistdemo test-public             # integration suite, public DB
 swift run mistdemo test-private            # integration suite, private DB
+swift run mistdemo probe-encrypted         # encrypted-field probe (standard vs ADP account)
 ```
 
 Configuration comes from `MistDemoConfiguration` — command-line flags or

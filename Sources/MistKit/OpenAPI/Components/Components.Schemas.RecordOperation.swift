@@ -51,10 +51,24 @@ extension Components.Schemas.RecordOperation {
       throw CloudKitError.unsupportedOperationType("\(recordOperation.operationType)")
     }
 
-    // Convert fields to OpenAPI FieldValueRequest format (for requests)
-    let apiFields = recordOperation.fields.mapValues {
-      fieldValue -> Components.Schemas.FieldValueRequest in
-      Components.Schemas.FieldValueRequest(from: fieldValue)
+    // Convert fields to OpenAPI FieldValueRequest format (for requests),
+    // tagging encrypted field names with isEncrypted: true.
+    var apiFields: [String: Components.Schemas.FieldValueRequest] = [:]
+    apiFields.reserveCapacity(recordOperation.fields.count)
+    for (fieldName, fieldValue) in recordOperation.fields {
+      var request = Components.Schemas.FieldValueRequest(from: fieldValue)
+      if recordOperation.encryptedFields.contains(fieldName) {
+        // Verified live (2026-09-14): an encrypted field whose `type` is left for
+        // CloudKit to infer is read as ENCRYPTED_BYTES and rejected with
+        // BAD_REQUEST "invalid attempt to set value type ENCRYPTED_BYTES for
+        // field … defined to be: ENCRYPTED_STRING". Apple's own example tags
+        // every encrypted field explicitly, so do the same for all of them.
+        request.isEncrypted = true
+        if request._type == nil {
+          request._type = Self.explicitType(for: fieldValue)
+        }
+      }
+      apiFields[fieldName] = request
     }
 
     // Build the OpenAPI record operation
@@ -77,5 +91,42 @@ extension Components.Schemas.RecordOperation {
         )
       )
     )
+  }
+
+  // The wire `type` for an encrypted value the request conversion leaves untagged.
+  //
+  // Since #481 every list arity is tagged `*_LIST` by `FieldValueRequest.init(from:)`,
+  // and `.double`/`.bytes`/`.date` scalars already carry DOUBLE/BYTES/TIMESTAMP — none
+  // of those reach here, because the caller only consults this when `_type == nil`.
+  // In practice that leaves `.string`, `.int64` and `.location` scalars;
+  // `.reference`/`.asset` are rejected upstream by `validateEncryptedFields(for:)`.
+  // The `switch` is `default`-free on purpose, so a new `FieldValue` case breaks the
+  // build here rather than silently sending an untagged encrypted field.
+  // swiftlint:disable:next cyclomatic_complexity
+  private static func explicitType(
+    for fieldValue: FieldValue
+  ) -> Components.Schemas.FieldValueRequest._typePayload? {
+    switch fieldValue {
+    case .string(.value):
+      return .STRING
+    case .int64(.value):
+      return .INT64
+    case .double(.value):
+      return .DOUBLE
+    case .bytes(.value):
+      return .BYTES
+    case .date(.value):
+      return .TIMESTAMP
+    case .location(.value):
+      return .LOCATION
+    case .reference(.value):
+      return .REFERENCE
+    case .asset(.value):
+      return .ASSET
+    case .string(.list), .int64(.list), .double(.list), .bytes(.list),
+      .date(.list), .location(.list), .reference(.list), .asset(.list):
+      // Already tagged `*_LIST` by the request conversion.
+      return nil
+    }
   }
 }

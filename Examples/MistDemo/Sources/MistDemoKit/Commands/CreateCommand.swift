@@ -48,6 +48,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
     OPTIONS:
       --record-type <type>         Record type (default: Note)
       --record-name <name>         Custom record name
+      --encrypted-fields <a,b>     Fields to send with isEncrypted (schema ENCRYPTED)
       --output-format <format>     Output format
 
     FIELD DEFINITION:
@@ -58,6 +59,8 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
     EXAMPLES:
       mistdemo create --field "title:string:My Note"
       mistdemo create --json-file fields.json
+      mistdemo create --database private --field "secret:string:hidden" \\
+        --encrypted-fields secret
     """
 
   private let config: CreateConfig
@@ -85,11 +88,15 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         recordType: config.recordType,
         recordName: recordName,
         fields: cloudKitFields,
+        encryptedFields: config.encryptedFields,
         // Zone: config.zone - to be added when CloudKitService supports it
         database: config.base.database
       )
 
       // Format and output result
+      if config.output == .table {
+        print(MistDemoConstants.Messages.recordCreated)
+      }
       try await outputResult(recordInfo, format: config.output)
     } catch {
       throw CreateError.operationFailed(error.localizedDescription)

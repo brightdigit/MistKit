@@ -42,9 +42,11 @@ extension OutputFormatting {
     }
 
     if records.count == 1 {
-      // Single record - detailed view
+      // Single record - detailed view. This path is shared by every
+      // record-returning command (query, lookup, create), so the header is
+      // the neutral count line; `create` prints its own success line first.
       let record = records[0]
-      print(MistDemoConstants.Messages.recordCreated)
+      print(String(format: MistDemoConstants.Messages.recordsFound, records.count))
       print("├─ Name: \(record.recordName)")
       print("├─ Type: \(record.recordType ?? "")")
       if let changeTag = record.recordChangeTag {

@@ -205,6 +205,8 @@ do {
 
 The token is valid for 30 minutes by default, or two weeks if the user ticks *Keep me signed in*, and CloudKit returns a rotated token in the `X-Apple-CloudKit-Web-Auth-Token` header of every response. MistKit adopts the rotated token automatically through ``TokenManager/didReceiveRotatedWebAuthToken(_:)`` — see <doc:RequestSigning>.
 
+> Important: An iCloud account with **Advanced Data Protection** turned on cannot complete this sign-in. Apple ID authentication and the trusted-device approval succeed, but CloudKit's own session setup refuses to mint a web-auth token for a third-party container, and the sign-in page ends on a generic "Authentication Error" (or "iCloud Data Web Access is Off" while web access is disabled). The account's CloudKit service keys live only in its iCloud Keychain, and the one-hour web-access window Apple offers covers iCloud.com's own services, not developer containers. There is no error MistKit can surface, because no request ever reaches the API; the only documented way back is the user turning Advanced Data Protection off. Server-to-server access to the public database is unaffected.
+
 ### Web auth token from an iOS app
 
 If your backend acts on behalf of a user who is already signed in to your iOS app, skip the browser. [`CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation) exchanges the device's iCloud session for a web auth token your server can use:

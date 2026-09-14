@@ -83,6 +83,10 @@ extension CloudKitService {
     numbersAsStrings: Bool? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordResult] {
+    for operation in operations {
+      try operation.validateEncryptedFields(for: database)
+    }
+
     let apiOperations: [Components.Schemas.RecordOperation]
     do {
       apiOperations = try operations.map {

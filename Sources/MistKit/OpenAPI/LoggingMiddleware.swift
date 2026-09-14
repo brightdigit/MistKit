@@ -44,7 +44,13 @@ internal struct LoggingMiddleware: ClientMiddleware {
   /// this still stream through to the caller untouched.
   private static let responseBodyLogCap: Int = 64 * 1_024
 
-  private let logger = Logger(subsystem: .middleware)
+  private let logger: Logger
+
+  /// - Parameter logger: Override for tests that need the debug-level body
+  ///   path without bootstrapping the process-wide `LoggingSystem`.
+  internal init(logger: Logger = Logger(subsystem: .middleware)) {
+    self.logger = logger
+  }
 
   internal func intercept(
     _ request: HTTPRequest,
@@ -124,17 +130,43 @@ internal struct LoggingMiddleware: ClientMiddleware {
         return responseBody
       }
 
+      // Read only the first `responseBodyLogCap` bytes. A body larger than the
+      // cap must still reach the caller intact, so the consumed prefix is
+      // replayed ahead of the untouched remainder instead of being dropped
+      // (which previously surfaced as "attempted to create a second iterator"
+      // on every debug-level response over the cap).
+      var iterator = responseBody.makeAsyncIterator()
+      // `consumed` is every byte taken off the source and must be replayed verbatim.
+      // `prefix` is only the capped portion that gets logged — a single chunk can be
+      // larger than the cap, so the two diverge and the logged slice is truncated
+      // mid-chunk rather than after it.
+      var consumed = Data()
+      var prefix = Data()
       do {
-        let bodyData = try await Data(
-          collecting: responseBody,
-          upTo: Self.responseBodyLogCap
-        )
-        logBodyData(bodyData)
-        return HTTPBody(bodyData)
+        while prefix.count < Self.responseBodyLogCap {
+          guard let chunk = try await iterator.next() else {
+            logBodyData(prefix)
+            return HTTPBody(consumed)
+          }
+          consumed.append(contentsOf: chunk)
+          let remainingCap = Self.responseBodyLogCap - prefix.count
+          prefix.append(contentsOf: chunk.prefix(remainingCap))
+        }
       } catch {
         logger.error("📄 Response Body: <failed to read: \(error)>")
-        return responseBody
+        return HTTPBody(
+          ReplayingBodyIterator(prefix: consumed, remainder: iterator, error: error).stream(),
+          length: responseBody.length
+        )
       }
+      logBodyData(prefix)
+      logger.debug(
+        "📄 Response Body: <truncated at \(Self.responseBodyLogCap) bytes; full body passed through>"
+      )
+      return HTTPBody(
+        ReplayingBodyIterator(prefix: prefix, remainder: iterator).stream(),
+        length: responseBody.length
+      )
     }
 
     private func logBodyData(_ bodyData: Data) {

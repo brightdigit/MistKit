@@ -68,6 +68,7 @@ public enum MistDemoRunner {
     await registry.register(FetchZoneRecordChangesCommand.self)
     await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)
+    await registry.register(ProbeEncryptedCommand.self)
     await registry.register(DemoErrorsCommand.self)
     await registry.register(ResolveCommand.self)
     await registry.register(AcceptCommand.self)

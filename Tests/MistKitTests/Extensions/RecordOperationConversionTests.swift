@@ -103,4 +103,60 @@ internal struct RecordOperationConversionTests {
     let apiOperation = try Components.Schemas.RecordOperation(from: operation)
     #expect(apiOperation.record?.recordChangeTag == "abc123")
   }
+
+  @Test("Conversion sets isEncrypted on named encrypted fields")
+  internal func conversionSetsIsEncrypted() throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
+    let operation = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-1",
+      fields: [
+        "title": .string(.value("plain")),
+        "secret": .string(.value("hidden")),
+      ],
+      encryptedFields: ["secret"]
+    )
+
+    let apiOperation = try Components.Schemas.RecordOperation(from: operation)
+    let fields = apiOperation.record?.fields?.additionalProperties
+    #expect(fields?["secret"]?.isEncrypted == true)
+    #expect(fields?["title"]?.isEncrypted == nil)
+  }
+
+  /// Verified live: an encrypted field sent without `type` is read by CloudKit
+  /// as ENCRYPTED_BYTES and rejected with BAD_REQUEST, so every encrypted
+  /// field must carry an explicit tag even where a plain write would not.
+  @Test("Conversion tags encrypted fields with an explicit type")
+  internal func conversionTagsEncryptedFieldTypes() throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
+    let operation = RecordOperation(
+      operationType: .create,
+      recordType: "TestRecord",
+      recordName: "enc-2",
+      fields: [
+        "title": .string(.value("plain")),
+        "secret": .string(.value("hidden")),
+        "count": .int64(.value(7)),
+        "tags": .string(.list(["a", "b"])),
+        "ratio": .double(.value(0.5)),
+      ],
+      encryptedFields: ["secret", "count", "tags", "ratio"]
+    )
+
+    let apiOperation = try Components.Schemas.RecordOperation(from: operation)
+    let fields = apiOperation.record?.fields?.additionalProperties
+    #expect(fields?["secret"]?._type == .STRING)
+    #expect(fields?["count"]?._type == .INT64)
+    #expect(fields?["tags"]?._type == .STRING_LIST)
+    #expect(fields?["ratio"]?._type == .DOUBLE)
+    // Plain fields keep the inference-friendly untagged form.
+    #expect(fields?["title"]?._type == nil)
+  }
 }

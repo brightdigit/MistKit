@@ -35,6 +35,25 @@ internal struct RecordInfoTests {
     #expect(recordInfo.recordName == "rec-1")
     #expect(recordInfo.recordType == "Article")
     #expect(recordInfo.fields.isEmpty)
+    #expect(recordInfo.encryptedFields.isEmpty)
+  }
+
+  @Test("RecordInfo collects encryptedFields when isEncrypted is echoed")
+  internal func recordInfoCollectsEncryptedFields() throws {
+    let mockRecord = Components.Schemas.RecordResponse(
+      recordName: "rec-enc",
+      recordType: "Note",
+      fields: .init(
+        additionalProperties: [
+          "title": .init(value: .StringValue("plain")),
+          "secret": .init(value: .StringValue("hidden"), isEncrypted: true),
+        ]
+      )
+    )
+    let recordInfo = try RecordInfo(from: mockRecord)
+
+    #expect(recordInfo.fields.count == 2)
+    #expect(recordInfo.encryptedFields == ["secret"])
   }
 
   /// CloudKit omits `recordType` for tombstones (deleted records) and other
@@ -52,5 +71,43 @@ internal struct RecordInfoTests {
     #expect(recordInfo.recordName == "rec-deleted")
     #expect(recordInfo.recordType == nil)
     #expect(recordInfo.deleted)
+  }
+
+  /// `encryptedFields` was added after `RecordInfo` became `Codable`, so JSON
+  /// produced before it existed (and hand-written stubs) carries no such key.
+  /// Decoding must default it to empty rather than throw `keyNotFound`.
+  @Test("RecordInfo decodes JSON without an encryptedFields key")
+  internal func recordInfoDecodesWithoutEncryptedFields() throws {
+    let json = """
+      {
+        "recordName": "rec-legacy",
+        "recordType": "Note",
+        "recordChangeTag": null,
+        "fields": {},
+        "created": null,
+        "modified": null,
+        "deleted": false
+      }
+      """
+    let recordInfo = try JSONDecoder().decode(RecordInfo.self, from: Data(json.utf8))
+
+    #expect(recordInfo.recordName == "rec-legacy")
+    #expect(recordInfo.encryptedFields.isEmpty)
+    #expect(!recordInfo.deleted)
+  }
+
+  @Test("RecordInfo round-trips encryptedFields through Codable")
+  internal func recordInfoRoundTripsEncryptedFields() throws {
+    let original = RecordInfo(
+      recordName: "rec-enc",
+      recordType: "Note",
+      fields: ["secret": .string(.value("s"))],
+      encryptedFields: ["secret"]
+    )
+    let data = try JSONEncoder().encode(original)
+    let decoded = try JSONDecoder().decode(RecordInfo.self, from: data)
+
+    #expect(decoded.encryptedFields == ["secret"])
+    #expect(decoded.recordName == "rec-enc")
   }
 }

@@ -1245,6 +1245,8 @@ public enum Components {
         /// The type field is optional. It is required for the scalar types whose JSON
         /// representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
         /// IN/NOT_IN list filters (the *_LIST types specify the list element type).
+        /// Set isEncrypted to true when writing a field declared ENCRYPTED in the
+        /// container schema (private/shared databases only; web-auth required).
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueRequest`.
@@ -1388,27 +1390,45 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
             public var _type: Components.Schemas.FieldValueRequest._typePayload?
+            /// When true, CloudKit encrypts the field value using the authenticated
+            /// user's CloudKit Service key. Only valid for private or shared databases
+            /// with web-auth credentials, against fields declared ENCRYPTED in the
+            /// schema. The value is sent as plaintext over TLS; under standard data
+            /// protection encryption happens on Apple's servers, which can also decrypt
+            /// it on read. Under Advanced Data Protection the service keys leave Apple's
+            /// servers entirely, making these fields end-to-end encrypted and
+            /// undecryptable by CloudKit Web Services — but web-auth sign-in cannot
+            /// complete for an ADP account, so this API is unreachable there.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/isEncrypted`.
+            public var isEncrypted: Swift.Bool?
             /// Creates a new `FieldValueRequest`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - _type: Optional CloudKit field type. Sent for scalar values whose JSON form is
+            ///   - isEncrypted: When true, CloudKit encrypts the field value using the authenticated
             public init(
                 value: Components.Schemas.FieldValueRequest.valuePayload,
-                _type: Components.Schemas.FieldValueRequest._typePayload? = nil
+                _type: Components.Schemas.FieldValueRequest._typePayload? = nil,
+                isEncrypted: Swift.Bool? = nil
             ) {
                 self.value = value
                 self._type = _type
+                self.isEncrypted = isEncrypted
             }
             public enum CodingKeys: String, CodingKey {
                 case value
                 case _type = "type"
+                case isEncrypted
             }
         }
         /// A CloudKit field value from API responses.
         /// May include optional type field for explicit type information.
         /// List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
         /// live CloudKit responses — not a flat LIST tag.
+        /// May echo isEncrypted when the field was stored encrypted.
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueResponse`.
@@ -1550,21 +1570,35 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueResponse/type`.
             public var _type: Components.Schemas.FieldValueResponse._typePayload?
+            /// Present when CloudKit echoes that the field is encrypted. Under
+            /// standard data protection the value in the response is plaintext,
+            /// decrypted server-side. Under Advanced Data Protection the field is
+            /// end-to-end encrypted and CloudKit Web Services cannot decrypt it —
+            /// though in practice web-auth sign-in cannot complete for such an
+            /// account, so these routes are unreachable there.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueResponse/isEncrypted`.
+            public var isEncrypted: Swift.Bool?
             /// Creates a new `FieldValueResponse`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - _type: The CloudKit field type (optional). List responses use STRING_LIST,
+            ///   - isEncrypted: Present when CloudKit echoes that the field is encrypted. Under
             public init(
                 value: Components.Schemas.FieldValueResponse.valuePayload,
-                _type: Components.Schemas.FieldValueResponse._typePayload? = nil
+                _type: Components.Schemas.FieldValueResponse._typePayload? = nil,
+                isEncrypted: Swift.Bool? = nil
             ) {
                 self.value = value
                 self._type = _type
+                self.isEncrypted = isEncrypted
             }
             public enum CodingKeys: String, CodingKey {
                 case value
                 case _type = "type"
+                case isEncrypted
             }
         }
         /// A text string value
