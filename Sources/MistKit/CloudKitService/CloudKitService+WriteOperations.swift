@@ -124,12 +124,14 @@ extension CloudKitService {
         try await responseProcessor.processModifyRecordsResponse(response)
 
       return try (modifyResponse.records ?? []).map { try RecordResult(from: $0) }
-    } catch let cloudKitError as CloudKitError {
-      throw cloudKitError.addingQuotaHint(
+    } catch {
+      // `mapToCloudKitError` passes a `CloudKitError` through unchanged and
+      // unwraps OpenAPIRuntime's `ClientError`, so a transport failure surfaces
+      // as `.networkError(URLError)` like every other operation, not as
+      // `.underlyingError(ClientError)`.
+      throw mapToCloudKitError(error, context: "modifyRecords").addingQuotaHint(
         Self.recordSizeQuotaHint(for: apiOperations)
       )
-    } catch {
-      throw CloudKitError.underlyingError(error)
     }
   }
 }

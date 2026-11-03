@@ -433,11 +433,23 @@ Non-WASI platforms default to `URLSessionTransport` — no transport plumbing is
 required. On Apple platforms, the default convenience initializer used in the
 examples above wires up `URLSessionTransport` automatically.
 
-WASI builds use the generic, transport-accepting initializer; see
-`Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift` for the
-internal entry point. A custom transport on Apple platforms (e.g. for
-server-side Swift with AsyncHTTPClient) is not yet exposed in the public
-v1.0.0-beta surface — track via the project roadmap.
+To use another HTTP client (e.g. AsyncHTTPClient on the server), replay
+recorded responses in your own tests, or wrap the default transport with a
+request log, pass any OpenAPIRuntime `ClientTransport`:
+
+```swift
+let service = CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    credentials: credentials,
+    environment: .production,
+    transport: AsyncHTTPClientTransport()
+)
+```
+
+The transport sees each request after it has been signed, so a logging
+decorator must redact the `ckAPIToken` / `ckWebAuthToken` query items and the
+`X-Apple-CloudKit-*` headers. Asset uploads to the CDN don't go through it.
+See *Configuring MistKit* in the documentation for details.
 
 #### Adaptive Token Manager
 

@@ -80,7 +80,7 @@ let service = CloudKitService(
 
 The service does **not** carry a database. The database is chosen per call, and the appropriate token manager is resolved from ``Credentials`` each time. Misconfiguration (no credential set covers a given call's database/user-context combination) surfaces at the call site as ``CloudKitError/missingCredentials(database:availability:reason:)``, not at construction.
 
-The public initializers wire up `URLSessionTransport`; a transport-accepting initializer exists but is internal today (see <doc:ConfiguringMistKit>).
+The convenience initializers wire up `URLSessionTransport`; the transport-accepting initializers take any `ClientTransport` (see <doc:ConfiguringMistKit>).
 
 ## Pick a database per call
 
