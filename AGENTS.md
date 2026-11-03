@@ -297,6 +297,18 @@ Likewise `zones/modify` takes **no** `atomic` request flag and `ZoneOperation` h
 operation's `zone` as having "a single `zoneID` key". Do not add these speculatively;
 confirm against a live response first.
 
+### CloudKit Management API (issue #135 Phase 1)
+
+Schema export is **not** a CloudKit Web Services endpoint. It is the Management API behind `cktool` / CKTool JS, and `CloudKitManagementService` (`Sources/MistKit/Management/`) is a separate, hand-written client for it — not in `openapi.yaml`, because it lives on a different host with different auth and error shapes. Facts below come from Apple's CKTool JS 1.3.2 npm packages (`@apple/cktool.api.database` `exportSchemaOp`, `@apple/cktool.core` `Configuration`, `@apple/cktool.api.base` security schemes); see `.claude/docs/research/135-management-api-request-format.md`.
+
+- Base URL `https://api.icloud.apple.com` (CKTool JS default `serverUrl`), **not** `api.apple-cloudkit.com`.
+- Export: `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{DEVELOPMENT|PRODUCTION}/schema/export` → `200 text/plain` CloudKit Schema Language (same text as `cktool export-schema`). Path segments are percent-encoded (`encodeURIComponent` in CKTool JS). Environment is upper case.
+- Auth: header `X-Apple-CloudKit-Management-Token: <token>` only (or the `myacinfo` console cookie). No signing, no API token.
+- Errors: JSON `RequestError` `{code, message, reason, detailedMessage?, requestUuid?, retryAfterSeconds?}` → `CloudKitManagementError.requestFailed(ManagementRequestFailure)`; non-JSON → `.httpError`.
+- Token: "scoped to a team and user", "default lifespan of one year", revocable in CloudKit Console Settings (Apple, *Automating CloudKit Development*). Required team role is undocumented.
+- `exportSchema(environment:)` parses the text with `CloudKitSchema(parsing:)` (`Sources/MistKit/Models/Schema/`) into record types, fields (`isQueryable`/`isSortable`/`isSearchable`), grants and roles; `exportSchemaText(environment:)` returns the raw text.
+- Unit tests use **provisional, hand-written** fixtures (`Tests/MistKitTests/Management/ProvisionalManagementFixtures.swift`). No live Management API call has been made yet.
+
 **Protocols:**
 - `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
 

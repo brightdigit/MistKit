@@ -54,6 +54,13 @@ extension HTTPField.Name {
     "X-Apple-CloudKit-Web-Auth-Token"
   )
 
+  /// CloudKit Management API token header field name.
+  /// Authenticates Management API calls (schema export) with a token from
+  /// CloudKit Console; see CKTool JS `ManagementTokenAuth`.
+  internal static let cloudKitManagementToken = Self.knownFieldName(
+    "X-Apple-CloudKit-Management-Token"
+  )
+
   private static func knownFieldName(_ name: String) -> HTTPField.Name {
     guard let fieldName = HTTPField.Name(name) else {
       preconditionFailure("Invalid HTTP field name: \(name)")

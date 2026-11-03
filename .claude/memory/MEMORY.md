@@ -64,3 +64,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Use xcrun for Swift](reference_use_xcrun_for_swift.md) — the swiftly-managed `swift` crashes swift-frontend here; `xcrun swift build/test` works and also fixes MistDemo's 6.4 pin
 - [Lint needs mise trust](reference_lint_needs_mise_trust.md) — an untrusted `mise.toml` silently downgrades SwiftLint and skips Periphery, inventing phantom findings
 - [Android emulator flake](reference_android_emulator_flake.md) — an Android job that fails with `adb ... TCP port 5554` after emitting the test modules is a flake; re-run, don't edit source
+- [Management API request format](reference_management_api_request_format.md) — schema export is `api.icloud.apple.com/v1/database/teams/…/schema/export` with `X-Apple-CloudKit-Management-Token`; from CKTool JS 1.3.2, not yet live-verified (#135)
