@@ -34,7 +34,17 @@ internal import Foundation
 /// Follows the grammar in Apple's "Integrating a Text-Based Schema into Your
 /// Workflow": `DEFINE SCHEMA` followed by `CREATE ROLE` and `RECORD TYPE`
 /// statements, each ending in `;`. Keywords are case-insensitive.
+///
+/// Strictness: bare names can't start with `_` or be one of
+/// ``reservedWords``; a trailing comma before `)` and a missing `;` after the
+/// last declaration are tolerated; a role, record type or field defined twice
+/// is an error, as is `ENCRYPTED` on a type that can't be encrypted.
 internal struct SchemaParser {
+  /// Words that must be quoted to be used as names.
+  internal static let reservedWords: Set<String> = [
+    "GRANT", "PREFERRED", "QUERYABLE", "SORTABLE", "SEARCHABLE",
+  ]
+
   private let text: String
   internal private(set) var tokens: [SchemaToken] = []
   internal var position = 0
@@ -55,93 +65,119 @@ internal struct SchemaParser {
     try expectKeyword("DEFINE")
     try expectKeyword("SCHEMA")
 
-    var roles: [String] = []
-    var recordTypes: [SchemaRecordType] = []
+    var schema = CloudKitSchema()
     while current.kind != .end {
-      if current.isKeyword("CREATE") {
-        advance()
-        try expectKeyword("ROLE")
-        roles.append(try identifier(describing: "a role name"))
-      } else if current.isKeyword("RECORD") {
-        recordTypes.append(try recordType())
-      } else {
-        throw unexpected(expecting: "CREATE ROLE or RECORD TYPE")
+      try declaration(into: &schema)
+      // Apple's grammar ends every declaration with ";". Allow it to be left
+      // off the last one, since nothing can be misread there.
+      guard consumeSymbol(";") || current.kind == .end else {
+        throw unexpected(expecting: "\";\"")
       }
-      try expectSymbol(";")
     }
-    return CloudKitSchema(roles: roles, recordTypes: recordTypes)
+    return schema
   }
 
   // MARK: - Statements
 
-  private mutating func recordType() throws -> SchemaRecordType {
-    try expectKeyword("RECORD")
-    try expectKeyword("TYPE")
-    let name = try identifier(describing: "a record type name")
+  private mutating func declaration(into schema: inout CloudKitSchema) throws {
+    if consumeKeyword("CREATE") {
+      try expectKeyword("ROLE")
+      let role = try identifier(describing: "a role name")
+      guard !schema.roles.contains(role.name) else {
+        throw SchemaParseError(
+          at: role.token,
+          message: "role \"\(role.name)\" is already defined"
+        )
+      }
+      schema.roles.append(role.name)
+    } else if current.isKeyword("RECORD") {
+      let line = current.line
+      advance()
+      try expectKeyword("TYPE")
+      let name = try identifier(describing: "a record type name")
+      guard schema.recordType(named: name.name) == nil else {
+        throw SchemaParseError(
+          at: name.token,
+          message: "record type \"\(name.name)\" is already defined"
+        )
+      }
+      schema.recordTypes.append(try recordTypeBody(named: name.name, line: line))
+    } else {
+      throw unexpected(expecting: "CREATE ROLE or RECORD TYPE")
+    }
+  }
+
+  private mutating func recordTypeBody(named name: String, line: Int) throws
+    -> SchemaRecordType
+  {
+    var recordType = SchemaRecordType(name: name, sourceLine: line)
     try expectSymbol("(")
-
-    var fields: [SchemaField] = []
-    var grants: [SchemaGrant] = []
-    while !isSymbol(")") {
-      if current.isKeyword("GRANT") {
-        grants.append(try grant())
-      } else {
-        fields.append(try field())
-      }
-      guard isSymbol(",") else {
-        break
-      }
-      advance()
+    if consumeSymbol(")") {
+      return recordType
     }
-    try expectSymbol(")")
-    return SchemaRecordType(name: name, fields: fields, grants: grants)
+    while true {
+      try element(into: &recordType)
+      // A trailing comma before ")" is tolerated.
+      guard consumeSymbol(",") else {
+        guard consumeSymbol(")") else {
+          throw unexpected(expecting: "\",\" or \")\"")
+        }
+        return recordType
+      }
+      if consumeSymbol(")") {
+        return recordType
+      }
+    }
   }
 
-  private mutating func field() throws -> SchemaField {
+  private mutating func element(into recordType: inout SchemaRecordType) throws {
+    if consumeKeyword("GRANT") {
+      recordType.grants.append(try grant())
+      return
+    }
     let name = try identifier(describing: "a field name or GRANT")
-    let type = try dataType()
-    var isQueryable = false
-    var isSortable = false
-    var isSearchable = false
-    while case .word = current.kind {
-      if current.isKeyword("QUERYABLE") {
-        isQueryable = true
-      } else if current.isKeyword("SORTABLE") {
-        isSortable = true
-      } else if current.isKeyword("SEARCHABLE") {
-        isSearchable = true
-      } else {
-        throw unexpected(expecting: "QUERYABLE, SORTABLE, SEARCHABLE, ',' or ')'")
+    guard recordType.field(named: name.name) == nil else {
+      throw SchemaParseError(
+        at: name.token,
+        message: "field \"\(name.name)\" is already defined in \(recordType.name)"
+      )
+    }
+    var field = SchemaField(name: name.name, type: try dataType(), sourceLine: name.token.line)
+    try indexes(into: &field)
+    recordType.fields.append(field)
+  }
+
+  /// `QUERYABLE`, `SEARCHABLE` and `SORTABLE`, in any order.
+  private mutating func indexes(into field: inout SchemaField) throws {
+    while let keyword = current.keyword {
+      switch keyword {
+      case "QUERYABLE": field.isQueryable = true
+      case "SORTABLE": field.isSortable = true
+      case "SEARCHABLE": field.isSearchable = true
+      default:
+        throw SchemaParseError(at: current, message: "unknown field option \"\(keyword)\"")
       }
       advance()
     }
-    return SchemaField(
-      name: name,
-      type: type,
-      isQueryable: isQueryable,
-      isSortable: isSortable,
-      isSearchable: isSearchable
-    )
   }
 
+  /// `READ, WRITE TO role`, after `GRANT`.
   private mutating func grant() throws -> SchemaGrant {
-    try expectKeyword("GRANT")
-    var permissions: [SchemaPermission] = []
-    repeat {
-      if !permissions.isEmpty {
-        advance()
-      }
-      guard
-        case .word(let word) = current.kind,
-        let permission = SchemaPermission(rawValue: word.uppercased())
-      else {
-        throw unexpected(expecting: "READ, CREATE or WRITE")
-      }
-      permissions.append(permission)
-      advance()
-    } while isSymbol(",") && nextIsPermission()
+    var permissions = [try permission()]
+    while consumeSymbol(",") {
+      permissions.append(try permission())
+    }
     try expectKeyword("TO")
-    let role = try identifier(describing: "a role name")
+    let role = try identifier(describing: "a role name").name
     return SchemaGrant(permissions: permissions, role: role)
+  }
+
+  private mutating func permission() throws -> SchemaPermission {
+    guard let keyword = current.keyword, let permission = SchemaPermission(rawValue: keyword)
+    else {
+      throw unexpected(expecting: "READ, CREATE or WRITE")
+    }
+    advance()
+    return permission
   }
 }

@@ -129,4 +129,33 @@ public struct QueryFilter: Sendable {
   public static func notListMemberBeginsWith(_ field: String, _ prefix: String) -> QueryFilter {
     QueryFilter(FilterBuilder.notListMemberBeginsWith(field, prefix))
   }
+
+  // MARK: Location Filters
+
+  /// Creates a NEAR filter: records whose `LOCATION` field lies within
+  /// `distance` meters of `location`.
+  ///
+  /// - Parameters:
+  ///   - field: The `LOCATION` field, which must be `QUERYABLE`.
+  ///   - location: The center of the circle.
+  ///   - distance: The radius, in meters.
+  /// - Returns: A `NEAR` filter carrying the distance.
+  public static func near(_ field: String, _ location: Location, distance: Double) -> QueryFilter {
+    QueryFilter(FilterBuilder.near(field, location, distance: distance))
+  }
+
+  // MARK: Record Name Filters
+
+  /// Creates a filter matching the record named `recordName`.
+  ///
+  /// CloudKit filters record names on the `___recordID` system field with a
+  /// `REFERENCE` value; this builds that filter.
+  public static func recordName(equals recordName: String) -> QueryFilter {
+    QueryFilter(FilterBuilder.recordName(recordName, comparator: .EQUALS))
+  }
+
+  /// Creates a filter matching every record except the one named `recordName`.
+  public static func recordName(notEquals recordName: String) -> QueryFilter {
+    QueryFilter(FilterBuilder.recordName(recordName, comparator: .NOT_EQUALS))
+  }
 }

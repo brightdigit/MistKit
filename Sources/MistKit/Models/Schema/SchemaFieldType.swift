@@ -33,13 +33,19 @@ internal import Foundation
 ///
 /// Mirrors the grammar's `data-type`: a primitive type, optionally
 /// `ENCRYPTED`, optionally wrapped in `LIST<…>`.
-public struct SchemaFieldType: Sendable, Hashable {
+public struct SchemaFieldType: Sendable, Hashable, Codable {
   /// The primitive (element) type.
-  public let primitive: SchemaPrimitiveType
+  public var primitive: SchemaPrimitiveType
   /// Whether the value is declared `ENCRYPTED`.
-  public let isEncrypted: Bool
+  public var isEncrypted: Bool
   /// Whether the field is a `LIST<…>` of ``primitive``.
-  public let isList: Bool
+  public var isList: Bool
+
+  /// The type as the language writes it, such as `LIST<ENCRYPTED STRING>`.
+  public var schemaText: String {
+    let element = isEncrypted ? "ENCRYPTED \(primitive.schemaText)" : primitive.schemaText
+    return isList ? "LIST<\(element)>" : element
+  }
 
   /// Creates a field type.
   public init(

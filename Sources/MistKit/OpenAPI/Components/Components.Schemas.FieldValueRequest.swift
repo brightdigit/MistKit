@@ -32,6 +32,9 @@ internal import MistKitOpenAPI
 
 /// Extension to convert MistKit FieldValue to OpenAPI FieldValueRequest for API requests
 extension Components.Schemas.FieldValueRequest {
+  /// A cleared field, `{"value": null}`.
+  internal static let cleared = Self(value: .ClearedValue(nil))
+
   // Initialize from MistKit FieldValue for CloudKit API requests.
   //
   // CloudKit infers a field's type from the value structure, so most scalar values are sent
@@ -181,6 +184,7 @@ extension Components.Schemas.FieldValueRequest {
     }
     return Components.Schemas.ReferenceValue(
       recordName: reference.recordName,
+      zoneID: reference.wireZoneID.map(Components.Schemas.ZoneID.init(from:)),
       action: action
     )
   }

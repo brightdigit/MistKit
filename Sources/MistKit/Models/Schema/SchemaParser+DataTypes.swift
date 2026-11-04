@@ -30,62 +30,48 @@
 internal import Foundation
 
 extension SchemaParser {
-  /// Primitive type keywords that take no further clauses.
-  private static let simplePrimitives: [String: SchemaPrimitiveType] = [
-    "ASSET": .asset,
-    "BYTES": .bytes,
-    "DOUBLE": .double,
-    "INT64": .int64,
-    "LOCATION": .location,
-    "REFERENCE": .reference,
-    "STRING": .string,
-    "TIMESTAMP": .timestamp,
-  ]
-
   /// `data-type`: a primitive type, optionally wrapped in `LIST<…>`.
   internal mutating func dataType() throws -> SchemaFieldType {
-    if current.isKeyword("LIST") {
-      advance()
-      try expectSymbol("<")
+    guard consumeKeyword("LIST") else {
       let (primitive, isEncrypted) = try primitiveType()
-      try expectSymbol(">")
-      return SchemaFieldType(primitive, isEncrypted: isEncrypted, isList: true)
+      return SchemaFieldType(primitive, isEncrypted: isEncrypted)
     }
+    try expectSymbol("<")
     let (primitive, isEncrypted) = try primitiveType()
-    return SchemaFieldType(primitive, isEncrypted: isEncrypted)
+    try expectSymbol(">")
+    return SchemaFieldType(primitive, isEncrypted: isEncrypted, isList: true)
   }
 
   /// `primitive-type`, with an optional leading `ENCRYPTED`.
   private mutating func primitiveType() throws -> (SchemaPrimitiveType, Bool) {
-    let isEncrypted = current.isKeyword("ENCRYPTED")
-    if isEncrypted {
-      advance()
-    }
-    guard case .word(let word) = current.kind else {
+    let isEncrypted = consumeKeyword("ENCRYPTED")
+    let token = current
+    guard let keyword = token.keyword else {
       throw unexpected(expecting: "a data type")
     }
-    let keyword = word.uppercased()
-    if keyword == "NUMBER" {
+    let primitive: SchemaPrimitiveType
+    if let simple = SchemaPrimitiveType.keywords[keyword] {
       advance()
-      return (.number(preferredAs: try numberPreference()), isEncrypted)
-    }
-    guard let primitive = Self.simplePrimitives[keyword] else {
+      primitive = simple
+    } else if keyword == "NUMBER" {
+      advance()
+      primitive = .number(preferredAs: try numberPreference())
+    } else {
       throw unexpected(expecting: "a data type")
     }
-    advance()
+    guard !isEncrypted || primitive.canBeEncrypted else {
+      throw SchemaParseError(at: token, message: "\(keyword) can't be ENCRYPTED")
+    }
     return (primitive, isEncrypted)
   }
 
   /// An optional `PREFERRED AS { INT64 | DOUBLE }` after `NUMBER`.
   private mutating func numberPreference() throws -> SchemaNumberPreference? {
-    guard current.isKeyword("PREFERRED") else {
+    guard consumeKeyword("PREFERRED") else {
       return nil
     }
-    advance()
     try expectKeyword("AS")
-    guard
-      case .word(let word) = current.kind,
-      let preference = SchemaNumberPreference(rawValue: word.uppercased())
+    guard let preference = current.keyword.flatMap(SchemaNumberPreference.init(rawValue:))
     else {
       throw unexpected(expecting: "INT64 or DOUBLE")
     }

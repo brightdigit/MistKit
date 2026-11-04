@@ -207,9 +207,12 @@ MistKit/
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` → `[ZoneChangeResult]`, `createZone(...)`, `deleteZone(...)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
 | `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
-| `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
+| `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
+| `CloudKitService+QueryPages.swift` | `queryRecordPages(_:limit:desiredKeys:continuationMarker:zoneID:database:)` — `AsyncThrowingStream` of query pages, with the stuck-marker guard |
+| `CloudKitService+ModifyAllRecords.swift` | `modifyAllRecords(_:atomicZones:database:batchSize:)` — groups `ZonedRecordOperation`s by zone, chunks at `maxRecordsPerRequest`, `atomic` per zone |
+| `CloudKitService+WebAuthSignIn.swift` | `fetchWebAuthSignInURL()` — the `redirectURL` of an API-token-only `users/caller` (`AUTHENTICATION_REQUIRED`) |
 | `CloudKitService+ShareOperations.swift` | `resolveShares(_:)`, `acceptShares(_:)` *(public DB + web-auth, fixed — no `database:` parameter)* |
 | `CloudKitService+CreateShare.swift` | `createShare(...)` *(private custom zone + web-auth; returns ``CreatedShare``)* |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
@@ -254,7 +257,7 @@ Set `ShortGUIDDictionary.shouldFetchRootRecord` to have CloudKit include the sha
 
 | Primitive (single request) | Auto-chunking convenience |
 |----------------------------|---------------------------|
-| `lookupRecords(recordNames:desiredKeys:database:)` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` |
+| `lookupRecords(recordNames:desiredKeys:zoneID:database:)` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` |
 | `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` *(overloads the no-arg address-book form)* |
 
 The `users/lookup/email` and `users/lookup/id` primitives (`lookupUsersByEmail` / `lookupUsersByRecordName`) are **deprecated by Apple** in favor of POST `users/discover` (verified against Apple's archived CloudKit Web Services reference), so they intentionally get **no** chunking convenience — callers needing >200 should use `discoverAllUserIdentities(lookupInfos:)`. `users/lookup/contacts` is likewise deprecated and unwrapped.
@@ -627,3 +630,11 @@ Versioned, in-repo agent memory is the source of truth for how to work in this r
 **Proactive maintenance:** when the human corrects you or gives an always/never instruction, append to `.claude/agent-notes.md` without being asked. When you learn a durable project fact, write a memory file under `.claude/memory/` and add a one-line index entry in `MEMORY.md`.
 
 **No native/global project memory:** `.claude/memory/` replaces Claude Code's `~/.claude/projects/<project>/memory/`, Cursor memories, and similar stores for this project. Do not save project-scoped memories there. The only allowed native-store entry is a pointer that memories live in-repo at `.claude/memory/`.
+
+### Wire format, retry hints, schema text (Mistico #119)
+
+- **Public wire codecs** (`Sources/MistKit/Models/WireFormat/`): `WireFieldValue` (`{"value": …, "type": …}`, `nil` = cleared field `{"value": null}`), `WireRecordOperation`, `ModifyRecordsRequestBody`. `FieldTypeTagging.whenRequired` matches what MistKit sends; `.always` tags every value like a response. Deletes write only `recordName` + `recordChangeTag`. `RecordOperation.clearedFields` goes out as `{"value": null}` (the `ClearedValue` member of `FieldValueRequest.value` in `openapi.yaml`).
+- **Errors**: `ErrorResponse.retryAfter`/`redirectURL` decode onto `CloudKitError.throttled(reason:retryAfter:)`, `.tryAgainLater(reason:retryAfter:)`, `.authenticationRequired(reason:redirectURL:)` (defaulted associated values). Public `reason`, `retryAfter`, `redirectURL`, `isRetryable`. MistKit never retries.
+- **Zones**: `lookupRecords`/`lookupAllRecords` take `zoneID:`; `Reference.zoneID` is sent only outside `_defaultZone`; `RecordInfo.zoneID` comes from the response.
+- **Queries**: `QueryFilter.near(_:_:distance:)` (meters, `Filter.distance`), `QueryFilter.recordName(equals:)` / `(notEquals:)` (`___recordID` as REFERENCE), `FilterComparator` + `SchemaFieldType.allowedComparators` + `requiresSortableIndex`.
+- **Schema text**: `CloudKitSchema.schemaText` writes the `cktool` layout and round-trips with `init(parsing:)`; `annotatingSourceLines()`, `SchemaField.sourceLine`/`SchemaRecordType.sourceLine` (ignored by `==`), `writtenIdentifier(_:)` quoting, `SchemaField.implicitSystemFields`, `fieldsIncludingImplicit`, `SchemaPrimitiveType.canBeEncrypted`; models are `Codable` with `var` properties. Parser strictness: bare `_names` and `GRANT`/`PREFERRED`/`QUERYABLE`/`SORTABLE`/`SEARCHABLE` must be quoted; trailing `,` before `)` and a missing final `;` are tolerated; duplicates and `ENCRYPTED` on a non-encryptable type are errors.

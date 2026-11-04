@@ -118,17 +118,25 @@ OpenAPI spec enumerates onto a dedicated case:
 | `ACCESS_DENIED` | 403 | ``CloudKitError/accessDenied(reason:)`` |
 | `ATOMIC_ERROR` | 400 | ``CloudKitError/atomicFailure(reason:)`` |
 | `AUTHENTICATION_FAILED` | 401 | ``CloudKitError/authenticationFailed(reason:)`` |
-| `AUTHENTICATION_REQUIRED` | 421 | ``CloudKitError/authenticationRequired(reason:)`` |
+| `AUTHENTICATION_REQUIRED` | 421 | ``CloudKitError/authenticationRequired(reason:redirectURL:)`` |
 | `BAD_REQUEST` | 400 | ``CloudKitError/badRequest(reason:)`` |
 | `CONFLICT` | 409 | ``CloudKitError/conflict(reason:)`` |
 | `EXISTS` | 409 | ``CloudKitError/exists(reason:)`` |
 | `INTERNAL_ERROR` | 500 | ``CloudKitError/internalServerError(reason:)`` |
 | `NOT_FOUND` | 404 | ``CloudKitError/notFound(reason:)`` |
 | `QUOTA_EXCEEDED` | 413 | ``CloudKitError/quotaExceeded(reason:hint:)`` |
-| `THROTTLED` | 429 | ``CloudKitError/throttled(reason:)`` |
-| `TRY_AGAIN_LATER` | 503 | ``CloudKitError/tryAgainLater(reason:)`` |
+| `THROTTLED` | 429 | ``CloudKitError/throttled(reason:retryAfter:)`` |
+| `TRY_AGAIN_LATER` | 503 | ``CloudKitError/tryAgainLater(reason:retryAfter:)`` |
 | `VALIDATING_REFERENCE_ERROR` | 412 | ``CloudKitError/validatingReferenceError(reason:)`` |
 | `ZONE_NOT_FOUND` | 404 | ``CloudKitError/zoneNotFound(reason:)`` |
+
+``CloudKitError/reason``, ``CloudKitError/retryAfter`` and
+``CloudKitError/redirectURL`` read the failure body's fields whatever the case.
+``CloudKitError/isRetryable`` is `true` for `THROTTLED` and `TRY_AGAIN_LATER`
+(request-level or per-record); MistKit never retries on its own, so a caller
+that does should wait `retryAfter` seconds when it's set and back off otherwise.
+``CloudKitService/fetchWebAuthSignInURL()`` returns the `redirectURL` of an
+`AUTHENTICATION_REQUIRED` answer to an API-token-only request: the web sign-in page.
 
 ```swift
 do {

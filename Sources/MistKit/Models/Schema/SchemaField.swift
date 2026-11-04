@@ -30,21 +30,40 @@
 internal import Foundation
 
 /// A field declaration inside a ``SchemaRecordType``.
-public struct SchemaField: Sendable, Hashable {
+///
+/// Equality and hashing ignore ``sourceLine``, so a parsed field equals one
+/// built in code.
+public struct SchemaField: Sendable, Hashable, Codable {
+  /// The fields every record type has, whether or not the schema lists them,
+  /// in the order CloudKit exports them. None is indexed.
+  ///
+  /// A schema lists one of them only to give it an index, such as
+  /// `"___recordID" REFERENCE QUERYABLE`.
+  public static let implicitSystemFields: [Self] = [
+    Self(name: "___createTime", type: SchemaFieldType(.timestamp)),
+    Self(name: "___createdBy", type: SchemaFieldType(.reference)),
+    Self(name: "___etag", type: SchemaFieldType(.string)),
+    Self(name: "___modTime", type: SchemaFieldType(.timestamp)),
+    Self(name: "___modifiedBy", type: SchemaFieldType(.reference)),
+    Self(name: "___recordID", type: SchemaFieldType(.reference)),
+  ]
+
   /// The field's name, without quotes.
-  public let name: String
+  public var name: String
   /// The field's data type.
-  public let type: SchemaFieldType
+  public var type: SchemaFieldType
   /// Whether the field has a `QUERYABLE` index.
   ///
   /// CloudKit rejects query filters on fields without one.
-  public let isQueryable: Bool
+  public var isQueryable: Bool
   /// Whether the field has a `SORTABLE` index.
   ///
   /// CloudKit rejects sorts and range filters on fields without one.
-  public let isSortable: Bool
+  public var isSortable: Bool
   /// Whether the field has a `SEARCHABLE` (full-text) index.
-  public let isSearchable: Bool
+  public var isSearchable: Bool
+  /// The 1-based line the declaration starts on, when parsed from text.
+  public var sourceLine: Int?
 
   /// Whether this is one of CloudKit's system fields, such as `___recordID`.
   ///
@@ -59,12 +78,29 @@ public struct SchemaField: Sendable, Hashable {
     type: SchemaFieldType,
     isQueryable: Bool = false,
     isSortable: Bool = false,
-    isSearchable: Bool = false
+    isSearchable: Bool = false,
+    sourceLine: Int? = nil
   ) {
     self.name = name
     self.type = type
     self.isQueryable = isQueryable
     self.isSortable = isSortable
     self.isSearchable = isSearchable
+    self.sourceLine = sourceLine
+  }
+
+  /// Whether two declarations match, ignoring their source lines.
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.name == rhs.name && lhs.type == rhs.type && lhs.isQueryable == rhs.isQueryable
+      && lhs.isSortable == rhs.isSortable && lhs.isSearchable == rhs.isSearchable
+  }
+
+  /// Hashes everything ``==`` compares.
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(name)
+    hasher.combine(type)
+    hasher.combine(isQueryable)
+    hasher.combine(isSortable)
+    hasher.combine(isSearchable)
   }
 }

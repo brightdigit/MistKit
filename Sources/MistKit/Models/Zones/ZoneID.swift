@@ -47,6 +47,11 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   /// `nil` when the server omits the key.
   public let zoneType: ZoneType?
 
+  /// Whether this names ``defaultZone`` (by name, for the current user).
+  public var isDefaultZone: Bool {
+    zoneName == Self.defaultZone.zoneName && ownerName == nil
+  }
+
   /// Initialize a zone identifier
   /// - Parameters:
   ///   - zoneName: The zone name
@@ -56,6 +61,15 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
     self.zoneName = zoneName
     self.ownerName = ownerName
     self.zoneType = zoneType
+  }
+
+  /// A reference's zone from the wire schema: name and owner only, since a
+  /// reference never carries a zone type.
+  internal init(referenceZone schema: Components.Schemas.ZoneID) {
+    self.init(
+      zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
+      ownerName: schema.ownerRecordName
+    )
   }
 
   /// Lift a zone identifier from the wire schema.

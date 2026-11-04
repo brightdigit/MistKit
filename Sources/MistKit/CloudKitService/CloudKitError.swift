@@ -62,7 +62,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   case authenticationFailed(reason: String?)
   /// HTTP 421 / `AUTHENTICATION_REQUIRED`. The request needs a user-attributed
   /// credential; the caller must complete the web-auth sign-in flow.
-  case authenticationRequired(reason: String?)
+  ///
+  /// `redirectURL` is the sign-in page CloudKit sends with the failure, when
+  /// it sends one. See ``CloudKitError/redirectURL``.
+  case authenticationRequired(reason: String?, redirectURL: String? = nil)
   /// HTTP 409 / `CONFLICT`. The supplied `recordChangeTag` did not match the
   /// server's copy — the record changed since it was fetched.
   case conflict(reason: String?)
@@ -76,9 +79,16 @@ public enum CloudKitError: LocalizedError, Sendable {
   case notFound(reason: String?)
   /// HTTP 429 / `THROTTLED`. The caller is being rate limited; back off and
   /// retry.
-  case throttled(reason: String?)
+  ///
+  /// `retryAfter` is the number of seconds CloudKit asked the caller to wait,
+  /// when it sent one. MistKit never retries on its own; see
+  /// ``CloudKitError/isRetryable``.
+  case throttled(reason: String?, retryAfter: Int? = nil)
   /// HTTP 503 / `TRY_AGAIN_LATER`. CloudKit is temporarily unavailable.
-  case tryAgainLater(reason: String?)
+  ///
+  /// `retryAfter` is the number of seconds CloudKit asked the caller to wait,
+  /// when it sent one.
+  case tryAgainLater(reason: String?, retryAfter: Int? = nil)
   /// HTTP 412 / `VALIDATING_REFERENCE_ERROR`. A reference field pointed at a
   /// record that failed validation — typically a missing target record.
   case validatingReferenceError(reason: String?)

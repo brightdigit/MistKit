@@ -30,7 +30,7 @@
 internal import Foundation
 
 /// A primitive type in CloudKit Schema Language.
-public enum SchemaPrimitiveType: Sendable, Hashable {
+public enum SchemaPrimitiveType: Sendable, Hashable, Codable {
   /// `ASSET`
   case asset
   /// `BYTES`
@@ -50,4 +50,47 @@ public enum SchemaPrimitiveType: Sendable, Hashable {
   case string
   /// `TIMESTAMP`
   case timestamp
+
+  /// The one-word keyword for each primitive except `NUMBER`.
+  internal static let keywords: [String: Self] = [
+    "ASSET": .asset,
+    "BYTES": .bytes,
+    "DOUBLE": .double,
+    "INT64": .int64,
+    "LOCATION": .location,
+    "REFERENCE": .reference,
+    "STRING": .string,
+    "TIMESTAMP": .timestamp,
+  ]
+
+  /// Whether the language allows `ENCRYPTED` in front of this type.
+  ///
+  /// CloudKit encrypts `BYTES`, `DOUBLE`, `INT64`, `LOCATION`, `STRING` and
+  /// `TIMESTAMP` values; `ASSET` (encrypted already), `REFERENCE` and `NUMBER`
+  /// can't be declared `ENCRYPTED`.
+  public var canBeEncrypted: Bool {
+    switch self {
+    case .bytes, .double, .int64, .location, .string, .timestamp:
+      return true
+    case .asset, .number, .reference:
+      return false
+    }
+  }
+
+  /// The type as the language writes it, such as `INT64` or
+  /// `NUMBER PREFERRED AS DOUBLE`.
+  public var schemaText: String {
+    switch self {
+    case .asset: return "ASSET"
+    case .bytes: return "BYTES"
+    case .double: return "DOUBLE"
+    case .int64: return "INT64"
+    case .location: return "LOCATION"
+    case .number(let preference):
+      return preference.map { "NUMBER PREFERRED AS \($0.rawValue)" } ?? "NUMBER"
+    case .reference: return "REFERENCE"
+    case .string: return "STRING"
+    case .timestamp: return "TIMESTAMP"
+    }
+  }
 }

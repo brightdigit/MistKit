@@ -193,6 +193,8 @@ paths:
             schema:
               type: object
               properties:
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
                 records:
                   type: array
                   items:
@@ -1374,6 +1376,12 @@ components:
           type: string
         fieldValue:
           $ref: '#/components/schemas/FieldValueRequest'
+        distance:
+          type: number
+          format: double
+          description: |
+            The radius, in meters, around the `fieldValue` location. Used only
+            with the NEAR comparator on a LOCATION field.
 
     Sort:
       type: object
@@ -1467,6 +1475,8 @@ components:
         recordName:
           type: string
           description: The unique identifier for the record
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
         recordType:
           type: string
           description: The record type (schema name)
@@ -1543,6 +1553,7 @@ components:
             - $ref: '#/components/schemas/ReferenceValue'
             - $ref: '#/components/schemas/AssetValue'
             - $ref: '#/components/schemas/ListValue'
+            - $ref: '#/components/schemas/ClearedValue'
         type:
           type: string
           enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
@@ -1564,6 +1575,14 @@ components:
             complete for an ADP account, so this API is unreachable there.
       required:
         - value
+
+    ClearedValue:
+      type: string
+      nullable: true
+      description: |
+        JSON `null`. A modify request that sets a field's value to null clears
+        the field. Request-only: listed last in `FieldValueRequest.value` so a
+        non-null value never decodes as it.
 
     FieldValueResponse:
       type: object
@@ -1675,6 +1694,8 @@ components:
         recordName:
           type: string
           description: The record name being referenced
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
         action:
           type: string
           enum: [NONE, DELETE_SELF, VALIDATE]
@@ -2527,8 +2548,14 @@ components:
             Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
         reason:
           type: string
+        retryAfter:
+          type: integer
+          description: |
+            Suggested seconds to wait before retrying. Sent with THROTTLED and
+            TRY_AGAIN_LATER; absent otherwise.
         redirectURL:
           type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
 
   responses:
     Failure:

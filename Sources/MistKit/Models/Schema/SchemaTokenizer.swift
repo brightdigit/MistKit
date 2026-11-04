@@ -45,6 +45,10 @@ internal struct SchemaTokenizer {
     self.characters = Array(text)
   }
 
+  private static func isWordStart(_ character: Character) -> Bool {
+    character == "_" || (character.isASCII && character.isLetter)
+  }
+
   private static func isWordCharacter(_ character: Character) -> Bool {
     character == "_" || (character.isASCII && (character.isLetter || character.isNumber))
   }
@@ -127,7 +131,7 @@ internal struct SchemaTokenizer {
     if character == "\"" {
       return try quotedIdentifier(line: startLine, column: startColumn)
     }
-    if Self.isWordCharacter(character) {
+    if Self.isWordStart(character) {
       var word = ""
       while let next = peek(), Self.isWordCharacter(next) {
         word.append(next)
@@ -138,7 +142,7 @@ internal struct SchemaTokenizer {
     throw SchemaParseError(
       line: startLine,
       column: startColumn,
-      message: "unexpected character '\(character)'"
+      message: "unexpected character \"\(character)\""
     )
   }
 
@@ -150,6 +154,13 @@ internal struct SchemaTokenizer {
     while let character = peek() {
       if character == "\"" {
         advance()
+        guard !name.isEmpty else {
+          throw SchemaParseError(
+            line: startLine,
+            column: startColumn,
+            message: "empty quoted identifier"
+          )
+        }
         return SchemaToken(kind: .quoted(name), line: startLine, column: startColumn)
       }
       if character.isNewline {

@@ -46,14 +46,22 @@ internal struct SchemaToken: Sendable, Equatable {
   internal let line: Int
   internal let column: Int
 
-  /// A short description for error messages.
+  /// How the token reads in an error message, such as `"RECORD"`.
   internal var displayName: String {
     switch kind {
-    case .word(let word): "'\(word)'"
-    case .quoted(let name): "\"\(name)\""
-    case .symbol(let symbol): "'\(symbol)'"
-    case .end: "end of schema"
+    case .word(let word): "\"\(word)\""
+    case .quoted(let name): "'\"\(name)\"'"
+    case .symbol(let symbol): "\"\(symbol)\""
+    case .end: "the end of the file"
     }
+  }
+
+  /// The word, uppercased, when this is a bare word.
+  internal var keyword: String? {
+    if case .word(let word) = kind {
+      return word.uppercased()
+    }
+    return nil
   }
 
   /// Whether this is a bare word matching `keyword` case-insensitively.

@@ -39,14 +39,14 @@ internal import Foundation
 ///
 /// CloudKit doesn't preserve comments and may reorder elements when it returns
 /// a schema, so two exports of the same schema can differ textually.
-public struct CloudKitSchema: Sendable, Hashable {
+public struct CloudKitSchema: Sendable, Hashable, Codable {
   /// Custom security roles declared with `CREATE ROLE`, in source order.
   ///
   /// The implicit roles (`_creator`, `_icloud`, `_world`) are not listed
   /// unless the schema declares them.
-  public let roles: [String]
+  public var roles: [String]
   /// Record types, in source order.
-  public let recordTypes: [SchemaRecordType]
+  public var recordTypes: [SchemaRecordType]
 
   /// Creates a schema from already-parsed parts.
   public init(roles: [String] = [], recordTypes: [SchemaRecordType] = []) {
@@ -57,6 +57,11 @@ public struct CloudKitSchema: Sendable, Hashable {
   /// Parses CloudKit Schema Language text.
   ///
   /// - Parameter text: A complete schema starting with `DEFINE SCHEMA`.
+  /// Bare names starting with `_` and the words `GRANT`, `PREFERRED`,
+  /// `QUERYABLE`, `SORTABLE` and `SEARCHABLE` must be quoted. A trailing comma
+  /// before `)` and a missing `;` after the last declaration are tolerated.
+  /// Each record type and field keeps its ``SchemaField/sourceLine``.
+  ///
   /// - Throws: ``SchemaParseError`` naming the line and column of the first
   ///   problem.
   public init(parsing text: String) throws {

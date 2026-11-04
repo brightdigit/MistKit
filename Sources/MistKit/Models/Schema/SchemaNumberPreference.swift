@@ -30,7 +30,7 @@
 internal import Foundation
 
 /// The type a `NUMBER` field is treated as (`NUMBER PREFERRED AS …`).
-public enum SchemaNumberPreference: String, Sendable, Hashable {
+public enum SchemaNumberPreference: String, Sendable, Hashable, Codable, CaseIterable {
   /// `PREFERRED AS INT64`
   case int64 = "INT64"
   /// `PREFERRED AS DOUBLE`

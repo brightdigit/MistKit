@@ -191,7 +191,7 @@ Choose `atomic: true` when the operations are semantically linked (paired update
 
 ## Looking up
 
-Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)`` to fetch known records by name:
+Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)`` to fetch known records by name:
 
 ```swift
 let results = try await service.lookupRecords(
@@ -230,7 +230,7 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 - ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
 - ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``
-- ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)``
+- ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)``
 
 ### Write operations
 

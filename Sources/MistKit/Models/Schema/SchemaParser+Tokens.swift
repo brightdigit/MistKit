@@ -36,50 +36,72 @@ extension SchemaParser {
     }
   }
 
-  internal func isSymbol(_ symbol: Character) -> Bool {
-    current.kind == .symbol(symbol)
-  }
-
-  internal func peekNext() -> SchemaToken {
-    tokens[min(position + 1, tokens.count - 1)]
-  }
-
-  internal func nextIsPermission() -> Bool {
-    guard case .word(let word) = peekNext().kind else {
+  internal mutating func consumeKeyword(_ keyword: String) -> Bool {
+    guard current.isKeyword(keyword) else {
       return false
     }
-    return SchemaPermission(rawValue: word.uppercased()) != nil
+    advance()
+    return true
+  }
+
+  internal mutating func consumeSymbol(_ symbol: Character) -> Bool {
+    guard current.kind == .symbol(symbol) else {
+      return false
+    }
+    advance()
+    return true
   }
 
   internal mutating func expectKeyword(_ keyword: String) throws {
-    guard current.isKeyword(keyword) else {
+    guard consumeKeyword(keyword) else {
       throw unexpected(expecting: keyword)
     }
-    advance()
   }
 
   internal mutating func expectSymbol(_ symbol: Character) throws {
-    guard isSymbol(symbol) else {
-      throw unexpected(expecting: "'\(symbol)'")
+    guard consumeSymbol(symbol) else {
+      throw unexpected(expecting: "\"\(symbol)\"")
     }
-    advance()
   }
 
-  internal mutating func identifier(describing what: String) throws -> String {
-    switch current.kind {
-    case .word(let name), .quoted(let name):
+  /// A name: a quoted identifier, or a bare one that isn't reserved and
+  /// doesn't start with an underscore.
+  internal mutating func identifier(describing what: String) throws -> (
+    name: String, token: SchemaToken
+  ) {
+    let token = current
+    switch token.kind {
+    case .quoted(let name):
       advance()
-      return name
+      return (name, token)
+    case .word(let word):
+      if Self.reservedWords.contains(word.uppercased()) {
+        throw SchemaParseError(
+          at: token,
+          message: "\"\(word)\" is a reserved word; quote it to use it as a name"
+        )
+      }
+      if word.hasPrefix("_") {
+        throw SchemaParseError(
+          at: token,
+          message: "names starting with \"_\" are system names and must be quoted"
+        )
+      }
+      advance()
+      return (word, token)
     case .symbol, .end:
       throw unexpected(expecting: what)
     }
   }
 
+  /// "expected X, found Y" at the current token.
   internal func unexpected(expecting expected: String) -> SchemaParseError {
-    SchemaParseError(
-      line: current.line,
-      column: current.column,
-      message: "expected \(expected), found \(current.displayName)"
-    )
+    SchemaParseError(at: current, message: "expected \(expected), found \(current.displayName)")
+  }
+}
+
+extension SchemaParseError {
+  internal init(at token: SchemaToken, message: String) {
+    self.init(line: token.line, column: token.column, message: message)
   }
 }

@@ -41,12 +41,28 @@ public struct Reference: Codable, Equatable, Sendable {
 
   /// The record name being referenced
   public let recordName: String
+  /// The zone of the referenced record, or `nil` for the default zone.
+  ///
+  /// A reference can only point within its record's own zone. The wire form
+  /// carries `zoneID` only when it names a zone other than
+  /// ``ZoneID/defaultZone``, so references to default-zone records encode as
+  /// they always have.
+  public let zoneID: ZoneID?
   /// The action to take (`NONE`, `DELETE_SELF`, `VALIDATE`, or nil)
   public let action: Action?
 
+  /// The zone to send on the wire: ``zoneID`` unless it's the default zone.
+  internal var wireZoneID: ZoneID? {
+    guard let zoneID, !zoneID.isDefaultZone else {
+      return nil
+    }
+    return zoneID
+  }
+
   /// Initialize a reference value
-  public init(recordName: String, action: Action? = nil) {
+  public init(recordName: String, zoneID: ZoneID? = nil, action: Action? = nil) {
     self.recordName = recordName
+    self.zoneID = zoneID
     self.action = action
   }
 }

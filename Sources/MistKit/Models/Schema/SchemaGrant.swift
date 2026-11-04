@@ -30,12 +30,12 @@
 internal import Foundation
 
 /// A `GRANT … TO role` clause inside a ``SchemaRecordType``.
-public struct SchemaGrant: Sendable, Hashable {
+public struct SchemaGrant: Sendable, Hashable, Codable {
   /// The permissions granted, in source order.
-  public let permissions: [SchemaPermission]
+  public var permissions: [SchemaPermission]
   /// The role receiving them, such as `_creator`, `_icloud`, `_world`, or a
   /// role from `CREATE ROLE`.
-  public let role: String
+  public var role: String
 
   /// Creates a grant.
   public init(permissions: [SchemaPermission], role: String) {

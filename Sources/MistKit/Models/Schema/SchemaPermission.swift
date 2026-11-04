@@ -30,7 +30,9 @@
 internal import Foundation
 
 /// A permission in a ``SchemaGrant``.
-public enum SchemaPermission: String, Sendable, Hashable, CaseIterable {
+///
+/// Cases are in the order the writer lists them.
+public enum SchemaPermission: String, Sendable, Hashable, Codable, CaseIterable {
   /// `READ`
   case read = "READ"
   /// `CREATE`

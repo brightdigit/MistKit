@@ -30,23 +30,52 @@
 internal import Foundation
 
 /// A `RECORD TYPE` declaration in a CloudKit schema.
-public struct SchemaRecordType: Sendable, Hashable {
+///
+/// Equality and hashing ignore ``sourceLine``, so a parsed record type equals
+/// one built in code.
+public struct SchemaRecordType: Sendable, Hashable, Codable {
   /// The record type's name.
-  public let name: String
+  public var name: String
   /// The fields the schema declares, in source order.
   ///
   /// CloudKit adds the system fields (`___recordID`, `___createTime`, …)
   /// implicitly. They appear here only when the schema mentions them,
-  /// usually to give them an index.
-  public let fields: [SchemaField]
+  /// usually to give them an index; ``fieldsIncludingImplicit`` adds the rest.
+  public var fields: [SchemaField]
   /// The `GRANT` clauses, in source order.
-  public let grants: [SchemaGrant]
+  public var grants: [SchemaGrant]
+  /// The 1-based line of `RECORD TYPE name`, when parsed from text.
+  public var sourceLine: Int?
+
+  /// Every field a record of this type has: the implicit system fields the
+  /// schema doesn't list (unindexed, in CloudKit's order), then ``fields``.
+  public var fieldsIncludingImplicit: [SchemaField] {
+    SchemaField.implicitSystemFields.filter { field(named: $0.name) == nil } + fields
+  }
 
   /// Creates a record type.
-  public init(name: String, fields: [SchemaField] = [], grants: [SchemaGrant] = []) {
+  public init(
+    name: String,
+    fields: [SchemaField] = [],
+    grants: [SchemaGrant] = [],
+    sourceLine: Int? = nil
+  ) {
     self.name = name
     self.fields = fields
     self.grants = grants
+    self.sourceLine = sourceLine
+  }
+
+  /// Whether two declarations match, ignoring their source lines.
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.name == rhs.name && lhs.fields == rhs.fields && lhs.grants == rhs.grants
+  }
+
+  /// Hashes everything ``==`` compares.
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(name)
+    hasher.combine(fields)
+    hasher.combine(grants)
   }
 
   /// The field with this exact name, if the schema declares one.

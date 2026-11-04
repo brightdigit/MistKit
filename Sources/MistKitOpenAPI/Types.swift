@@ -826,25 +826,35 @@ public enum Components {
             public var fieldName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Filter/fieldValue`.
             public var fieldValue: Components.Schemas.FieldValueRequest?
+            /// The radius, in meters, around the `fieldValue` location. Used only
+            /// with the NEAR comparator on a LOCATION field.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Filter/distance`.
+            public var distance: Swift.Double?
             /// Creates a new `Filter`.
             ///
             /// - Parameters:
             ///   - comparator:
             ///   - fieldName:
             ///   - fieldValue:
+            ///   - distance: The radius, in meters, around the `fieldValue` location. Used only
             public init(
                 comparator: Components.Schemas.Filter.comparatorPayload? = nil,
                 fieldName: Swift.String? = nil,
-                fieldValue: Components.Schemas.FieldValueRequest? = nil
+                fieldValue: Components.Schemas.FieldValueRequest? = nil,
+                distance: Swift.Double? = nil
             ) {
                 self.comparator = comparator
                 self.fieldName = fieldName
                 self.fieldValue = fieldValue
+                self.distance = distance
             }
             public enum CodingKeys: String, CodingKey {
                 case comparator
                 case fieldName
                 case fieldValue
+                case distance
             }
         }
         /// - Remark: Generated from `#/components/schemas/Sort`.
@@ -1083,6 +1093,8 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/recordName`.
             public var recordName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/zoneID`.
+            public var zoneID: Components.Schemas.ZoneID?
             /// The record type (schema name)
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/recordType`.
@@ -1162,6 +1174,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - recordName: The unique identifier for the record
+            ///   - zoneID:
             ///   - recordType: The record type (schema name)
             ///   - recordChangeTag: Change tag for optimistic concurrency control
             ///   - fields: Record fields with their values and optional type information
@@ -1176,6 +1189,7 @@ public enum Components {
             ///   - currentUserParticipant:
             public init(
                 recordName: Swift.String? = nil,
+                zoneID: Components.Schemas.ZoneID? = nil,
                 recordType: Swift.String? = nil,
                 recordChangeTag: Swift.String? = nil,
                 fields: Components.Schemas.RecordResponse.fieldsPayload? = nil,
@@ -1190,6 +1204,7 @@ public enum Components {
                 currentUserParticipant: Components.Schemas.ShareParticipant? = nil
             ) {
                 self.recordName = recordName
+                self.zoneID = zoneID
                 self.recordType = recordType
                 self.recordChangeTag = recordChangeTag
                 self.fields = fields
@@ -1205,6 +1220,7 @@ public enum Components {
             }
             public enum CodingKeys: String, CodingKey {
                 case recordName
+                case zoneID
                 case recordType
                 case recordChangeTag
                 case fields
@@ -1271,6 +1287,8 @@ public enum Components {
                 case AssetValue(Components.Schemas.AssetValue)
                 /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value/case9`.
                 case ListValue(Components.Schemas.ListValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value/case10`.
+                case ClearedValue(Components.Schemas.ClearedValue?)
                 public init(from decoder: any Decoder) throws {
                     var errors: [any Error] = []
                     do {
@@ -1327,6 +1345,12 @@ public enum Components {
                     } catch {
                         errors.append(error)
                     }
+                    do {
+                        self = .ClearedValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
                     throw Swift.DecodingError.failedToDecodeOneOfSchema(
                         type: Self.self,
                         codingPath: decoder.codingPath,
@@ -1352,6 +1376,8 @@ public enum Components {
                     case let .AssetValue(value):
                         try value.encode(to: encoder)
                     case let .ListValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .ClearedValue(value):
                         try encoder.encodeToSingleValueContainer(value)
                     }
                 }
@@ -1424,6 +1450,13 @@ public enum Components {
                 case isEncrypted
             }
         }
+        /// JSON `null`. A modify request that sets a field's value to null clears
+        /// the field. Request-only: listed last in `FieldValueRequest.value` so a
+        /// non-null value never decodes as it.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ClearedValue`.
+        public typealias ClearedValue = Swift.String
         /// A CloudKit field value from API responses.
         /// May include optional type field for explicit type information.
         /// List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
@@ -1706,6 +1739,8 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/recordName`.
             public var recordName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ReferenceValue/zoneID`.
+            public var zoneID: Components.Schemas.ZoneID?
             /// Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
             ///
             ///
@@ -1724,16 +1759,20 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - recordName: The record name being referenced
+            ///   - zoneID:
             ///   - action: Action to perform on the referenced record. NONE performs no action; DELETE_SELF deletes this record when the referenced record is deleted; VALIDATE verifies the target record exists before creating the reference (create fails if missing). VALIDATE is a CloudKit Web Services value; native CKRecord.ReferenceAction has only none and deleteSelf.
             public init(
                 recordName: Swift.String,
+                zoneID: Components.Schemas.ZoneID? = nil,
                 action: Components.Schemas.ReferenceValue.actionPayload? = nil
             ) {
                 self.recordName = recordName
+                self.zoneID = zoneID
                 self.action = action
             }
             public enum CodingKeys: String, CodingKey {
                 case recordName
+                case zoneID
                 case action
             }
         }
@@ -3842,6 +3881,14 @@ public enum Components {
             public var serverErrorCode: Components.Schemas.ErrorResponse.serverErrorCodePayload?
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/reason`.
             public var reason: Swift.String?
+            /// Suggested seconds to wait before retrying. Sent with THROTTLED and
+            /// TRY_AGAIN_LATER; absent otherwise.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ErrorResponse/retryAfter`.
+            public var retryAfter: Swift.Int?
+            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/redirectURL`.
             public var redirectURL: Swift.String?
             /// Creates a new `ErrorResponse`.
@@ -3850,22 +3897,26 @@ public enum Components {
             ///   - uuid:
             ///   - serverErrorCode: Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
             ///   - reason:
-            ///   - redirectURL:
+            ///   - retryAfter: Suggested seconds to wait before retrying. Sent with THROTTLED and
+            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
             public init(
                 uuid: Swift.String? = nil,
                 serverErrorCode: Components.Schemas.ErrorResponse.serverErrorCodePayload? = nil,
                 reason: Swift.String? = nil,
+                retryAfter: Swift.Int? = nil,
                 redirectURL: Swift.String? = nil
             ) {
                 self.uuid = uuid
                 self.serverErrorCode = serverErrorCode
                 self.reason = reason
+                self.retryAfter = retryAfter
                 self.redirectURL = redirectURL
             }
             public enum CodingKeys: String, CodingKey {
                 case uuid
                 case serverErrorCode
                 case reason
+                case retryAfter
                 case redirectURL
             }
         }
@@ -5293,6 +5344,8 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json/zoneID`.
+                    public var zoneID: Components.Schemas.ZoneID?
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json/recordsPayload`.
                     public struct recordsPayloadPayload: Codable, Hashable, Sendable {
                         /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json/recordsPayload/recordName`.
@@ -5323,11 +5376,17 @@ public enum Operations {
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
+                    ///   - zoneID:
                     ///   - records:
-                    public init(records: Operations.lookupRecords.Input.Body.jsonPayload.recordsPayload? = nil) {
+                    public init(
+                        zoneID: Components.Schemas.ZoneID? = nil,
+                        records: Operations.lookupRecords.Input.Body.jsonPayload.recordsPayload? = nil
+                    ) {
+                        self.zoneID = zoneID
                         self.records = records
                     }
                     public enum CodingKeys: String, CodingKey {
+                        case zoneID
                         case records
                     }
                 }

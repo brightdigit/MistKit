@@ -61,7 +61,7 @@ public struct CloudKitService: Sendable {
 
   /// CloudKit's maximum number of items (records, lookups, or operations)
   /// accepted or returned per batch request. The auto-chunking convenience
-  /// methods (e.g. ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``)
+  /// methods (e.g. ``lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)``)
   /// default their `batchSize` to this value.
   public static let maxRecordsPerRequest: Int = 200
 
