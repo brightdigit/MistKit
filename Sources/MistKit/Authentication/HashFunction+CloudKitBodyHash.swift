@@ -31,13 +31,15 @@ internal import Crypto
 internal import Foundation
 
 extension HashFunction {
-  /// Returns the base64-encoded hash of the given body, or the empty
-  /// string when `body` is nil — matching CloudKit Web Services' convention
-  /// for signing requests with no body.
+  /// Returns the base64-encoded hash of the given body for a CloudKit Web
+  /// Services request signature.
+  ///
+  /// A request without a body (every `GET`) is signed with the hash of
+  /// empty data, not the empty string: for SHA-256 that is
+  /// `47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=`. CloudKit rejects a
+  /// signature over an empty body hash with `401 AUTHENTICATION_FAILED`.
+  /// `nil` and an empty `Data()` therefore produce the same value.
   internal static func cloudKitBodyHash(of body: Data?) -> String {
-    guard let body else {
-      return ""
-    }
-    return Data(Self.hash(data: body)).base64EncodedString()
+    Data(Self.hash(data: body ?? Data())).base64EncodedString()
   }
 }

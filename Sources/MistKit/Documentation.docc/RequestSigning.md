@@ -249,7 +249,7 @@ It is a transport-format value, not a domain value, and two storage choices foll
 The convenience initializer `init(keyID:privateKey:requestBody:webServiceSubpath:date:)` does:
 
 1. **Format the ISO 8601 date.** `Date.ISO8601FormatStyle` on macOS 12 / iOS 15 / tvOS 15 / watchOS 8 and later; a shared [`ISO8601DateFormatter`](https://developer.apple.com/documentation/foundation/iso8601dateformatter) (documented thread-safe for `string(from:)`) on older systems.
-2. **Hash the body.** `SHA256.cloudKitBodyHash(of:)` returns `base64(SHA256(body))`, or the **empty string** when the body is `nil` — not the hash of empty data. Both are defensible; only one is what CloudKit accepts.
+2. **Hash the body.** `SHA256.cloudKitBodyHash(of:)` returns `base64(SHA256(body))`. A request with no body (every `GET`) is signed with the hash of **empty data**, `47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=`, not the empty string: CloudKit answers a signature over an empty body hash with `401 AUTHENTICATION_FAILED`.
 3. **Build the payload:** `"<iso8601Date>:<bodyHash>:<webServiceSubpath>"`.
 4. **Sign with P-256.** `privateKey.signature(for: Data(payload.utf8))` → DER bytes.
 5. **Store** the key ID, the exact date string, and the DER bytes.

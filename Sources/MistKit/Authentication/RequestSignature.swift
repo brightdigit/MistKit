@@ -90,7 +90,8 @@ extension RequestSignature {
   /// - Parameters:
   ///   - keyID: The CloudKit key identifier from Apple Developer Console.
   ///   - privateKey: The ECDSA P-256 private key used to sign the payload.
-  ///   - requestBody: The HTTP request body (for POST requests). May be nil.
+  ///   - requestBody: The HTTP request body (for POST requests). May be nil;
+  ///     a nil body is signed with the hash of empty data.
   ///   - webServiceSubpath: The CloudKit Web Services URL subpath.
   ///   - date: The request date. Defaults to `Date()`.
   /// - Throws: A `Crypto` error if `P256.Signing.PrivateKey.signature(for:)`
@@ -122,8 +123,10 @@ extension RequestSignature {
   /// - Parameters:
   ///   - keyID: The CloudKit key identifier from Apple Developer Console.
   ///   - privateKey: The ECDSA P-256 private key used to sign the payload.
-  ///   - bodyHash: The base64-encoded SHA-256 hash of the request body, or
-  ///     the empty string when no body is present.
+  ///   - bodyHash: The base64-encoded SHA-256 hash of the request body. When
+  ///     no body is present this is the hash of empty data
+  ///     (`47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=`), never the empty
+  ///     string.
   ///   - webServiceSubpath: The CloudKit Web Services URL subpath.
   ///   - iso8601DateString: The ISO8601-formatted request date. This exact
   ///     string is both signed and emitted on the wire — keep them in sync.

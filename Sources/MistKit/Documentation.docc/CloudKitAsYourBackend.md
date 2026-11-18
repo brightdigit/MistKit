@@ -342,7 +342,7 @@ openssl ec -in eckey.pem -pubout
 
 Paste the public key into step 3, save, and copy the **Key ID**. The private key never leaves your server.
 
-Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is the request URL with the scheme and host removed — everything from `/database/` onward, for example `/database/1/iCloud.com.example.App/development/public/records/modify` — which is exactly what MistKit signs as the request's path:
+Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (the hash of empty data when there is no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is the request URL with the scheme and host removed — everything from `/database/` onward, for example `/database/1/iCloud.com.example.App/development/public/records/modify` — which is exactly what MistKit signs as the request's path:
 
 | Header | Value |
 | --- | --- |
@@ -488,7 +488,7 @@ internal var headers: HTTPFields {
 }
 ```
 
-where the body hash is `SHA256.cloudKitBodyHash(of:)` — `base64(SHA256(body))`, or `""` when there is no body. The full design, including why `body` is `inout`, is in <doc:RequestSigning>.
+where the body hash is `SHA256.cloudKitBodyHash(of:)` — `base64(SHA256(body))`, with an absent body hashed as empty data. The full design, including why `body` is `inout`, is in <doc:RequestSigning>.
 
 ## Field type polymorphism
 
