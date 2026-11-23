@@ -28,7 +28,7 @@
 //
 
 /// Reference dictionary as defined in CloudKit Web Services
-public struct Reference: Codable, Equatable, Sendable {
+public struct Reference: Codable, Hashable, Sendable {
   /// Reference action types supported by CloudKit Web Services.
   /// Native `CKRecord.ReferenceAction` only has `none` and `deleteSelf`;
   /// `validate` is a Web Services case that verifies the target record exists

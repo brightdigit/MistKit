@@ -28,7 +28,7 @@
 //
 
 /// Asset dictionary as defined in CloudKit Web Services
-public struct Asset: Codable, Equatable, Sendable {
+public struct Asset: Codable, Hashable, Sendable {
   /// Opaque, server-minted checksum identifying the stored file.
   ///
   /// Apple documents this only as a signature and specifies no algorithm. It is

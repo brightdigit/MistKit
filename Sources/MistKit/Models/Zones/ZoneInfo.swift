@@ -30,7 +30,7 @@
 internal import MistKitOpenAPI
 
 /// Zone information from CloudKit
-public struct ZoneInfo: Codable, Sendable {
+public struct ZoneInfo: Codable, Hashable, Sendable, Identifiable {
   /// The zone name
   public let zoneName: String
   /// The owner record name
@@ -60,6 +60,14 @@ public struct ZoneInfo: Codable, Sendable {
   /// `false`, so list/lookup responses stay distinguishable from change-feed
   /// tombstones.
   public let deleted: Bool?
+
+  /// The zone's identity: its name and owner.
+  ///
+  /// ``zoneType`` is left out, as it is from a reference's zone, so the
+  /// identifier matches a ``ZoneID`` built from the name and owner alone.
+  public var id: ZoneID {
+    ZoneID(zoneName: zoneName, ownerName: ownerRecordName)
+  }
 
   /// Initialize zone information
   public init(

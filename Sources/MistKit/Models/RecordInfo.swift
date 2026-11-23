@@ -40,7 +40,7 @@ internal import MistKitOpenAPI
 /// ``OperationResult/failure(_:)`` on a ``RecordResult`` (a ``RecordOperationFailure``)
 /// and never become a `RecordInfo`. A response record missing its `recordName` is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
-public struct RecordInfo: Codable, Sendable {
+public struct RecordInfo: Codable, Hashable, Sendable, Identifiable {
   /// The record name
   public let recordName: String
   /// The zone CloudKit reported the record in, or `nil` when the response
@@ -65,6 +65,9 @@ public struct RecordInfo: Codable, Sendable {
   /// When `true`, this is a tombstone entry from `fetchRecordChanges()` —
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
+
+  /// The record's identity within its zone: its ``recordName``.
+  public var id: String { recordName }
 
   internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
     guard let recordName = record.recordName else {
