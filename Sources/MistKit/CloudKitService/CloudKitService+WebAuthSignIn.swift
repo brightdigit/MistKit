@@ -62,17 +62,7 @@ extension CloudKitService {
     }
     let failure: CloudKitError
     do {
-      let response = try await client(tokenManager: APITokenManager(apiToken: apiToken))
-        .getCaller(
-          .init(
-            path: Operations.getCaller.Input.Path(
-              containerIdentifier: containerIdentifier,
-              environment: environment,
-              database: database
-            )
-          )
-        )
-      _ = try await responseProcessor.processGetCallerResponse(response)
+      try await fetchCallerSignedWithAPIToken(apiToken, context: "fetchWebAuthSignInURL")
       throw CloudKitError.incompleteResponse(
         reason: "users/caller succeeded with only an API token; no sign-in page to open"
       )
@@ -88,5 +78,31 @@ extension CloudKitService {
       )
     }
     return url
+  }
+
+  /// Send `users/caller` signed with `apiToken` alone, ignoring any
+  /// configured web-auth token.
+  ///
+  /// With a valid API token CloudKit answers `AUTHENTICATION_REQUIRED`, so
+  /// callers inspect the thrown error rather than expect success.
+  internal func fetchCallerSignedWithAPIToken(
+    _ apiToken: String,
+    context: String
+  ) async throws(CloudKitError) {
+    do {
+      let response = try await client(tokenManager: APITokenManager(apiToken: apiToken))
+        .getCaller(
+          .init(
+            path: Operations.getCaller.Input.Path(
+              containerIdentifier: containerIdentifier,
+              environment: environment,
+              database: .public(.prefers(.webAuth))
+            )
+          )
+        )
+      _ = try await responseProcessor.processGetCallerResponse(response)
+    } catch {
+      throw mapToCloudKitError(error, context: context)
+    }
   }
 }

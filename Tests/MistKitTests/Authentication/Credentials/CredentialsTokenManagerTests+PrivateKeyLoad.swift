@@ -58,5 +58,29 @@ extension CredentialsTokenManagerTests {
         #expect(path == missingPath)
       }
     }
+
+    @Test(".public + S2S with raw text that isn't a P-256 PEM → throws invalidPrivateKey")
+    internal func publicWithMalformedRawPEMThrowsInvalidPrivateKey() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
+      let credentials = try Credentials(
+        serverToServer: ServerToServerCredentials(
+          keyID: "test-key-id-12345678",
+          privateKey: .raw("not a private key")
+        )
+      )
+      do {
+        _ = try credentials.makeTokenManager(for: .public(.requires(.serverToServer)))
+        Issue.record("expected makeTokenManager to throw .invalidPrivateKey")
+      } catch let error as CloudKitError {
+        guard case .invalidPrivateKey(let path, let underlying) = error else {
+          Issue.record("expected .invalidPrivateKey, got \(error)")
+          return
+        }
+        #expect(path == nil)
+        #expect(underlying is TokenManagerError)
+      }
+    }
   }
 }
