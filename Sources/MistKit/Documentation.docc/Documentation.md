@@ -89,6 +89,9 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 - ``FieldValue``
 - ``QueryFilter``
 - ``QuerySort``
+- ``QueryDescriptor``
+- ``QueryPredicate``
+- ``QueryValidation``
 - ``QueryResult``
 - ``RecordOperation``
 - ``RecordChangesResult``

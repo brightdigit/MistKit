@@ -98,6 +98,14 @@ public struct QueryFilter: Sendable {
     QueryFilter(FilterBuilder.containsAllTokens(field, tokens))
   }
 
+  /// Creates a CONTAINS_ANY_TOKENS filter for string fields: records whose
+  /// field contains at least one of the tokens in `tokens`.
+  ///
+  /// The field needs a `SEARCHABLE` index.
+  public static func containsAnyTokens(_ field: String, _ tokens: String) -> QueryFilter {
+    QueryFilter(FilterBuilder.containsAnyTokens(field, tokens))
+  }
+
   /// Creates an IN filter to check if field value is in a list
   public static func `in`(_ field: String, _ values: [FieldValue]) -> QueryFilter {
     QueryFilter(FilterBuilder.in(field, values))
