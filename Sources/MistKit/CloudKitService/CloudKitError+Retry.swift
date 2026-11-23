@@ -35,7 +35,14 @@ extension CloudKitError {
   /// without a code (``CloudKitError/httpErrorWithDetails(statusCode:reason:)``)
   /// and the per-item failures surfaced by single-item conveniences. Use it for
   /// display and logs; switch on the cases for control flow.
+  ///
+  /// This and the other properties here read through
+  /// ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)`` to its
+  /// `underlying` error.
   public var reason: String? {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.reason
+    }
     if let serverErrorDetail {
       return serverErrorDetail.reason
     }
@@ -58,6 +65,9 @@ extension CloudKitError {
   /// Read from a request-level `THROTTLED` / `TRY_AGAIN_LATER` failure body or
   /// from the per-record failure a single-record convenience surfaced.
   public var retryAfter: Int? {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.retryAfter
+    }
     switch self {
     case .throttled(_, let retryAfter), .tryAgainLater(_, let retryAfter):
       return retryAfter
@@ -76,6 +86,9 @@ extension CloudKitError {
   /// A request signed with only an API token gets this URL back; opening it
   /// starts the web sign-in flow that yields a web-auth token.
   public var redirectURL: String? {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.redirectURL
+    }
     switch self {
     case .authenticationRequired(_, let redirectURL):
       return redirectURL
@@ -97,6 +110,9 @@ extension CloudKitError {
   /// Network failures aren't classed as retryable: whether to resend after
   /// losing the connection is the caller's decision.
   public var isRetryable: Bool {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.isRetryable
+    }
     switch self {
     case .throttled, .tryAgainLater:
       return true

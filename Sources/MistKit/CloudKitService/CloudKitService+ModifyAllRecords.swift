@@ -47,6 +47,42 @@ public struct ZonedRecordOperation: Sendable {
 }
 
 extension CloudKitService {
+  /// One planned `records/modify` request.
+  private struct ModifyRequest {
+    let zoneID: ZoneID
+    let atomic: Bool
+    let operations: [ZonedRecordOperation]
+  }
+
+  /// Groups `operations` by zone and splits each zone into requests.
+  private static func modifyRequests(
+    for operations: [ZonedRecordOperation],
+    atomicZones: Set<ZoneID>,
+    batchSize: Int
+  ) -> [ModifyRequest] {
+    var zoneOrder: [ZoneID] = []
+    var byZone: [ZoneID: [ZonedRecordOperation]] = [:]
+    for zoned in operations {
+      let zoneID = zoned.zoneID ?? .defaultZone
+      if byZone[zoneID] == nil {
+        zoneOrder.append(zoneID)
+      }
+      byZone[zoneID, default: []].append(zoned)
+    }
+    let size = min(max(batchSize, 1), CloudKitService.maxRecordsPerRequest)
+    return zoneOrder.flatMap { zoneID -> [ModifyRequest] in
+      let zoneOperations = byZone[zoneID] ?? []
+      let atomic = atomicZones.contains(zoneID)
+      return stride(from: 0, to: zoneOperations.count, by: size).map { start in
+        ModifyRequest(
+          zoneID: zoneID,
+          atomic: atomic,
+          operations: Array(zoneOperations[start..<min(start + size, zoneOperations.count)])
+        )
+      }
+    }
+  }
+
   /// Modify records across zones, any number at a time.
   ///
   /// Groups `operations` by zone (zones in the order they first appear,
@@ -57,6 +93,30 @@ extension CloudKitService {
   /// Atomicity holds per request, not across requests: a zone with more than
   /// `batchSize` operations commits in several all-or-nothing steps.
   ///
+  /// ## When a request fails
+  ///
+  /// Requests are sent one at a time in the order above. When one throws,
+  /// no later request is sent and the method throws
+  /// ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``:
+  ///
+  /// - `completed`: the ``RecordResult``s of every request that came back,
+  ///   in send order. These include per-record failures, which don't throw.
+  /// - `unsent`: the failed request's operations followed by those of every
+  ///   request after it, in send order, as passed in.
+  /// - `underlying`: the error the failed request threw.
+  ///
+  /// This is the shape whichever request fails. When the first one fails,
+  /// `completed` is empty and `unsent` holds every operation. Cancellation
+  /// is checked before each request, as before; a cancelled task sends no
+  /// further request and throws the same shape, with the cancellation error
+  /// as `underlying`.
+  ///
+  /// - Important: The failed request's operations are reported as unsent,
+  ///   but CloudKit may have applied some or all of them — for example when
+  ///   the connection drops after the request was sent. A caller that sends
+  ///   them again should expect a `CONFLICT` (or `EXISTS` for a create) for a
+  ///   record that was in fact saved, and re-fetch it to find out.
+  ///
   /// - Parameters:
   ///   - operations: The operations and their zones (any length).
   ///   - atomicZones: Zones whose requests are atomic. Only custom zones in a
@@ -66,36 +126,39 @@ extension CloudKitService {
   ///     `1...maxRecordsPerRequest`.
   /// - Returns: A ``RecordResult`` per operation, grouped by zone in the order
   ///   above.
-  /// - Throws: ``CloudKitError`` from the first request that fails; later
-  ///   requests aren't sent.
+  /// - Throws: ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``
+  ///   when any request fails or the task is cancelled; later requests
+  ///   aren't sent.
   public func modifyAllRecords(
     _ operations: [ZonedRecordOperation],
     atomicZones: Set<ZoneID> = [],
     database: Database,
     batchSize: Int = CloudKitService.maxRecordsPerRequest
   ) async throws(CloudKitError) -> [RecordResult] {
-    var zoneOrder: [ZoneID] = []
-    var byZone: [ZoneID: [RecordOperation]] = [:]
-    for zoned in operations {
-      let zoneID = zoned.zoneID ?? .defaultZone
-      if byZone[zoneID] == nil {
-        zoneOrder.append(zoneID)
-      }
-      byZone[zoneID, default: []].append(zoned.operation)
-    }
+    let requests = Self.modifyRequests(
+      for: operations,
+      atomicZones: atomicZones,
+      batchSize: batchSize
+    )
     var results: [RecordResult] = []
-    for zoneID in zoneOrder {
-      let atomic = atomicZones.contains(zoneID)
-      results += try await chunkedBatches(
-        byZone[zoneID] ?? [],
-        batchSize: batchSize,
-        context: "modifyAllRecords"
-      ) { batch throws(CloudKitError) in
-        try await self.modifyRecords(
-          batch,
-          atomic: atomic,
-          zoneID: zoneID.isDefaultZone ? nil : zoneID,
+    for (index, request) in requests.enumerated() {
+      do throws(CloudKitError) {
+        do {
+          try Task.checkCancellation()
+        } catch {
+          throw mapToCloudKitError(error, context: "modifyAllRecords")
+        }
+        results += try await modifyRecords(
+          request.operations.map(\.operation),
+          atomic: request.atomic,
+          zoneID: request.zoneID.isDefaultZone ? nil : request.zoneID,
           database: database
+        )
+      } catch {
+        throw .modifyIncomplete(
+          completed: results,
+          unsent: requests[index...].flatMap(\.operations),
+          underlying: error
         )
       }
     }

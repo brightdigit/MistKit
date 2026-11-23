@@ -39,7 +39,9 @@ extension CloudKitError {
   }
 
   /// Code, documented HTTP status, summary, and reason for every case that
-  /// models a CloudKit `serverErrorCode`; `nil` for all other cases.
+  /// models a CloudKit `serverErrorCode`; the underlying error's for
+  /// ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``; `nil`
+  /// for all other cases.
   ///
   /// The switch is deliberately exhaustive: adding a case to ``CloudKitError``
   /// stops compiling here until the new case is classified. Wire strings and
@@ -82,6 +84,8 @@ extension CloudKitError {
         summary: ServerErrorCodeDetail.unrecognizedSummary,
         reason: reason
       )
+    case .modifyIncomplete(_, _, let underlying):
+      return underlying.serverErrorDetail
     case .httpError, .httpErrorWithDetails, .httpErrorWithRawResponse, .invalidResponse,
       .incompleteResponse, .conversionFailed, .recordOperationFailed, .zoneOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,

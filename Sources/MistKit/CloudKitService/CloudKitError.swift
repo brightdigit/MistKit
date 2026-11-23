@@ -148,6 +148,26 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// `zones` payload carries every zone collected before the cap was hit so
   /// callers can resume from the partial result.
   case zonePaginationLimitExceeded(maxPages: Int, zones: [ZoneInfo])
+  /// ``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)``
+  /// stopped at a request that failed (or at cancellation), so only part of
+  /// the batch is known to be applied.
+  ///
+  /// - `completed`: the results of every request that came back, in send
+  ///   order; empty when the first request failed.
+  /// - `unsent`: the failed request's operations and every later request's,
+  ///   in send order.
+  /// - `underlying`: the error the failed request threw.
+  ///
+  /// CloudKit may have applied the failed request's operations (for example
+  /// when the connection dropped after the request was sent), so a caller
+  /// that re-sends `unsent` should expect a `CONFLICT` for a record that was
+  /// in fact saved. ``reason``, ``retryAfter``, ``redirectURL`` and
+  /// ``isRetryable`` read through to `underlying`.
+  indirect case modifyIncomplete(
+    completed: [RecordResult],
+    unsent: [ZonedRecordOperation],
+    underlying: CloudKitError
+  )
   case missingCredentials(
     database: Database,
     availability: CredentialAvailability = .notConfigured,
@@ -162,8 +182,13 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// For the cases that model a CloudKit `serverErrorCode` this is the status
   /// Apple documents for that code, except for
   /// ``unknownServerError(code:statusCode:reason:)``, which reports the status
-  /// actually observed on the wire.
+  /// actually observed on the wire. For
+  /// ``modifyIncomplete(completed:unsent:underlying:)`` it is the underlying
+  /// error's.
   public var httpStatusCode: Int? {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.httpStatusCode
+    }
     if let serverErrorDetail {
       return serverErrorDetail.statusCode
     }

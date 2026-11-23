@@ -72,6 +72,12 @@ extension CloudKitError {
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
+    case .modifyIncomplete(let completed, let unsent, let underlying):
+      return Self.modifyIncompleteDescription(
+        completedCount: completed.count,
+        unsentCount: unsent.count,
+        underlying: underlying
+      )
     case .zonePaginationLimitExceeded(let maxPages, let zones):
       return Self.zonePaginationDescription(maxPages: maxPages, zoneCount: zones.count)
     case .missingCredentials(let database, let availability, let reason):
@@ -106,6 +112,17 @@ extension CloudKitError {
       message += "\nHint: \(hint.description)"
     }
     return message
+  }
+
+  private static func modifyIncompleteDescription(
+    completedCount: Int,
+    unsentCount: Int,
+    underlying: CloudKitError
+  ) -> String {
+    "CloudKit modify stopped early: \(completedCount) record results came back, "
+      + "\(unsentCount) operations unsent (the failed request's operations may "
+      + "have been applied)\nUnderlying error: "
+      + (underlying.errorDescription ?? String(describing: underlying))
   }
 
   private static func recordOperationDescription(_ recordError: RecordOperationFailure) -> String {

@@ -87,6 +87,7 @@ Every operation on ``CloudKitService`` throws ``CloudKitError``. The cases group
 | ``CloudKitError/underlyingError(_:)`` | Depends | Unclassified throw from the transport stack |
 | ``CloudKitError/unsupportedOperationType(_:)`` | No | Bug — server returned a record op MistKit doesn't model |
 | ``CloudKitError/paginationLimitExceeded(maxPages:records:)`` | Yes — but inspect | Auto-paginator hit its guard with records still collected |
+| ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)`` | Inspect `underlying` | `modifyAllRecords` stopped at a failed request; carries the results so far and the unsent operations |
 | ``CloudKitError/missingCredentials(database:availability:reason:)`` | No | The configured ``Credentials`` don't cover the call's database/auth combo |
 | ``CloudKitError/invalidPrivateKey(path:underlying:)`` | No | S2S key file is missing, unreadable, or not a valid ECDSA P-256 PEM |
 
@@ -186,6 +187,24 @@ do {
   // Either accept the partial result, raise the cap, or narrow the query.
 }
 ```
+
+### `modifyIncomplete` carries completed results and unsent operations
+
+``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)`` sends one `records/modify` request per zone and `batchSize` chunk. When a request fails — or the task is cancelled between requests — it stops and throws ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``, whichever request failed (when it is the first, `completed` is empty):
+
+```swift
+do {
+  let results = try await service.modifyAllRecords(operations, database: .private)
+} catch CloudKitError.modifyIncomplete(let completed, let unsent, let underlying) {
+  // `completed`: results of every request that came back (per-record failures included).
+  // `unsent`: the failed request's operations, then every later request's.
+  logger.warning("Saved \(completed.records.count), \(unsent.count) unsent: \(underlying)")
+}
+```
+
+`reason`, `retryAfter`, `redirectURL`, `isRetryable`, `httpStatusCode` and `serverErrorCode` read through to `underlying`.
+
+> Important: The failed request's own operations are reported as unsent, but CloudKit may have applied them — for example when the connection drops after the request was sent. A caller that re-sends them should expect `CONFLICT` (or `EXISTS` for a create) for a record that was in fact saved, and re-fetch it.
 
 ### Subscription duplicates surface as `INTERNAL_ERROR`
 
