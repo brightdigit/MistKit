@@ -30,9 +30,9 @@
 internal import Foundation
 
 /// Represents a CloudKit record operation (create, update, delete, etc.)
-public struct RecordOperation: Sendable {
+public struct RecordOperation: Sendable, Hashable {
   /// The type of operation to perform
-  public enum OperationType: Sendable {
+  public enum OperationType: Sendable, Hashable {
     /// Create a new record
     case create
     /// Update an existing record

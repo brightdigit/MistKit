@@ -36,7 +36,7 @@ internal import MistKitOpenAPI
 /// What ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
 /// sends, for callers that show, export or replay the request. Each operation
 /// is a ``WireRecordOperation``; `zoneID` and `atomic` are omitted when `nil`.
-public struct ModifyRecordsRequestBody: Codable, Sendable {
+public struct ModifyRecordsRequestBody: Codable, Hashable, Sendable {
   private enum CodingKeys: String, CodingKey {
     case operations
     case zoneID
@@ -66,6 +66,10 @@ public struct ModifyRecordsRequestBody: Codable, Sendable {
   }
 
   /// Decodes a body.
+  ///
+  /// - Throws: `DecodingError` as ``WireRecordOperation`` does, or
+  ///   `DecodingError.dataCorrupted` with a ``ConversionError`` as its
+  ///   `underlyingError` for an unknown `zoneType`.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let operations = try container.decode([WireRecordOperation].self, forKey: .operations)
@@ -73,9 +77,14 @@ public struct ModifyRecordsRequestBody: Codable, Sendable {
       Components.Schemas.ZoneID.self,
       forKey: .zoneID
     )
+    let converted = try ConversionFailureReporter.decodingWithoutTrapping(
+      at: container.codingPath
+    ) {
+      try zoneID.map { schema throws(ConversionError) in try ZoneID(from: schema) }
+    }
     self.init(
       operations: operations.map(\.operation),
-      zoneID: try zoneID.map { schema throws(ConversionError) in try ZoneID(from: schema) },
+      zoneID: converted,
       atomic: try container.decodeIfPresent(Bool.self, forKey: .atomic),
       typeTagging: operations.contains { $0.typeTagging == .always } ? .always : .whenRequired
     )

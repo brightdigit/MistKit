@@ -51,6 +51,12 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case unmappableListItem(fieldName: String, item: String)
   /// A nested-list element was not one of the supported basic types.
   case unmappableNestedListItem(fieldName: String, item: String)
+  /// An empty list arrived without a `type` and without a schema type
+  /// (``CodingUserInfoKey/cloudKitFieldTypes``), so its element type is unknown.
+  ///
+  /// Raised only when decoding caller-supplied JSON (``WireFieldValue``),
+  /// wrapped in a `DecodingError` whose `codingPath` ends at the field.
+  case ambiguousEmptyList(fieldName: String)
   /// A record timestamp was negative.
   case negativeTimestamp(milliseconds: Double)
   /// A record response was missing its `recordName`.
@@ -108,6 +114,9 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Unmappable list item for field '\(fieldName)' (\(item))"
     case .unmappableNestedListItem(let fieldName, let item):
       return "Unmappable nested list item for field '\(fieldName)' (\(item))"
+    case .ambiguousEmptyList(let fieldName):
+      return "Field '\(fieldName)' is an empty list with no type or schema type, "
+        + "so its element type is unknown"
     case .negativeTimestamp(let milliseconds):
       return "Invalid negative timestamp (\(milliseconds) ms)"
     case .recordMissingRecordName:

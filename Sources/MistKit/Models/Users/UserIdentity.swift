@@ -30,7 +30,7 @@
 internal import MistKitOpenAPI
 
 /// A user identity returned by CloudKit discover endpoints (`users/discover`, `users/caller`).
-public struct UserIdentity: Codable, Sendable {
+public struct UserIdentity: Codable, Sendable, Hashable {
   /// Whether the user is discoverable and, if so, their record name in the
   /// Users zone. A non-discoverable user reports ``UserRecordName/nonDiscoverable``.
   public let userRecordName: UserRecordName

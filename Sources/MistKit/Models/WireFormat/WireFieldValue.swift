@@ -45,7 +45,7 @@ internal import MistKitOpenAPI
 /// )
 /// // {"value":1790000000500,"type":"TIMESTAMP"}
 /// ```
-public struct WireFieldValue: Codable, Equatable, Sendable {
+public struct WireFieldValue: Codable, Hashable, Sendable {
   private enum CodingKeys: String, CodingKey {
     case value
   }
@@ -68,20 +68,51 @@ public struct WireFieldValue: Codable, Equatable, Sendable {
 
   /// Decodes a field dictionary.
   ///
-  /// - Throws: `DecodingError` for malformed JSON, or ``ConversionError`` when
-  ///   the value contradicts its `type` (the same rules as a query response).
+  /// The type comes from the dictionary's `type`, then the decoder's
+  /// ``CodingUserInfoKey/cloudKitFieldTypes`` for this field, then the value's
+  /// JSON shape: a string reads as `STRING`, a whole number as `INT64`, any
+  /// other number as `DOUBLE`, an object as a `LOCATION`, `REFERENCE` or
+  /// `ASSET` by its keys, and a list by its first element.
+  ///
+  /// The shape can't tell every type apart. A whole number reads as `INT64`
+  /// even when written `5.0` (`JSONDecoder` doesn't keep the difference), a
+  /// base64 string as `STRING` and a millisecond timestamp as `INT64`; pass a
+  /// `type` or a schema type for `DOUBLE`, `BYTES` and `TIMESTAMP` values. An
+  /// empty list has no shape at all, so without either it isn't decoded.
+  ///
+  /// This is caller-supplied JSON, not a CloudKit response, so a contradiction
+  /// is thrown without the DEBUG trap response conversion uses.
+  ///
+  /// - Throws: `DecodingError` for malformed JSON, or
+  ///   `DecodingError.dataCorrupted` at the field with a ``ConversionError``
+  ///   as its `underlyingError`: ``ConversionError/ambiguousEmptyList(fieldName:)``
+  ///   for an empty list of unknown type, or the conversion's error when the
+  ///   value contradicts its `type` (the same rules as a query response).
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     if try container.decodeNil(forKey: .value) {
       self.init(nil)
       return
     }
-    let response = try Components.Schemas.FieldValueResponse(from: decoder)
+    var response = try Components.Schemas.FieldValueResponse(from: decoder)
     let fieldName = decoder.codingPath.last?.stringValue ?? ""
-    self.init(
-      try FieldValue(response, fieldName: fieldName),
-      typeTagging: response._type == nil ? .whenRequired : .always
-    )
+    let isTagged = response._type != nil
+    if !isTagged {
+      response._type = decoder.cloudKitFieldTypes[fieldName]?.responseType
+    }
+    if response._type == nil, case .ListValue(let items) = response.value, items.isEmpty {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath,
+          debugDescription: "An empty list needs a type or a schema type.",
+          underlyingError: ConversionError.ambiguousEmptyList(fieldName: fieldName)
+        )
+      )
+    }
+    let value = try ConversionFailureReporter.decodingWithoutTrapping(at: decoder.codingPath) {
+      try FieldValue(response, fieldName: fieldName)
+    }
+    self.init(value, typeTagging: isTagged ? .always : .whenRequired)
   }
 
   /// Encodes the field dictionary.

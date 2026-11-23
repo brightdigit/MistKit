@@ -40,6 +40,36 @@ internal enum ConversionFailureReporter {
     { message, file, line in
       assertionFailure(message, file: file, line: line)
     }
+
+  /// Runs `operation` with the trap turned off, for converting caller-supplied
+  /// JSON (``WireFieldValue``, ``WireRecord``), where a contradiction is bad
+  /// input, not a MistKit bug. Failures are still logged and thrown.
+  internal static func withoutTrapping<Result>(
+    _ operation: () throws -> Result
+  ) rethrows -> Result {
+    try $assertionHandler.withValue({ _, _, _ in }, operation: operation)
+  }
+
+  /// Runs `operation` as ``withoutTrapping(_:)`` does, decoding
+  /// caller-supplied JSON at `codingPath`: a ``ConversionError`` is thrown as
+  /// `DecodingError.dataCorrupted` at that path, with the conversion error as
+  /// its `underlyingError`, so the caller learns where the JSON went wrong.
+  internal static func decodingWithoutTrapping<Result>(
+    at codingPath: [any CodingKey],
+    _ operation: () throws -> Result
+  ) throws -> Result {
+    do {
+      return try withoutTrapping(operation)
+    } catch let error as ConversionError {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: codingPath,
+          debugDescription: error.message,
+          underlyingError: error
+        )
+      )
+    }
+  }
 }
 
 extension ConversionError {

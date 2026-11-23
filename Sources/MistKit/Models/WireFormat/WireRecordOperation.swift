@@ -42,7 +42,7 @@ internal import MistKitOpenAPI
 ///
 /// Decoding reads the operation type, record name, type, change tag and fields
 /// (cleared and encrypted ones included). The sharing keys aren't decoded.
-public struct WireRecordOperation: Codable, Sendable {
+public struct WireRecordOperation: Codable, Hashable, Sendable {
   private enum CodingKeys: String, CodingKey {
     case operationType
     case record
@@ -59,23 +59,6 @@ public struct WireRecordOperation: Codable, Sendable {
     case participants
   }
 
-  private struct FieldKey: CodingKey {
-    let stringValue: String
-    var intValue: Int? { nil }
-
-    init(stringValue: String) {
-      self.stringValue = stringValue
-    }
-
-    init?(intValue _: Int) {
-      nil
-    }
-  }
-
-  private struct EncryptedFlag: Decodable {
-    let isEncrypted: Bool?
-  }
-
   /// The operation.
   public var operation: RecordOperation
   /// When field dictionaries carry `type`.
@@ -89,8 +72,9 @@ public struct WireRecordOperation: Codable, Sendable {
 
   /// Decodes an operation.
   ///
-  /// - Throws: `DecodingError` for an unknown `operationType` or malformed
-  ///   JSON, or ``ConversionError`` for a field value that contradicts its type.
+  /// - Throws: `DecodingError` for an unknown `operationType`, malformed
+  ///   JSON, or a field value that contradicts its type (a ``ConversionError``
+  ///   as its `underlyingError`).
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let wireType = try container.decode(
@@ -98,38 +82,18 @@ public struct WireRecordOperation: Codable, Sendable {
       forKey: .operationType
     )
     let record = try container.nestedContainer(keyedBy: RecordKeys.self, forKey: .record)
-    var fields: [String: FieldValue] = [:]
-    var cleared: Set<String> = []
-    var encrypted: Set<String> = []
-    var tagging = FieldTypeTagging.whenRequired
-    if record.contains(.fields) {
-      let fieldContainer = try record.nestedContainer(keyedBy: FieldKey.self, forKey: .fields)
-      for key in fieldContainer.allKeys {
-        let field = try fieldContainer.decode(WireFieldValue.self, forKey: key)
-        if field.typeTagging == .always {
-          tagging = .always
-        }
-        if let value = field.value {
-          fields[key.stringValue] = value
-        } else {
-          cleared.insert(key.stringValue)
-        }
-        if try fieldContainer.decode(EncryptedFlag.self, forKey: key).isEncrypted == true {
-          encrypted.insert(key.stringValue)
-        }
-      }
-    }
+    let fields = try WireFields(from: record, forKey: .fields)
     self.init(
       RecordOperation(
         operationType: RecordOperation.OperationType(wireType),
         recordType: try record.decodeIfPresent(String.self, forKey: .recordType) ?? "",
         recordName: try record.decodeIfPresent(String.self, forKey: .recordName),
-        fields: fields,
-        clearedFields: cleared,
-        encryptedFields: encrypted,
+        fields: fields.values,
+        clearedFields: fields.cleared,
+        encryptedFields: fields.encrypted,
         recordChangeTag: try record.decodeIfPresent(String.self, forKey: .recordChangeTag)
       ),
-      typeTagging: tagging
+      typeTagging: fields.typeTagging
     )
   }
 
@@ -150,7 +114,13 @@ public struct WireRecordOperation: Codable, Sendable {
     }
     try record.encode(operation.recordType, forKey: .recordType)
     try record.encodeIfPresent(operation.recordChangeTag, forKey: .recordChangeTag)
-    try encodeFields(into: &record)
+    try WireFields(
+      values: operation.fields,
+      cleared: operation.clearedFields,
+      encrypted: operation.encryptedFields,
+      typeTagging: typeTagging
+    )
+    .encode(to: &record, forKey: .fields)
     try record.encodeIfPresent(operation.createShortGUID, forKey: .createShortGUID)
     try record.encodeIfPresent(
       operation.forRecord.map(Components.Schemas.ShareTargetReference.init(from:)),
@@ -166,20 +136,6 @@ public struct WireRecordOperation: Codable, Sendable {
       operation.participants?.map(Components.Schemas.ShareParticipant.init(from:)),
       forKey: .participants
     )
-  }
-
-  private func encodeFields(
-    into record: inout KeyedEncodingContainer<RecordKeys>
-  ) throws {
-    var fields = record.nestedContainer(keyedBy: FieldKey.self, forKey: .fields)
-    let names = Set(operation.fields.keys).union(operation.clearedFields).sorted()
-    for name in names {
-      let field = WireFieldValue(operation.fields[name], typeTagging: typeTagging)
-      try fields.encode(
-        field.request(isEncrypted: operation.encryptedFields.contains(name)),
-        forKey: FieldKey(stringValue: name)
-      )
-    }
   }
 }
 
