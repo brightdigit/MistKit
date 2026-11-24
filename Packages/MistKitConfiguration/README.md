@@ -78,7 +78,7 @@ the clear.
 
 ## Used by
 
-- [BushelCloud][bushelcloud] and [CelestraCloud][celestracloud].
+- [SwoopMistKit][swoopmistkit] (BushelCloud) and [CelestraCloud][celestracloud].
 - [MistDemo][mistdemo], inside [MistKit][mistkit].
 
 ## Adding to your `Package.swift`
@@ -102,5 +102,5 @@ MIT — see [LICENSE](LICENSE).
 
 [mistkit]: https://github.com/brightdigit/MistKit
 [mistdemo]: https://github.com/brightdigit/MistKit/tree/main/Examples/MistDemo
-[bushelcloud]: https://github.com/brightdigit/BushelCloud
+[swoopmistkit]: https://github.com/brightdigit/SwoopMistKit
 [celestracloud]: https://github.com/brightdigit/CelestraCloud

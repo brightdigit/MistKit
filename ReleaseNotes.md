@@ -15,6 +15,7 @@
 * Fix server-to-server signing of body-less requests: CloudKit expects the hash of empty data, so every signed GET failed with `AUTHENTICATION_FAILED` (#507) by @leogdion in https://github.com/brightdigit/MistKit/pull/511
 * Add `ConversionError.integerOutOfRange(fieldName:value:)`: on 32-bit platforms (WASI) an `INT64` value that doesn't fit in `Int` now throws instead of trapping by @leogdion in https://github.com/brightdigit/MistKit/pull/511
 * CI: pin Android to ubuntu-24.04, drop windows-2025, move the Xcode 27 lanes to Xcode 27.2, and run the example-schema tests on WASI and Android by @leogdion in https://github.com/brightdigit/MistKit/pull/511
+* Examples: `Examples/BushelCloud` is now `Examples/SwoopMistKit`, following the repo's rename to [brightdigit/SwoopMistKit](https://github.com/brightdigit/SwoopMistKit), and `Examples/CelestraCloud` is removed; CelestraCloud continues as its [standalone repo](https://github.com/brightdigit/CelestraCloud) by @leogdion in https://github.com/brightdigit/MistKit/pull/511
 * Documentation: revise the "CloudKit as Your Backend" article against the iOSDevUK recording, add the talk PDF and a table of contents, and skip the 1.5 MB SizeLimits test on WASM (#480, #482, #483)
 
 **Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-beta.5...1.0.0-beta.6

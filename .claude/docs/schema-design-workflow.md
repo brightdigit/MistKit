@@ -511,6 +511,6 @@ Schema design and implementation workflow is best managed using Claude Code's pl
 
 ## See Also
 
-- **Schema Workflow Guide:** [Examples/Celestra/AI_SCHEMA_WORKFLOW.md](../../Examples/Celestra/AI_SCHEMA_WORKFLOW.md)
+- **Schema Workflow Guide:** [CelestraCloud AI_SCHEMA_WORKFLOW.md](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/AI_SCHEMA_WORKFLOW.md)
 - **Quick Reference:** [Examples/SCHEMA_QUICK_REFERENCE.md](../../Examples/SCHEMA_QUICK_REFERENCE.md)
 - **Claude Reference:** [.claude/docs/cloudkit-schema-reference.md](../../.claude/docs/cloudkit-schema-reference.md)

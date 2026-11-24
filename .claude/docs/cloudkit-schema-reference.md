@@ -317,7 +317,7 @@ cktool import-schema schema.ckdb
 
 ## See Also
 
-- **Full Documentation:** [Examples/Celestra/AI_SCHEMA_WORKFLOW.md](../../Examples/Celestra/AI_SCHEMA_WORKFLOW.md)
+- **Full Documentation:** [CelestraCloud AI_SCHEMA_WORKFLOW.md](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/AI_SCHEMA_WORKFLOW.md)
 - **Apple Docs Source:** [.claude/docs/sosumi-cloudkit-schema-source.md](sosumi-cloudkit-schema-source.md)
-- **Setup Guide:** [Examples/Celestra/CLOUDKIT_SCHEMA_SETUP.md](../../Examples/Celestra/CLOUDKIT_SCHEMA_SETUP.md)
+- **Setup Guide:** [CelestraCloud CLOUDKIT_SCHEMA_SETUP.md](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/CLOUDKIT_SCHEMA_SETUP.md)
 - **Quick Reference:** [Examples/SCHEMA_QUICK_REFERENCE.md](../../Examples/SCHEMA_QUICK_REFERENCE.md)

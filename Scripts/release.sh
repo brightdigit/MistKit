@@ -20,12 +20,11 @@ REPO_URL="https://github.com/${REPO}.git"
 # a release gate is policy, not configuration.
 REQUIRED_WORKFLOWS=("MistKit" "MistDemo Integration" "Examples")
 
-# Example workflows carrying a MISTKIT_BRANCH pin. Both are git subrepos.
+# Example workflows carrying a MISTKIT_BRANCH pin. Each is a git subrepo.
 # When Packages/MistKitConfiguration lands (#407), add its workflow here and
 # to the git subrepo push hints in cmd_pins.
 PIN_FILES=(
-	"Examples/BushelCloud/.github/workflows/BushelCloud.yml"
-	"Examples/CelestraCloud/.github/workflows/CelestraCloud.yml"
+	"Examples/SwoopMistKit/.github/workflows/BushelCloud.yml"
 )
 
 ERRORS=0
@@ -307,8 +306,7 @@ cmd_pins() {
 			# These files live in git subrepos; pushing them is a separate,
 			# deliberate step the human runs.
 			info "Examples are git subrepos — after committing, push each:"
-			echo "     git subrepo push Examples/BushelCloud"
-			echo "     git subrepo push Examples/CelestraCloud"
+			echo "     git subrepo push Examples/SwoopMistKit"
 			;;
 		*)
 			# Report-only.

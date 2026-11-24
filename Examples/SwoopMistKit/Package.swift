@@ -23,7 +23,7 @@ let package = Package(
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        // Local path: BushelCloud develops as Examples/BushelCloud inside the
+        // Local path: BushelCloud develops as Examples/SwoopMistKit inside the
         // MistKit repo, so ../.. resolves to the parent MistKit checkout. On main
         // this is a tagged remote release; this one-line overlay is reapplied when
         // the branch is recreated from main (never merged, so it never conflicts).

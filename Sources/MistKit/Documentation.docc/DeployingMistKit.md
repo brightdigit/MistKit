@@ -4,7 +4,7 @@ From a local CLI to a scheduled CloudKit job in CI — building a static Linux b
 
 ## Overview
 
-The hard part of using MistKit on a backend is not writing the code. It is deciding where the code runs, how the credentials get there, and what happens when nobody is watching. This article picks up where <doc:AuthenticationAndDatabases> leaves off and covers the operational side, using two production deployments as worked examples: [BushelCloud](https://github.com/brightdigit/BushelCloud) and [CelestraCloud](https://github.com/brightdigit/CelestraCloud). Both live in this repository under `Examples/`, and both ship today as scheduled [GitHub Actions](https://docs.github.com/en/actions) jobs writing to a CloudKit public database from stock Ubuntu runners.
+The hard part of using MistKit on a backend is not writing the code. It is deciding where the code runs, how the credentials get there, and what happens when nobody is watching. This article picks up where <doc:AuthenticationAndDatabases> leaves off and covers the operational side, using two production deployments as worked examples: BushelCloud, in [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) (also in this repository under `Examples/SwoopMistKit/`), and [CelestraCloud](https://github.com/brightdigit/CelestraCloud). Both ship today as scheduled [GitHub Actions](https://docs.github.com/en/actions) jobs writing to a CloudKit public database from stock Ubuntu runners.
 
 "Deploying" a MistKit-based service means one of three things:
 

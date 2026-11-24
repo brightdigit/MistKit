@@ -56,7 +56,7 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 
 Apple's CloudKit framework only runs on Apple platforms. MistKit wraps the CloudKit Web Services REST API so server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps. Four patterns cover most uses:
 
-- **Public database as a managed catalog** — a scheduled job writes data every user wants and the app just queries it. [BushelCloud](https://github.com/brightdigit/BushelCloud) ([`Examples/BushelCloud`](Examples/BushelCloud/)) syncs macOS restore images and Xcode/Swift versions for [Bushel](https://getbushel.app); [CelestraCloud](https://github.com/brightdigit/CelestraCloud) ([`Examples/CelestraCloud`](Examples/CelestraCloud/)) syncs RSS feeds for [Celestra](https://celestr.app). Software-version catalogs, asset packs, feature flags, and MDM configuration fit the same shape.
+- **Public database as a managed catalog** — a scheduled job writes data every user wants and the app just queries it. [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) ([`Examples/SwoopMistKit`](Examples/SwoopMistKit/)) syncs macOS restore images and Xcode/Swift versions for [Bushel](https://getbushel.app); [CelestraCloud](https://github.com/brightdigit/CelestraCloud) syncs RSS feeds for [Celestra](https://celestr.app). Software-version catalogs, asset packs, feature flags, and MDM configuration fit the same shape.
 - **Private database on behalf of a user** — the user signs in once, the server keeps their web auth token, and reads or writes their private database while they are away. [HeartWitch](https://github.com/brightdigit/HeartWitch) links an Apple Watch to a Vapor backend this way; wearable data pipelines, two-way sync with external services, and server-side processing of uploads are the same idea.
 - **Web app ↔ Apple device bridge** — a browser portal for a CloudKit-backed app, or a webhook handler that writes straight into a user's records.
 - **Data aggregation** — anonymized telemetry read through `records/changes`, or crowdsourced data cleaned up by a background job.
@@ -470,8 +470,7 @@ try await adaptiveManager.upgradeToWebAuthentication(webAuthToken: webToken)
 Check out the `Examples/` directory for complete working examples:
 
 - **[MistDemo](Examples/MistDemo/)**: Web-based CloudKit authentication demo with automatic token capture
-- **[BushelCloud](Examples/BushelCloud/)** ([standalone repo](https://github.com/brightdigit/BushelCloud)): Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions from a scheduled GitHub Actions job — backend for the [Bushel app](https://getbushel.app)
-- **[CelestraCloud](Examples/CelestraCloud/)** ([standalone repo](https://github.com/brightdigit/CelestraCloud)): RSS reader demonstrating CloudKit query filtering, sorting, and web etiquette patterns — backend for the [Celestra app](https://celestr.app), built with [SyndiKit](https://github.com/brightdigit/SyndiKit)
+- **[SwoopMistKit](Examples/SwoopMistKit/)** (formerly BushelCloud) ([standalone repo](https://github.com/brightdigit/SwoopMistKit)): Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions from a scheduled GitHub Actions job — backend for the [Bushel app](https://getbushel.app)
 
 ## Documentation
 
@@ -516,10 +515,10 @@ Links from the talk:
 
 #### Use case examples
 
-- [BushelCloud](https://github.com/brightdigit/BushelCloud) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/BushelCloud`](Examples/BushelCloud/))
-  - [`cloudkit-sync-dev.yml`](Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
-  - [`cloudkit-sync` composite action](Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)
-- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting (also at [`Examples/CelestraCloud`](Examples/CelestraCloud/))
+- [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/SwoopMistKit`](Examples/SwoopMistKit/))
+  - [`cloudkit-sync-dev.yml`](Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
+  - [`cloudkit-sync` composite action](Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)
+- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting
 - [HeartWitch](https://github.com/brightdigit/HeartWitch) — the private-database, Apple Watch to Vapor bridge
 - [Rebuilding MistKit with Claude Code, part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/) and [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 

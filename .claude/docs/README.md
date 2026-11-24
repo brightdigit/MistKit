@@ -75,5 +75,5 @@ reasoning rather than as current reference. Each is a point-in-time record.
 
 Example-specific domain docs live with their examples, not here:
 
-- `Examples/BushelCloud/.claude/` — firmware/MobileAsset wikis, data-source research
-- `Examples/CelestraCloud/.claude/` — public-database architecture, schema setup
+- `Examples/SwoopMistKit/.claude/` — firmware/MobileAsset wikis, data-source research
+- CelestraCloud's `.claude/` (standalone repo, https://github.com/brightdigit/CelestraCloud/tree/mistkit/.claude) — public-database architecture, schema setup

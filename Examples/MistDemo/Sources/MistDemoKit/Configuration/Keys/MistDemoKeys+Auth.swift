@@ -32,7 +32,7 @@ internal import ConfigKeyKit
 extension MistDemoKeys {
   /// Web-auth and sharee credential keys.
   ///
-  /// These are MistDemo-only — neither BushelCloud nor CelestraCloud models web auth —
+  /// These are MistDemo-only — SwoopMistKit (BushelCloud) doesn't model web auth —
   /// so they keep their historical bases plus ``MistDemoKeys/envPrefix``.
   internal enum Auth {
     /// `--api-token` / `CLOUDKIT_API_TOKEN`.

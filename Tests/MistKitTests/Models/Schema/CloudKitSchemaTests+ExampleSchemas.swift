@@ -39,8 +39,7 @@ extension CloudKitSchemaTests {
       "Every committed example .ckdb parses",
       arguments: [
         "Examples/MistDemo/schema.ckdb",
-        "Examples/BushelCloud/schema.ckdb",
-        "Examples/CelestraCloud/schema.ckdb",
+        "Examples/SwoopMistKit/schema.ckdb",
       ]
     )
     internal func parses(relativePath: String) throws {

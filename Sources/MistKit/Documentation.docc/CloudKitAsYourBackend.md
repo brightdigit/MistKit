@@ -148,7 +148,7 @@ GitHub Actions (cron) ──▶ bushel-cloud CLI (MistKit) ──▶ CloudKit pu
 
 The same pattern powers [Celestra](https://celestr.app), an RSS reader whose feeds are fetched and synced to a public database on a schedule.
 
-Sources: [brightdigit/BushelCloud](https://github.com/brightdigit/BushelCloud) (also in this repository under `Examples/BushelCloud/`) and [brightdigit/CelestraCloud](https://github.com/brightdigit/CelestraCloud) (`Examples/CelestraCloud/`).
+Sources: [brightdigit/SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) (formerly BushelCloud; also in this repository under `Examples/SwoopMistKit/`) and [brightdigit/CelestraCloud](https://github.com/brightdigit/CelestraCloud).
 
 ### More use cases
 
@@ -584,7 +584,7 @@ Bushel's sync job runs entirely in [GitHub Actions](https://docs.github.com/en/a
 
 ![Repository secrets: CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY, CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN](talk-github-secrets)
 
-The scheduled workflow ([`Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml)) fires three times a day at off-the-hour minutes and hands the secrets to a composite action:
+The scheduled workflow ([`Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml)) fires three times a day at off-the-hour minutes and hands the secrets to a composite action:
 
 ```yaml
 name: Scheduled CloudKit Sync (Development)
@@ -622,7 +622,7 @@ jobs:
           enable-export: 'false'
 ```
 
-The action ([`Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)) downloads a pre-built binary when one is cached, builds it in Docker otherwise, validates the PEM before touching CloudKit, and runs the CLI with the credentials in environment variables:
+The action ([`Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)) downloads a pre-built binary when one is cached, builds it in Docker otherwise, validates the PEM before touching CloudKit, and runs the CLI with the credentials in environment variables:
 
 ```yaml
 name: 'CloudKit Sync Action'
@@ -708,10 +708,10 @@ And one more thing: Leo's apps — [Bushel](https://getbushel.app), virtualizati
 
 ### Use case examples
 
-- [BushelCloud](https://github.com/brightdigit/BushelCloud) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/BushelCloud`](https://github.com/brightdigit/MistKit/tree/main/Examples/BushelCloud))
-  - [`cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
-  - [`cloudkit-sync` composite action](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)
-- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting (also at [`Examples/CelestraCloud`](https://github.com/brightdigit/MistKit/tree/main/Examples/CelestraCloud))
+- [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/SwoopMistKit`](https://github.com/brightdigit/MistKit/tree/main/Examples/SwoopMistKit))
+  - [`cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
+  - [`cloudkit-sync` composite action](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)
+- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting
 - [HeartWitch](https://github.com/brightdigit/HeartWitch) — the private-database, Apple Watch to Vapor bridge
 - [Rebuilding MistKit with Claude Code, part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/) and [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 

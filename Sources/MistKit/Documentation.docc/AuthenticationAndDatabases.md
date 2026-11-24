@@ -255,7 +255,7 @@ Keys do not expire on their own, but the console allows several active keys per 
 
 ### Environment variables
 
-The conventional variable names used by MistDemo, [BushelCloud](https://github.com/brightdigit/BushelCloud), and [CelestraCloud](https://github.com/brightdigit/CelestraCloud):
+The conventional variable names used by MistDemo, [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit), and [CelestraCloud](https://github.com/brightdigit/CelestraCloud):
 
 | Variable | Method |
 | --- | --- |
