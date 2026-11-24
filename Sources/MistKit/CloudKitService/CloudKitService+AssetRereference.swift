@@ -120,6 +120,7 @@ extension CloudKitService {
   ) async throws(CloudKitError) -> RecordInfo {
     let lookups = try await lookupRecords(
       recordNames: [targetRecordName],
+      zoneID: zoneID,
       database: database
     )
     guard let firstLookup = lookups.first else {
@@ -196,6 +197,7 @@ extension CloudKitService {
       recordName: targetRecordName,
       fields: [resolvedTargetField: .asset(.value(asset))],
       recordChangeTag: recordChangeTag,
+      zoneID: zoneID,
       database: database
     )
   }

@@ -104,5 +104,42 @@ extension CloudKitServiceTests.Rereference {
       #expect(await provider.callCount(for: "lookupRecords") == 0)
       #expect(await provider.callCount(for: "modifyRecords") == 1)
     }
+
+    @Test("rereferenceAsset sends zoneID on the target lookup and update")
+    internal func forwardsZoneIDToLookupAndModify() async throws {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+
+      let (service, provider) = try Helper.makeServiceWithProvider(responsesByOperation: [
+        "rereferenceAssets": try Helper.rereferenceResponse(assets: [
+          Helper.assetDictionary(fileChecksum: "shared-chk")
+        ]),
+        "lookupRecords": try Helper.recordsResponse([
+          Helper.noteRecord(recordName: "note-b", changeTag: "tag-b")
+        ]),
+        "modifyRecords": try Helper.recordsResponse([
+          Helper.noteRecord(recordName: "note-b", changeTag: "tag-b2", imageChecksum: "shared-chk")
+        ]),
+      ])
+
+      _ = try await service.rereferenceAsset(
+        fromRecord: "note-a",
+        field: "image",
+        toRecord: "note-b",
+        zoneID: ZoneID(zoneName: "Photos"),
+        database: Helper.publicDatabase
+      )
+
+      for operation in ["lookupRecords", "modifyRecords"] {
+        let body = try #require(await provider.bodies(for: operation).compactMap { $0 }.first)
+        let json = try #require(
+          JSONSerialization.jsonObject(with: body) as? [String: Any]
+        )
+        let zoneID = json["zoneID"] as? [String: Any]
+        #expect(zoneID?["zoneName"] as? String == "Photos", "\(operation) body")
+      }
+    }
   }
 }

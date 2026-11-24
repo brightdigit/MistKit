@@ -35,6 +35,8 @@ internal import Testing
 extension CloudKitServiceTests.LookupUsersByRecordName {
   @Suite("Validation")
   internal struct Validation {
+    private typealias Lookup = CloudKitServiceTests.LookupUsersByRecordName
+
     @Test("lookupUsersByRecordName() throws on authentication error")
     internal func throwsOnAuthError() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -45,7 +47,7 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
         .makeAuthErrorService()
 
       await #expect(throws: CloudKitError.self) {
-        try await service.lookupUsersByRecordName(["_user-0"])
+        try await Lookup.lookupUsersByRecordName(service, ["_user-0"])
       }
     }
   }

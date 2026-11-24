@@ -49,7 +49,7 @@ extension CloudKitService {
   ///   - maxPages: Maximum number of rounds before throwing
   ///     ``CloudKitError/paginationLimitExceeded(maxPages:records:)``
   ///     (defaults to 1,000).
-  ///   - database: The CloudKit database scope to query (defaults to `.private`).
+  ///   - database: The CloudKit database scope to query.
   /// - Returns: One merged entry per originally-requested zone, in input order.
   /// - Throws: ``CloudKitError``. When `maxPages` is exceeded, throws
   ///   ``CloudKitError/paginationLimitExceeded(maxPages:records:)`` whose
@@ -66,7 +66,7 @@ extension CloudKitService {
     resultsLimit: Int? = nil,
     desiredRecordTypes: [String]? = nil,
     maxPages: Int = 1_000,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> RecordZoneChangesResult {
     var accumulator = ZoneChangesAccumulator(requested: zones)
     var pending = zones
