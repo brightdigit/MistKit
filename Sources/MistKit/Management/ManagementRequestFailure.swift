@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKitManagementOpenAPI
 
 /// A CloudKit Management API error response.
 ///
@@ -91,6 +92,20 @@ public struct ManagementRequestFailure: Sendable, Hashable, Decodable {
       detailedMessage: try container.decodeIfPresent(String.self, forKey: .detailedMessage),
       requestUUID: try container.decodeIfPresent(String.self, forKey: .requestUUID),
       retryAfterSeconds: try container.decodeIfPresent(Int.self, forKey: .retryAfterSeconds)
+    )
+  }
+
+  /// Converts the generated `RequestError`, taking `statusCode` from the
+  /// HTTP response rather than the body's `code`.
+  internal init(_ failure: Components.Schemas.RequestError, statusCode: Int) {
+    self.init(
+      statusCode: statusCode,
+      code: Int(failure.code),
+      message: failure.message,
+      reason: failure.reason,
+      detailedMessage: failure.detailedMessage,
+      requestUUID: failure.requestUuid,
+      retryAfterSeconds: failure.retryAfterSeconds.map(Int.init)
     )
   }
 

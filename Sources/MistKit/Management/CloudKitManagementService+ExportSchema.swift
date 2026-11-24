@@ -28,28 +28,75 @@
 //
 
 internal import Foundation
+internal import MistKitManagementOpenAPI
+internal import OpenAPIRuntime
 
 extension CloudKitManagementService {
-  /// Downloads an environment's schema as CloudKit Schema Language text.
+  /// The largest schema export collected (a schema export is plain text).
+  internal static let maxResponseBytes = 32 * 1_024 * 1_024
+
+  /// Collects a success body of at most ``maxResponseBytes`` as UTF-8 text.
   ///
-  /// Sends CKTool JS's `exportSchema` operation:
-  /// `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{environment}/schema/export`,
-  /// which answers `200 text/plain`. This is the same text `cktool
-  /// export-schema` writes to a `.ckdb` file.
-  ///
-  /// - Throws: ``CloudKitManagementError`` for an error response; transport
-  ///   errors propagate unchanged.
-  public func exportSchemaText(environment: Environment) async throws -> String {
-    let request = ManagementRequest.exportSchema(
-      teamIdentifier: teamIdentifier,
-      containerIdentifier: containerIdentifier,
-      environment: environment
+  /// Collected chunk by chunk rather than with `Data(collecting:upTo:)`,
+  /// whose over-limit error is private to OpenAPIRuntime and can't be told
+  /// apart from a transport failure.
+  private static func text(from body: HTTPBody) async throws -> String {
+    let tooLarge = CloudKitManagementError.invalidResponse(
+      reason: "schema export body exceeded \(maxResponseBytes) bytes"
     )
-    let data = try await send(request)
+    if case .known(let length) = body.length, length > maxResponseBytes {
+      throw tooLarge
+    }
+    var data = Data()
+    for try await chunk in body {
+      data.append(contentsOf: chunk)
+      guard data.count <= maxResponseBytes else {
+        throw tooLarge
+      }
+    }
     guard let text = String(data: data, encoding: .utf8) else {
       throw CloudKitManagementError.invalidResponse(reason: "schema export body is not UTF-8")
     }
     return text
+  }
+
+  /// Downloads an environment's schema as CloudKit Schema Language text.
+  ///
+  /// Sends the `exportSchema` operation from `management-openapi.yaml`:
+  /// `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{environment}/schema/export`,
+  /// which answers `200 text/plain`. This is the same text `cktool
+  /// export-schema` writes to a `.ckdb` file.
+  ///
+  /// - Throws: ``CloudKitManagementError`` for an error response, or for a
+  ///   success response that isn't UTF-8 text of at most 32 MiB; transport
+  ///   errors propagate unchanged.
+  public func exportSchemaText(environment: Environment) async throws -> String {
+    let output: Operations.exportSchema.Output
+    do {
+      output = try await client.exportSchema(
+        path: .init(
+          teamId: teamIdentifier,
+          containerId: containerIdentifier,
+          environment: environment.managementEnvironment
+        )
+      )
+    } catch let error as ClientError {
+      throw await CloudKitManagementError.translating(error)
+    }
+    switch output {
+    case .ok(let response):
+      switch response.body {
+      case .plainText(let body):
+        return try await Self.text(from: body)
+      }
+    case .default(let statusCode, let response):
+      switch response.body {
+      case .json(let failure):
+        throw CloudKitManagementError.requestFailed(
+          ManagementRequestFailure(failure, statusCode: statusCode)
+        )
+      }
+    }
   }
 
   /// Downloads and parses an environment's schema.

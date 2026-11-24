@@ -36,6 +36,15 @@ internal import Testing
 extension CloudKitManagementServiceTests {
   @Suite("Errors")
   internal struct Errors {
+    private static func parseError(of text: String) -> SchemaParseError? {
+      do {
+        _ = try CloudKitSchema(parsing: text)
+        return nil
+      } catch {
+        return error as? SchemaParseError
+      }
+    }
+
     @Test("A JSON RequestError body becomes requestFailed with every field")
     internal func requestError() async throws {
       let (service, _) = makeService(
@@ -108,7 +117,7 @@ extension CloudKitManagementServiceTests {
     }
 
     @Test("Errors describe themselves without the token")
-    internal func descriptions() {
+    internal func descriptions() throws {
       let failure = ManagementRequestFailure(
         statusCode: 401,
         code: 401,
@@ -126,6 +135,19 @@ extension CloudKitManagementServiceTests {
       #expect(
         CloudKitManagementError.httpError(statusCode: 502, body: "Bad Gateway").errorDescription
           == "CloudKit Management API HTTP 502"
+      )
+      #expect(
+        CloudKitManagementError.invalidResponse(reason: "schema export body is not UTF-8")
+          .errorDescription
+          == "CloudKit Management API returned an unusable response: "
+          + "schema export body is not UTF-8"
+      )
+      let parseError = try #require(Self.parseError(of: "not a schema"))
+      let description = CloudKitManagementError.invalidSchema(parseError, text: "not a schema")
+        .errorDescription
+      #expect(
+        description?.hasPrefix("CloudKit Management API returned a schema MistKit couldn't parse.")
+          == true
       )
     }
   }

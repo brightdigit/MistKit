@@ -6,7 +6,8 @@
 import PackageDescription
 
 // Bare imports in swift-openapi-generator output must stay public; do not apply
-// InternalImportsByDefault to the generated MistKitOpenAPI target.
+// InternalImportsByDefault to the generated MistKitOpenAPI and
+// MistKitManagementOpenAPI targets.
 let swiftSettings: [SwiftSetting] = [
   .enableUpcomingFeature("InternalImportsByDefault"),
 ]
@@ -33,6 +34,10 @@ let package = Package(
       name: "MistKitOpenAPI",
       targets: ["MistKitOpenAPI"]
     ),
+    .library(
+      name: "MistKitManagementOpenAPI",
+      targets: ["MistKitManagementOpenAPI"]
+    ),
   ],
   dependencies: [
     // Swift OpenAPI Runtime dependencies
@@ -52,10 +57,19 @@ let package = Package(
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ]
     ),
+    // Generated from management-openapi.yaml: the CloudKit Management API
+    // (cktool's service), a different host, auth and error shape.
+    .target(
+      name: "MistKitManagementOpenAPI",
+      dependencies: [
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+      ]
+    ),
     .target(
       name: "MistKit",
       dependencies: [
         "MistKitOpenAPI",
+        "MistKitManagementOpenAPI",
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
         // URLSession transport only available on non-WASM platforms
         .product(
@@ -70,7 +84,7 @@ let package = Package(
     ),
     .testTarget(
       name: "MistKitTests",
-      dependencies: ["MistKit", "MistKitOpenAPI"],
+      dependencies: ["MistKit", "MistKitOpenAPI", "MistKitManagementOpenAPI"],
       swiftSettings: swiftSettings
     ),
   ]

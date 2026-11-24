@@ -12,8 +12,8 @@ MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit W
 - **Target Platforms**: Cross-platform including macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows
 - **Default Branch**: `main`
 - **API Reference**: The `openapi.yaml` file contains the OpenAPI 3.0.3 specification for Apple's CloudKit Web Services
-- **Code Generation**: Generated client code lives in `Sources/MistKitOpenAPI/` (its own target/product) and is committed
-- **Targets/products**: `MistKit` (curated wrapper) and `MistKitOpenAPI` (raw generated client + types, `public`). `import MistKit` for the curated API; add `import MistKitOpenAPI` only to reach raw generated types
+- **Code Generation**: Generated client code lives in `Sources/MistKitOpenAPI/` and `Sources/MistKitManagementOpenAPI/` (each its own target/product) and is committed
+- **Targets/products**: `MistKit` (curated wrapper), `MistKitOpenAPI` (raw generated CloudKit Web Services client + types, `public`) and `MistKitManagementOpenAPI` (raw generated CloudKit Management API client from `management-openapi.yaml`, `public`). `import MistKit` for the curated API; add `import MistKitOpenAPI` / `import MistKitManagementOpenAPI` only to reach raw generated types
 
 ## Development Commands
 
@@ -46,7 +46,8 @@ swift package generate-xcodeproj
 
 ### OpenAPI Code Generation
 ```bash
-# Generate OpenAPI client code (run this after modifying openapi.yaml)
+# Generate OpenAPI client code (run this after modifying openapi.yaml or
+# management-openapi.yaml; it regenerates both targets)
 ./Scripts/generate-openapi.sh
 
 # Or manually with swift-openapi-generator
@@ -105,6 +106,7 @@ swift run mistdemo demo-errors
 swift run mistdemo test-public
 swift run mistdemo test-private
 swift run mistdemo probe-encrypted   # issue #392: encrypted-field probe for one web-auth user
+swift run mistdemo export-schema [--raw] [--environment production]  # Management API (needs CLOUDKIT_MANAGEMENT_TOKEN + CLOUDKIT_TEAM_ID)
 
 # Configuration (no config-file flag — MistDemo uses Swift Configuration):
 # highest priority first — (1) CLI args, (2) CLOUDKIT_-prefixed env vars,
@@ -118,7 +120,8 @@ swift run mistdemo probe-encrypted   # issue #392: encrypted-field probe for one
 # Recognized keys: CLOUDKIT_CONTAINER_ID, CLOUDKIT_DATABASE, CLOUDKIT_ENVIRONMENT,
 # CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_SHAREE_WEB_AUTH_TOKEN,
 # CLOUDKIT_SHAREE_EMAIL, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
-# CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR.
+# CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR,
+# CLOUDKIT_MANAGEMENT_TOKEN, CLOUDKIT_TEAM_ID (export-schema only).
 # Capture sharer+sharee tokens: swift run mistdemo auth-tokens --sharee-email …
 swift run mistdemo query
 ```
@@ -184,12 +187,14 @@ When a scalar `type` *contradicts* the value's category — a numeric type (`TIM
 MistKit/
 ├── Sources/
 │   ├── MistKit/           # Curated wrapper (CloudKitService, domain types, auth)
-│   └── MistKitOpenAPI/    # Generated OpenAPI client + types (public, committed)
+│   ├── MistKitOpenAPI/    # Generated CloudKit Web Services client + types (public, committed)
+│   └── MistKitManagementOpenAPI/ # Generated Management API client (from management-openapi.yaml)
 ├── Tests/
 │   └── MistKitTests/
 ├── Scripts/
-│   └── generate-openapi.sh # Script to generate OpenAPI code → Sources/MistKitOpenAPI/
+│   └── generate-openapi.sh # Generates both OpenAPI targets
 ├── openapi.yaml           # CloudKit Web Services OpenAPI specification
+├── management-openapi.yaml # CloudKit Management API OpenAPI specification
 └── openapi-generator-config.yaml # Configuration for code generation
 ```
 
@@ -304,13 +309,14 @@ confirm against a live response first.
 
 ### CloudKit Management API (issue #135 Phase 1)
 
-Schema export is **not** a CloudKit Web Services endpoint. It is the Management API behind `cktool` / CKTool JS, and `CloudKitManagementService` (`Sources/MistKit/Management/`) is a separate, hand-written client for it — not in `openapi.yaml`, because it lives on a different host with different auth and error shapes. Facts below come from Apple's CKTool JS 1.3.2 npm packages (`@apple/cktool.api.database` `exportSchemaOp`, `@apple/cktool.core` `Configuration`, `@apple/cktool.api.base` security schemes); see `.claude/docs/research/135-management-api-request-format.md`.
+Schema export is **not** a CloudKit Web Services endpoint. It is the Management API behind `cktool` / CKTool JS. It has its **own spec, `management-openapi.yaml`**, generated into its own target, `Sources/MistKitManagementOpenAPI/` (never hand-edit), rather than being added to `openapi.yaml`, because it lives on a different host with different auth and error shapes. `CloudKitManagementService` (`Sources/MistKit/Management/`) is the curated wrapper over the generated `Client`, the same way `CloudKitService` wraps `MistKitOpenAPI`: generated types stay out of the public API. Facts below come from Apple's CKTool JS 1.3.2 npm packages (`@apple/cktool.api.database` `exportSchemaOp`, `@apple/cktool.core` `Configuration`, `@apple/cktool.api.base` security schemes); see `.claude/docs/research/135-management-api-request-format.md`.
 
 - Base URL `https://api.icloud.apple.com` (CKTool JS default `serverUrl`), **not** `api.apple-cloudkit.com`.
 - Export: `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{DEVELOPMENT|PRODUCTION}/schema/export` → `200 text/plain` CloudKit Schema Language (same text as `cktool export-schema`). Path segments are percent-encoded (`encodeURIComponent` in CKTool JS). Environment is upper case.
 - Auth: header `X-Apple-CloudKit-Management-Token: <token>` only (or the `myacinfo` console cookie). No signing, no API token.
 - Errors: JSON `RequestError` `{code, message, reason, detailedMessage?, requestUuid?, retryAfterSeconds?}` → `CloudKitManagementError.requestFailed(ManagementRequestFailure)`; non-JSON → `.httpError`.
 - Token: "scoped to a team and user", "default lifespan of one year", revocable in CloudKit Console Settings (Apple, *Automating CloudKit Development*). Required team role is undocumented.
+- Wrapper plumbing: `ManagementTokenMiddleware` adds the token header; `ManagementErrorBodyMiddleware` buffers non-2xx bodies (≤1 MiB) so a body the generated client couldn't decode as a `RequestError` is still readable for `.httpError`. There is **no logging middleware**, and a `ClientError` is never rethrown (its description includes the request headers): `CloudKitManagementError.translating(_:)` maps it to the transport's own error, `.httpError`, or `.invalidResponse`. Success bodies are capped at 32 MiB (`.invalidResponse`). `ManagementToken` is redacted in `description`, `debugDescription` and `Mirror`/`dump`.
 - `exportSchema(environment:)` parses the text with `CloudKitSchema(parsing:)` (`Sources/MistKit/Models/Schema/`) into record types, fields (`isQueryable`/`isSortable`/`isSearchable`), grants and roles; `exportSchemaText(environment:)` returns the raw text.
 - Unit tests use **provisional, hand-written** fixtures (`Tests/MistKitTests/Management/ProvisionalManagementFixtures.swift`). No live Management API call has been made yet.
 
@@ -479,7 +485,7 @@ Run via `swift run mistdemo test-public` or `swift run mistdemo test-private` (p
 
 The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in the standalone `MistKitOpenAPI` target at `Sources/MistKitOpenAPI/` (`accessModifier: public` so downstream code can `import MistKitOpenAPI` as an escape hatch). It is committed.
 
-> **IMPORTANT: Never manually edit files in `Sources/MistKitOpenAPI/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
+> **IMPORTANT: Never manually edit files in `Sources/MistKitOpenAPI/` or `Sources/MistKitManagementOpenAPI/`.** These files are auto-generated from `openapi.yaml` and `management-openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify the spec and regenerate using `./Scripts/generate-openapi.sh` (CI's "Check generated OpenAPI output" job diffs both targets).
 
 The `openapi.yaml` file serves as the source of truth for:
 - All available endpoints and their HTTP methods

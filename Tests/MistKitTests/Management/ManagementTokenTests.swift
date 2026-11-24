@@ -46,4 +46,23 @@ internal struct ManagementTokenTests {
   internal func value() {
     #expect(ManagementToken("abc").value == "abc")
   }
+
+  @Test("Hides its value from dump and Mirror")
+  internal func reflection() {
+    let token = ManagementToken("super-secret")
+    var dumped = ""
+    dump(token, to: &dumped)
+    #expect(!dumped.contains("super-secret"))
+    #expect(Mirror(reflecting: token).children.isEmpty)
+  }
+
+  @Test("Compares by value")
+  internal func hashable() {
+    let first = ManagementToken("a")
+    let same = ManagementToken("a")
+    let other = ManagementToken("b")
+    #expect(first == same)
+    #expect(first != other)
+    #expect(Set([first, same]).count == 1)
+  }
 }

@@ -36,10 +36,18 @@ else
 	GENERATOR=(swift run --package-path Scripts/OpenAPITools swift-openapi-generator)
 fi
 
+# CloudKit Web Services → MistKitOpenAPI
 "${GENERATOR[@]}" generate \
     --output-directory Sources/MistKitOpenAPI \
     --config openapi-generator-config.yaml \
     openapi.yaml
+
+# CloudKit Management API (cktool's service) → MistKitManagementOpenAPI. It
+# has its own spec and target: a different host, auth and error shape.
+"${GENERATOR[@]}" generate \
+    --output-directory Sources/MistKitManagementOpenAPI \
+    --config openapi-generator-config.yaml \
+    management-openapi.yaml
 
 popd
 

@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   regenerate-and-diff:
-    name: Regenerate Sources/MistKitOpenAPI and diff
+    name: Regenerate Sources/MistKitOpenAPI and Sources/MistKitManagementOpenAPI and diff
     runs-on: ubuntu-latest
     container:
       image: swift:latest
@@ -38,10 +38,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ! git diff --exit-code Sources/MistKitOpenAPI/; then
+          if ! git diff --exit-code Sources/MistKitOpenAPI/ Sources/MistKitManagementOpenAPI/ \
+            || [ -n "$(git status --porcelain --untracked-files=all Sources/MistKitOpenAPI/ Sources/MistKitManagementOpenAPI/)" ]; then
             echo ""
-            echo "::error::Sources/MistKitOpenAPI/ does not match the output of ./Scripts/generate-openapi.sh."
-            echo "Never hand-edit generated code. Change openapi.yaml, run"
+            echo "::error::Generated OpenAPI output does not match ./Scripts/generate-openapi.sh."
+            echo "Never hand-edit generated code. Change openapi.yaml or management-openapi.yaml, run"
             echo "./Scripts/generate-openapi.sh, and commit the regenerated files."
             exit 1
           fi

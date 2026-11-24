@@ -40,10 +40,11 @@ internal import Foundation
 /// developer.apple.com/icloud/cloudkit/automating/). It is not tied to one
 /// container or environment.
 ///
-/// The value never appears in `description`, `debugDescription` or string
-/// interpolation, so it can't leak through logs.
+/// The value never appears in `description`, `debugDescription`, string
+/// interpolation or reflection (`dump`, `Mirror`), so it can't leak through
+/// logs.
 public struct ManagementToken: Sendable, Hashable, CustomStringConvertible,
-  CustomDebugStringConvertible
+  CustomDebugStringConvertible, CustomReflectable
 {
   /// The raw token, sent in the `X-Apple-CloudKit-Management-Token` header.
   internal let value: String
@@ -56,6 +57,11 @@ public struct ManagementToken: Sendable, Hashable, CustomStringConvertible,
   /// A redacted placeholder.
   public var debugDescription: String {
     description
+  }
+
+  /// A mirror with no children, so `dump` and `Mirror` can't reach the value.
+  public var customMirror: Mirror {
+    Mirror(self, children: [], displayStyle: .struct)
   }
 
   /// Wraps a management token copied from CloudKit Console.

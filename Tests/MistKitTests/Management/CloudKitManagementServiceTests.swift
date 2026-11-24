@@ -29,6 +29,7 @@
 
 internal import Foundation
 internal import HTTPTypes
+internal import OpenAPIRuntime
 internal import Testing
 
 @testable import MistKit
@@ -50,5 +51,28 @@ internal enum CloudKitManagementServiceTests {
       transport: transport
     )
     return (service, transport)
+  }
+
+  internal static func makeService(
+    transport: any ClientTransport
+  ) -> CloudKitManagementService {
+    CloudKitManagementService(
+      teamIdentifier: teamIdentifier,
+      containerIdentifier: containerIdentifier,
+      managementToken: ManagementToken(token),
+      transport: transport
+    )
+  }
+
+  /// The error `exportSchemaText` throws, or `nil` when it succeeds.
+  internal static func exportTextError(
+    _ service: CloudKitManagementService
+  ) async -> (any Error)? {
+    do {
+      _ = try await service.exportSchemaText(environment: .development)
+      return nil
+    } catch {
+      return error
+    }
   }
 }

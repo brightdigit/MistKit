@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+internal import MistKitManagementOpenAPI
 internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
@@ -44,8 +45,9 @@ internal import OpenAPIRuntime
 /// containers by team, and reports errors as a JSON `RequestError`
 /// (``ManagementRequestFailure``) rather than a `serverErrorCode` body.
 ///
-/// The request format comes from Apple's CKTool JS 1.3.2
-/// (`@apple/cktool.api.database`, `@apple/cktool.core`).
+/// Requests go through a client generated from `management-openapi.yaml`
+/// (the `MistKitManagementOpenAPI` target), whose contract comes from Apple's
+/// CKTool JS 1.3.2 (`@apple/cktool.api.database`, `@apple/cktool.core`).
 public struct CloudKitManagementService: Sendable {
   // swift-format-ignore: NeverForceUnwrap
   // swiftlint:disable force_unwrapping
@@ -59,8 +61,30 @@ public struct CloudKitManagementService: Sendable {
   /// The CloudKit container identifier, such as `iCloud.com.example.App`.
   public let containerIdentifier: String
 
-  internal let managementToken: ManagementToken
-  internal let transport: any ClientTransport
+  /// The generated Management API client, with the token middleware.
+  internal let client: Client
+
+  /// Creates a service that sends requests through `transport`.
+  ///
+  /// The client has only the token and error-body middlewares: no logging
+  /// middleware, so the management token never reaches a log.
+  internal init(
+    teamIdentifier: String,
+    containerIdentifier: String,
+    managementToken: ManagementToken,
+    transport: any ClientTransport
+  ) {
+    self.teamIdentifier = teamIdentifier
+    self.containerIdentifier = containerIdentifier
+    self.client = Client(
+      serverURL: Self.baseURL,
+      transport: transport,
+      middlewares: [
+        ManagementTokenMiddleware(managementToken: managementToken),
+        ManagementErrorBodyMiddleware(),
+      ]
+    )
+  }
 }
 
 #if !os(WASI)

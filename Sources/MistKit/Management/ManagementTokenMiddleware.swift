@@ -1,5 +1,5 @@
 //
-//  CloudKitManagementService+Send.swift
+//  ManagementTokenMiddleware.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -31,29 +31,26 @@ internal import Foundation
 internal import HTTPTypes
 internal import OpenAPIRuntime
 
-extension CloudKitManagementService {
-  /// The largest response body collected (a schema export is plain text).
-  private static let maxResponseBytes = 32 * 1_024 * 1_024
+/// Adds the ``ManagementToken`` to every CloudKit Management API request, in
+/// the `X-Apple-CloudKit-Management-Token` header.
+///
+/// This is the only authentication the Management API takes: no request
+/// signing and no API token. The Management client has no logging middleware,
+/// so the header never reaches a log.
+internal struct ManagementTokenMiddleware: ClientMiddleware {
+  /// The token to send.
+  internal let managementToken: ManagementToken
 
-  /// Sends `request` with the management token and returns the body of a
-  /// 2xx response.
-  internal func send(_ request: ManagementRequest) async throws -> Data {
-    let httpRequest = request.httpRequest(managementToken: managementToken)
-    let (response, body) = try await transport.send(
-      httpRequest,
-      body: nil,
-      baseURL: Self.baseURL,
-      operationID: request.operationID
-    )
-    let data: Data =
-      if let body {
-        try await Data(collecting: body, upTo: Self.maxResponseBytes)
-      } else {
-        Data()
-      }
-    guard response.status.kind == .successful else {
-      throw CloudKitManagementError(statusCode: response.status.code, body: data)
-    }
-    return data
+  /// Sets the token header, then passes the request on.
+  internal func intercept(
+    _ request: HTTPRequest,
+    body: HTTPBody?,
+    baseURL: URL,
+    operationID: String,
+    next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+  ) async throws -> (HTTPResponse, HTTPBody?) {
+    var request = request
+    request.headerFields[.cloudKitManagementToken] = managementToken.value
+    return try await next(request, body, baseURL)
   }
 }

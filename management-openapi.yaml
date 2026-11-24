@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Apple CloudKit Management API
+  description: |
+    The CloudKit Management API is the HTTP service behind `cktool` and CKTool JS.
+    It handles schema operations. It is a separate service from CloudKit Web
+    Services (`openapi.yaml`): it has a different host, authentication and error
+    shape.
+
+    ## Source
+    The contract comes from Apple's CKTool JS 1.3.2 npm packages:
+    - `@apple/cktool.api.database` (`exportSchemaOp`)
+    - `@apple/cktool.api.base` (security schemes, `CKEnvironment`, `RequestError`)
+    - `@apple/cktool.core` (default `serverUrl`, `encodeURIComponent` path escaping)
+
+    See `.claude/docs/research/135-management-api-request-format.md`.
+
+    ## Authentication
+    Send a management token, created in CloudKit Console → Settings, in the
+    `X-Apple-CloudKit-Management-Token` header. There's no request signing and
+    no API token. CKTool JS also accepts the `myacinfo` console cookie, which
+    MistKit doesn't model.
+
+    ## Errors
+    Every non-success status returns a JSON `RequestError`.
+
+    ## Not yet modeled (Phase 2)
+    `importSchema` (`PUT …/schema`), `validateSchema` (`POST …/schema/validate`),
+    `resetToProduction` (`POST …/reset`), `getTeams` (`GET /users/current/teams`),
+    `getContainers` (`GET /teams/{teamId}/containers`).
+  version: 1.0.0
+  contact:
+    name: Apple Developer Support
+    url: https://developer.apple.com/support/
+servers:
+  - url: https://api.icloud.apple.com
+    description: CloudKit Management API (CKTool JS default serverUrl)
+
+security:
+  - ManagementTokenAuth: []
+
+paths:
+  /v1/database/teams/{teamId}/containers/{containerId}/environments/{environment}/schema/export:
+    get:
+      summary: Export a container's schema
+      description: |
+        Returns the container environment's schema as CloudKit Schema Language
+        text, the same text `cktool export-schema` writes to a `.ckdb` file.
+      operationId: exportSchema
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+        - $ref: '#/components/parameters/containerId'
+        - $ref: '#/components/parameters/environment'
+      responses:
+        '200':
+          description: The schema file
+          content:
+            text/plain:
+              schema:
+                type: string
+        default:
+          description: Request failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestError'
+
+components:
+  securitySchemes:
+    ManagementTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Apple-CloudKit-Management-Token
+      description: Management token from CloudKit Console Settings
+
+  parameters:
+    teamId:
+      name: teamId
+      in: path
+      required: true
+      description: The Apple Developer team ID that owns the container
+      schema:
+        type: string
+    containerId:
+      name: containerId
+      in: path
+      required: true
+      description: The container identifier, such as `iCloud.com.example.App`
+      schema:
+        type: string
+    environment:
+      name: environment
+      in: path
+      required: true
+      description: The container environment
+      schema:
+        $ref: '#/components/schemas/CKEnvironment'
+
+  schemas:
+    CKEnvironment:
+      type: string
+      description: A container environment, written in upper case
+      enum:
+        - DEVELOPMENT
+        - PRODUCTION
+
+    RequestError:
+      type: object
+      description: The error body for every non-success response
+      required:
+        - code
+        - message
+        - reason
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: The HTTP status code
+        message:
+          type: string
+          description: An error code string, such as `AUTHENTICATION_FAILED`
+        reason:
+          type: string
+          description: A readable description of the failure
+        detailedMessage:
+          type: string
+          description: Extra detail about the failure
+        requestUuid:
+          type: string
+          description: The request's identifier, for Apple support
+        retryAfterSeconds:
+          type: integer
+          format: int32
+          description: Seconds to wait before retrying, when the failure is transient

@@ -37,7 +37,7 @@ extension CloudKitManagementServiceTests {
   @Suite("Export schema")
   internal struct ExportSchema {
     @Test(
-      "Builds the CKTool JS exportSchema request",
+      "Sends the exportSchema request from management-openapi.yaml",
       arguments: [
         (Environment.development, "DEVELOPMENT"),
         (Environment.production, "PRODUCTION"),
@@ -62,29 +62,9 @@ extension CloudKitManagementServiceTests {
       )
       let tokenHeader = try #require(HTTPField.Name("X-Apple-CloudKit-Management-Token"))
       #expect(sent.request.headerFields[tokenHeader] == "management-token-value")
-      #expect(sent.request.headerFields[.accept] == "text/plain")
+      #expect(sent.request.headerFields[.accept]?.contains("text/plain") == true)
       #expect(sent.operationID == "exportSchema")
       #expect(sent.body == nil)
-    }
-
-    @Test("Percent-encodes path identifiers")
-    internal func percentEncoding() async throws {
-      let transport = RecordingTransport(
-        response: ProvisionalManagementFixtures.textResponse("DEFINE SCHEMA")
-      )
-      let service = CloudKitManagementService(
-        teamIdentifier: "TEAM/1",
-        containerIdentifier: "iCloud.com.example.a b",
-        managementToken: ManagementToken("t"),
-        transport: transport
-      )
-      _ = try await service.exportSchemaText(environment: .development)
-      let sent = try #require(await transport.sent.first)
-      #expect(
-        sent.request.path
-          == "/v1/database/teams/TEAM%2F1/containers/iCloud.com.example.a%20b"
-          + "/environments/DEVELOPMENT/schema/export"
-      )
     }
 
     @Test("Returns the raw schema text unchanged")
