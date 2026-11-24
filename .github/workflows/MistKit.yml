@@ -206,6 +206,10 @@ jobs:
           android-swift-version: ${{ matrix.swift.version }}
           android-api-level: ${{ matrix.android-api-level }}
           android-run-tests: true
+          # The example-schema tests read Examples/*/schema.ckdb relative to the
+          # working directory (Tests/MistKitTests/Helpers/PackageFile.swift); the
+          # emulator runs the test binary from the copied folder, not the checkout.
+          android-copy-files: "Examples"
       # Note: Code coverage is not supported on Android builds
       # The Swift Android SDK does not include LLVM coverage tools (llvm-profdata, llvm-cov)
 

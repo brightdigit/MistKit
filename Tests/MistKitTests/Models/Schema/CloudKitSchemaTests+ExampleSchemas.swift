@@ -33,21 +33,8 @@ internal import Testing
 @testable import MistKit
 
 extension CloudKitSchemaTests {
-  @Suite(
-    "Example schemas",
-    .enabled(
-      if: Platform.isPackageSourceTreeReachable,
-      "Reads committed files from the package source tree, which WASI and Android can't see"
-    )
-  )
+  @Suite("Example schemas")
   internal struct ExampleSchemas {
-    private static let packageRoot = URL(fileURLWithPath: #filePath)
-      .deletingLastPathComponent()  // Schema
-      .deletingLastPathComponent()  // Models
-      .deletingLastPathComponent()  // MistKitTests
-      .deletingLastPathComponent()  // Tests
-      .deletingLastPathComponent()
-
     @Test(
       "Every committed example .ckdb parses",
       arguments: [
@@ -57,7 +44,7 @@ extension CloudKitSchemaTests {
       ]
     )
     internal func parses(relativePath: String) throws {
-      let url = Self.packageRoot.appendingPathComponent(relativePath)
+      let url = PackageFile.url(relativePath)
       try #require(FileManager.default.fileExists(atPath: url.path))
       let text = try String(contentsOf: url, encoding: .utf8)
       let schema = try CloudKitSchema(parsing: text)
@@ -66,7 +53,7 @@ extension CloudKitSchemaTests {
 
     @Test("MistDemo's Note keeps its index flags and encrypted field")
     internal func mistDemoNote() throws {
-      let url = Self.packageRoot.appendingPathComponent("Examples/MistDemo/schema.ckdb")
+      let url = PackageFile.url("Examples/MistDemo/schema.ckdb")
       let schema = try CloudKitSchema(parsing: try String(contentsOf: url, encoding: .utf8))
       let note = try #require(schema.recordType(named: "Note"))
       let title = try #require(note.field(named: "title"))

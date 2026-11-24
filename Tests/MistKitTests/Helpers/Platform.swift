@@ -22,22 +22,6 @@ internal enum Platform {
     #endif
   }()
 
-  /// Whether the package checkout is on disk where the tests run.
-  ///
-  /// False where the test binary runs away from the source tree: in the WASI
-  /// sandbox, and on the Android emulator. Gate tests that read committed
-  /// files through `#filePath` on this rather than on a platform list.
-  internal static let isPackageSourceTreeReachable: Bool = {
-    let packageRoot = URL(fileURLWithPath: #filePath)
-      .deletingLastPathComponent()  // Helpers
-      .deletingLastPathComponent()  // MistKitTests
-      .deletingLastPathComponent()  // Tests
-      .deletingLastPathComponent()
-    return FileManager.default.fileExists(
-      atPath: packageRoot.appendingPathComponent("Package.swift").path
-    )
-  }()
-
   /// True only on Windows × Swift 6.2, which silently aborts emitting
   /// MistKitTests past a tip-over size (no `error:` / stack dump).
   /// Prefer compile-time body `#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))`
