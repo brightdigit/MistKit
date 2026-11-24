@@ -66,3 +66,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Android emulator flake](reference_android_emulator_flake.md) — an Android job that fails with `adb ... TCP port 5554` after emitting the test modules is a flake; re-run, don't edit source
 - [Management API request format](reference_management_api_request_format.md) — schema export is `api.icloud.apple.com/v1/database/teams/…/schema/export` with `X-Apple-CloudKit-Management-Token`; from CKTool JS 1.3.2, live-verified 2026-11-24; `message` codes are kebab-case, unknown container is 403 (#135)
 - [Examples: SwoopMistKit, no CelestraCloud](project_examples_swoopmistkit.md) — 2026-11-24: `Examples/BushelCloud` → `Examples/SwoopMistKit` (repo renamed; package still BushelCloud); `Examples/CelestraCloud` removed
+- [Change tracking is custom-zone only](project_change_tracking_custom_zones_only.md) — changes/zone and records/changes reject _defaultZone; confirmed 2026-11-24
