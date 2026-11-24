@@ -35,6 +35,21 @@ internal import MistKitOpenAPI
 #endif
 
 extension CloudKitService {
+  /// Whether `url` is an `https` URL on an `apple.com` or `icloud.com` host.
+  ///
+  /// The sign-in page is opened in a browser session, so a `redirectURL`
+  /// from a tampered or misdirected response (a `file:` or custom-scheme
+  /// URL, or another host) is refused rather than returned. Live CloudKit
+  /// sends `https://idmsa.apple.com/…`.
+  internal static func isAppleSignInURL(_ url: URL) -> Bool {
+    guard url.scheme?.lowercased() == "https", let host = url.host?.lowercased() else {
+      return false
+    }
+    return ["apple.com", "icloud.com"].contains { domain in
+      host == domain || host.hasSuffix(".\(domain)")
+    }
+  }
+
   /// Ask CloudKit for the web sign-in page that issues a web-auth token.
   ///
   /// Sends `users/caller` signed with the API token alone. CloudKit answers
@@ -50,7 +65,8 @@ extension CloudKitService {
   /// - Throws: ``CloudKitError/missingCredentials(database:availability:reason:)``
   ///   when the service has no API token;
   ///   ``CloudKitError/incompleteResponse(reason:)`` when CloudKit answered
-  ///   without a usable `redirectURL`; otherwise the request's error.
+  ///   without a usable `redirectURL`, or with one that isn't an `https`
+  ///   `apple.com` or `icloud.com` page; otherwise the request's error.
   public func fetchWebAuthSignInURL() async throws(CloudKitError) -> URL {
     let database = Database.public(.prefers(.webAuth))
     guard let apiToken = credentials?.apiAuth?.apiToken else {
@@ -75,6 +91,11 @@ extension CloudKitService {
     guard let redirectURL = failure.redirectURL, let url = URL(string: redirectURL) else {
       throw .incompleteResponse(
         reason: "AUTHENTICATION_REQUIRED response had no valid redirectURL"
+      )
+    }
+    guard Self.isAppleSignInURL(url) else {
+      throw .incompleteResponse(
+        reason: "AUTHENTICATION_REQUIRED redirectURL isn't an https Apple sign-in page"
       )
     }
     return url

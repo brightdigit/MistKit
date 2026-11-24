@@ -55,19 +55,23 @@ extension CloudKitService {
     let operations: [ZonedRecordOperation]
   }
 
-  /// The field error that encoding a request's operations would throw, if any:
-  /// a `NaN` or infinite number. Operations that can't be converted at all are
-  /// left for ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
-  /// to report.
-  private static func encodingFailure(
-    in operations: [ZonedRecordOperation]
+  /// The error a request's operations would throw before reaching CloudKit,
+  /// if any: an encrypted field `database` can't take, an operation that can't
+  /// be converted, or a `NaN` or infinite number. These are the checks
+  /// ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
+  /// runs before sending, run here for every request up front.
+  private static func preflightFailure(
+    in operations: [ZonedRecordOperation],
+    database: Database
   ) -> CloudKitError? {
-    guard
-      let apiOperations = try? operations.map({
-        try Components.Schemas.RecordOperation(from: $0.operation)
-      })
-    else {
-      return nil
+    var apiOperations: [Components.Schemas.RecordOperation] = []
+    do throws(CloudKitError) {
+      for zoned in operations {
+        try zoned.operation.validateEncryptedFields(for: database)
+        apiOperations.append(try Components.Schemas.RecordOperation(from: zoned.operation))
+      }
+    } catch {
+      return error
     }
     do {
       _ = try JSONEncoder.shared.encode(apiOperations)
@@ -144,9 +148,13 @@ extension CloudKitService {
   ///   them again should expect a `CONFLICT` (or `EXISTS` for a create) for a
   ///   record that was in fact saved, and re-fetch it to find out.
   ///
-  /// Every request is encoded before the first is sent. When one can't be (a
-  /// field holding a `NaN` or infinite number), nothing is sent: `completed`
-  /// is empty, `unsent` holds every operation, and `underlying` is
+  /// Every request is checked and encoded before the first is sent. When one
+  /// fails a client-side check, nothing is sent: `completed` is empty,
+  /// `unsent` holds every operation, and `underlying` is the error
+  /// ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
+  /// would have thrown for it. That is an encrypted field `database` can't
+  /// take, an operation that can't be converted, or a field holding a `NaN`
+  /// or infinite number, which is
   /// ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``
   /// naming the record and field. ``CloudKitError/recordName`` and
   /// ``CloudKitError/fieldName`` read through to it.
@@ -176,11 +184,11 @@ extension CloudKitService {
       atomicZones: atomicZones,
       batchSize: batchSize
     )
-    // Encode every request before sending the first, so a field CloudKit can't
-    // take stops the whole call with nothing saved.
+    // Check and encode every request before sending the first, so an operation
+    // CloudKit can't take stops the whole call with nothing saved.
     for request in requests {
-      if let fieldError = Self.encodingFailure(in: request.operations) {
-        throw .modifyIncomplete(completed: [], unsent: operations, underlying: fieldError)
+      if let failure = Self.preflightFailure(in: request.operations, database: database) {
+        throw .modifyIncomplete(completed: [], unsent: operations, underlying: failure)
       }
     }
     var results: [RecordResult] = []

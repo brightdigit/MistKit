@@ -58,7 +58,11 @@ internal struct PredicateParser {
     if current.kind == .end {
       return []
     }
-    if current.keyword == "TRUEPREDICATE", tokens[position + 1].kind == .end {
+    // The lexer always ends with `.end`, but don't rely on it to index past
+    // `current`.
+    if current.keyword == "TRUEPREDICATE", tokens.indices.contains(position + 1),
+      tokens[position + 1].kind == .end
+    {
       return []
     }
     var conditions = [try condition()]

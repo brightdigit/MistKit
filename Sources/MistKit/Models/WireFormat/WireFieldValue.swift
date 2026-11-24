@@ -94,6 +94,9 @@ public struct WireFieldValue: Codable, Hashable, Sendable {
       self.init(nil)
       return
     }
+    // A second read of the same decoder: Decodable allows asking a decoder for
+    // a container more than once, and the generated type reads `value` and
+    // `type` from it independently of the `decodeNil` check above.
     var response = try Components.Schemas.FieldValueResponse(from: decoder)
     let fieldName = decoder.codingPath.last?.stringValue ?? ""
     let isTagged = response._type != nil

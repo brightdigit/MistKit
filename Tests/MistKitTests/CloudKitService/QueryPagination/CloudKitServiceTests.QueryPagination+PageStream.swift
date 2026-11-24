@@ -72,6 +72,17 @@ extension CloudKitServiceTests.QueryPagination {
       #expect(pages.map(\.records.count) == [2])
     }
 
+    @Test("yields a page with records once when the server repeats the marker, then stops")
+    internal func stuckMarkerWithRecords() async throws {
+      let service = try await CloudKitServiceTests.QueryPagination.makePaginatedService(
+        pages: [(2, "m1"), (3, "m1"), (4, nil)]
+      )
+      let pages = try await Self.pages(
+        service.queryRecordPages(Self.query, database: Self.database)
+      )
+      #expect(pages.map(\.records.count) == [2, 3])
+    }
+
     @Test("an error ends the stream with the CloudKitError")
     internal func errorEnds() async throws {
       let provider = ResponseProvider(

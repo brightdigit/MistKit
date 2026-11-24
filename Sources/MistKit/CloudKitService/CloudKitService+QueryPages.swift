@@ -40,9 +40,11 @@ extension CloudKitService {
   /// or one page by hand
   /// (``queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``).
   ///
-  /// Like `queryAllRecords`, it stops when the server repeats the previous
-  /// continuation marker with no records (the stuck-marker case): the stream
-  /// finishes after the last page that made progress.
+  /// It stops when the server answers with the continuation marker it was
+  /// sent (the stuck-marker case), since the next request would be identical:
+  /// a page with no records ends the stream before it, and a page with records
+  /// is yielded once and then ends it. Unlike `queryAllRecords` there is no
+  /// `maxPages` ceiling; cancel the consuming task to stop earlier.
   ///
   /// Cancelling the consuming task, or dropping the stream, cancels the
   /// request in flight and sends no more. An error ends the stream with that
@@ -56,7 +58,9 @@ extension CloudKitService {
   ///   - continuationMarker: Where to start; `nil` for the first page.
   ///   - zoneID: The zone to query; `nil` for the default zone.
   ///   - database: The database to query.
-  /// - Returns: A stream of pages whose errors are ``CloudKitError``.
+  /// - Returns: A stream of pages. Every error it ends with is a
+  ///   ``CloudKitError``; the stream's failure type is `any Error` only
+  ///   because `AsyncThrowingStream` can't carry a typed failure.
   public func queryRecordPages(
     _ query: Query,
     limit: Int? = nil,
@@ -86,12 +90,16 @@ extension CloudKitService {
             zoneID: zoneID,
             database: database
           )
-          if page.records.isEmpty, page.continuationMarker != nil,
-            page.continuationMarker == marker
-          {
+          // A repeated marker means the next request would be identical, so
+          // stop: before an empty page, after one with records.
+          let isStuck = page.continuationMarker != nil && page.continuationMarker == marker
+          if isStuck, page.records.isEmpty {
             break
           }
           continuation.yield(page)
+          if isStuck {
+            break
+          }
           marker = page.continuationMarker
         } while marker != nil
         continuation.finish()

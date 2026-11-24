@@ -56,6 +56,10 @@ internal struct ManagementErrorBodyMiddleware: ClientMiddleware {
     guard response.status.kind != .successful, let responseBody else {
       return (response, responseBody)
     }
+    // An error body over the cap, or one that fails mid-read, is dropped on
+    // purpose: the status code still reaches CloudKitManagementError, and a
+    // RequestError is a few hundred bytes, so losing a huge body loses nothing
+    // a caller could act on.
     guard
       let data = try? await Data(collecting: responseBody, upTo: Self.maxErrorBodyBytes)
     else {

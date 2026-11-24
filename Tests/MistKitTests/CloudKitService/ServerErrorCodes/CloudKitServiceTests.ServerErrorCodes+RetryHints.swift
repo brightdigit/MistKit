@@ -38,7 +38,7 @@ extension CloudKitServiceTests.ServerErrorCodes {
   /// public ``CloudKitError`` accessors built on them (MistKit #489, #491, #496).
   @Suite("Retry hints")
   internal struct RetryHints {
-    private static func service(statusCode: Int, json: String) throws -> CloudKitService {
+    internal static func service(statusCode: Int, json: String) throws -> CloudKitService {
       var headers = HTTPFields()
       headers[.contentType] = "application/json"
       let provider = ResponseProvider(
