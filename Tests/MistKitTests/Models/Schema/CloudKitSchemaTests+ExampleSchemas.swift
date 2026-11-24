@@ -35,7 +35,10 @@ internal import Testing
 extension CloudKitSchemaTests {
   @Suite(
     "Example schemas",
-    .disabled(if: Platform.isWasm, "WASI sandbox can't read the package source tree")
+    .enabled(
+      if: Platform.isPackageSourceTreeReachable,
+      "Reads committed files from the package source tree, which WASI and Android can't see"
+    )
   )
   internal struct ExampleSchemas {
     private static let packageRoot = URL(fileURLWithPath: #filePath)
