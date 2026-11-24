@@ -27,8 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Codable
-
 extension FieldValue {
   /// Decodes a CloudKit field dictionary that carries its type,
   /// `{"value": …, "type": …}`.
