@@ -351,7 +351,9 @@ jobs:
 
   lint:
     name: Linting
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, which lacks
+    # libxml2.so.2, so the mise-installed SwiftLint Linux binary can't start.
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
     # Shared with MistKit's lint job: serialize across workflows so a cold
