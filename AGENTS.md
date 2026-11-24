@@ -213,8 +213,8 @@ MistKit/
 | `CloudKitService+RecordZoneChanges.swift` | `fetchRecordZoneChanges(zones:...)` — `changes/zone` |
 | `CloudKitService+RecordZoneChangesPagination.swift` | `fetchAllRecordZoneChanges(zones:...)` — per-zone auto-pagination |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` → `[ZoneChangeResult]`, `createZone(...)`, `deleteZone(...)` |
-| `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
+| `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:database:)`, `fetchAllRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:maxPages:database:)` |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)` *(there is no no-argument address-book form: GET `users/discover` returns HTTP 500, #28, so it is not wrapped)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
 | `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
@@ -236,8 +236,8 @@ MistKit/
 `RecordManaging` declares only `queryAllRecords(recordType:)` (`Sources/MistKit/RecordManagement/RecordManaging.swift`) and stays zone-unaware — callers needing a specific zone should call `CloudKitService` directly.
 
 **Sync/Change Operations:**
-- `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
-- `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
+- `fetchRecordChanges(zoneID:syncToken:…:database:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`. Filter by type with `desiredRecordTypes:`; there is no `recordType:` parameter.
+- `fetchAllRecordChanges(zoneID:syncToken:…:maxPages:database:)` — auto-paginates using `moreComing` (with a `maxPages` ceiling) and returns a `(records:, syncToken:)` tuple
 - `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`. **Deprecated** (`@available(*, deprecated)`): Apple deprecated `zones/changes` in favor of `changes/database`. Same for `fetchAllZoneChanges`.
 
   **Wire key is `metaSyncToken`, not `syncToken` (issue #430).** Verified against a live container (`iCloud.com.brightdigit.MistDemo`/`development`/private, web-auth): the response's top-level keys are exactly `[moreComing, metaSyncToken, zones]`, and a request sending `syncToken` is *silently ignored* — CloudKit replays page one instead of advancing, so `fetchZoneChanges`/`fetchAllZoneChanges` pagination never actually worked. Only `zones/changes` is affected; `changes/database`, `changes/zone` and `records/changes` all genuinely use `syncToken` — **do not rename those**. The rename is confined to `openapi.yaml`; every Swift-facing name (`ZoneChangesResult.syncToken`, its `init(syncToken:)` label, the `fetchZoneChanges(syncToken:)`/`fetchAllZoneChanges(syncToken:)` argument labels) is deliberately unchanged, so this is not source-breaking — `MistKitOpenAPI` is an `internal import`. `Tests/.../FetchZoneChanges/CloudKitServiceTests.FetchZoneChanges+WireFormat.swift` pins the sent and read keys.
@@ -248,7 +248,7 @@ MistKit/
 
 **User-Identity Operations (public DB + web-auth required):**
 - `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces Apple's deprecated `users/current` endpoint (the `fetchCurrentUser()` wrapper was removed in #421). Only valid against the public database with web-auth credentials.
-- `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
+- There is no wrapper for GET `/users/discover` (the address-book form): Apple returns HTTP 500 (#28). Use POST via `discoverUserIdentities(lookupInfos:)` / `discoverAllUserIdentities(lookupInfos:batchSize:)`.
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
 
@@ -266,7 +266,7 @@ Set `ShortGUIDDictionary.shouldFetchRootRecord` to have CloudKit include the sha
 | Primitive (single request) | Auto-chunking convenience |
 |----------------------------|---------------------------|
 | `lookupRecords(recordNames:desiredKeys:zoneID:database:)` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` |
-| `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` *(overloads the no-arg address-book form)* |
+| `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` |
 
 The `users/lookup/email` and `users/lookup/id` primitives (`lookupUsersByEmail` / `lookupUsersByRecordName`) are **deprecated by Apple** in favor of POST `users/discover` (verified against Apple's archived CloudKit Web Services reference), so they intentionally get **no** chunking convenience — callers needing >200 should use `discoverAllUserIdentities(lookupInfos:)`. `users/lookup/contacts` is likewise deprecated and unwrapped.
 
@@ -323,7 +323,7 @@ Schema export is **not** a CloudKit Web Services endpoint. It is the Management 
 - Unit tests use **recorded** fixtures (`Tests/MistKitTests/Management/RecordedManagementFixtures.swift`, request UUIDs scrubbed); only `fullRequestErrorJSON`, which exercises the never-observed optional keys, is hand-written.
 
 **Protocols:**
-- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
+- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; the `RecordTypeSetType` of `CloudKitRecordCollection`, conformed to by `RecordTypeSet`
 
 ### Key Design Principles
 1. **Protocol-Oriented**: Define protocols for all major components (TokenManager, NetworkClient, etc.)
@@ -504,7 +504,7 @@ see the `/device/` note below.
   Apple in favor of `/changes/database`)*
 - Changes: `/changes/database`, `/changes/zone`
 - Subscriptions: `/subscriptions/list`, `/subscriptions/lookup`, `/subscriptions/modify`
-- Users: `/users/caller`, `/users/discover` (POST; GET is `@available(*, unavailable)` — Apple
+- Users: `/users/caller`, `/users/discover` (POST only; GET is not wrapped — Apple
   returns HTTP 500, see #28), `/users/lookup/email`, `/users/lookup/id`
   *(`/users/lookup/contacts` and `/users/current` are deprecated and unwrapped)*
 - Assets: `/assets/upload`, `/assets/rereference`

@@ -117,6 +117,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 
 ### Zones and change tracking
 
+- <doc:SyncingChanges>
 - ``ZoneID``
 - ``ZoneInfo``
 - ``ZoneType``
@@ -130,6 +131,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 
 ### Users and sharing
 
+- <doc:SharingAndUsers>
 - ``UserInfo``
 - ``UserIdentity``
 - ``UserIdentityLookupInfo``
@@ -142,6 +144,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 
 ### Assets
 
+- <doc:WorkingWithAssets>
 - ``AssetUploader``
 - ``AssetUploadResponse``
 - ``AssetUploadReceipt``
@@ -149,6 +152,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 
 ### Subscriptions and notifications
 
+- <doc:SubscriptionsAndNotifications>
 - ``SubscriptionInfo``
 - ``SubscriptionOperation``
 - ``SubscriptionResult``

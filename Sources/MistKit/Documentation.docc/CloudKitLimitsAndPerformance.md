@@ -59,7 +59,7 @@ If a request fails partway through, it throws ``CloudKitError/modifyIncomplete(c
 
 ## Asset upload transport
 
-Asset uploads are a [two-step workflow](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html): ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` PUTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` chains both steps.
+Asset uploads are a [two-step workflow](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/UploadAssets.html): ``CloudKitService/requestAssetUploadURL(recordType:fieldName:recordName:zoneID:database:)`` returns a one-time URL on `cvws.icloud-content.com`, then ``CloudKitService/uploadAssetData(_:to:using:)`` POSTs the bytes there. MistKit's high-level ``CloudKitService/uploadAssets(data:recordType:fieldName:recordName:zoneID:using:database:)`` chains both steps.
 
 The CDN upload deliberately does **not** flow through the service's `ClientTransport`. It uses `URLSession.shared` directly:
 
