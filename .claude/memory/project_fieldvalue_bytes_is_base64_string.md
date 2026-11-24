@@ -11,8 +11,8 @@ change only (issue #467): `Sources/MistKitOpenAPI/` and `openapi.yaml` are untou
 the generated `BytesValue` remains `typealias … = Swift.String` because the wire format
 is still base64 text.
 
-- Encode: `value.base64EncodedString()` in `FieldValueRequest`, `ListValuePayload`, and
-  `FieldValue+Codable`.
+- Encode: `value.base64EncodedString()` in `FieldValueRequest` and `ListValuePayload`
+  (`FieldValue+Codable` goes through `WireFieldValue`, which uses `FieldValueRequest`).
 - Decode: `Data(base64Encoded:)` at the `FieldValue` boundary. `ScalarPayload.bytes`
   still holds the raw wire `String` so `requireString` stays total.
 - Malformed tagged `BYTES` throws `ConversionError.typeValueMismatch` (no new public

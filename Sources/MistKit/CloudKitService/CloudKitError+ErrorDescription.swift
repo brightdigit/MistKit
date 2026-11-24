@@ -64,6 +64,10 @@ extension CloudKitError {
       return "CloudKit operation failed with underlying error: \(String(reflecting: error))"
     case .decodingError(let error):
       return Self.decodingErrorDescription(error)
+    case .invalidFieldValue(let recordName, let fieldName, _):
+      let record = recordName.map { "record '\($0)'" } ?? "an unnamed record"
+      return "Field '\(fieldName)' of \(record) has a value JSON can't hold "
+        + "(a NaN or infinite number); the request wasn't sent"
     case .networkError(let error):
       return Self.networkErrorDescription(error)
     case .unsupportedOperationType(let type):

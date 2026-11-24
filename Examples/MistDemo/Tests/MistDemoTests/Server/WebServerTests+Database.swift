@@ -64,13 +64,16 @@
         ("/api/records/query", #"{"recordType":"Note","database":"public"}"#),
         (
           "/api/records/create",
-          #"{"recordType":"Note","database":"public","fields":{"title":"X"}}"#
+          #"""
+          {"recordType":"Note","database":"public",\#
+          "fields":{"title":{"value":"X","type":"STRING"}}}
+          """#
         ),
         (
           "/api/records/update",
           #"""
           {"recordType":"Note","database":"public",\#
-          "recordName":"r1","fields":{"title":"X"}}
+          "recordName":"r1","fields":{"title":{"value":"X","type":"STRING"}}}
           """#
         ),
         (

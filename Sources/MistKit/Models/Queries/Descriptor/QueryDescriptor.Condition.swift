@@ -33,17 +33,9 @@ extension QueryDescriptor {
   /// One condition of a query: a field, a comparator and the value to compare
   /// with.
   ///
-  /// The value is encoded as a CloudKit field dictionary that always carries
-  /// its `type` (`{"value": …, "type": "TIMESTAMP"}`, see ``WireFieldValue``),
-  /// because ``FieldValue``'s own coding is untagged and would read a
-  /// timestamp back as a number.
+  /// The value is coded as ``FieldValue`` codes itself: a CloudKit field
+  /// dictionary with its `type` (`{"value": …, "type": "TIMESTAMP"}`).
   public struct Condition: Hashable, Codable, Sendable {
-    private enum CodingKeys: String, CodingKey {
-      case fieldName
-      case comparator
-      case value
-    }
-
     /// The field to filter on.
     public var fieldName: String
     /// How to compare the field with ``value``.
@@ -61,30 +53,6 @@ extension QueryDescriptor {
       self.fieldName = fieldName
       self.comparator = comparator
       self.value = value
-    }
-
-    /// Decodes a condition; a cleared value (`{"value": null}`) is an error.
-    public init(from decoder: any Decoder) throws {
-      let container = try decoder.container(keyedBy: CodingKeys.self)
-      fieldName = try container.decode(String.self, forKey: .fieldName)
-      comparator = try container.decode(Comparator.self, forKey: .comparator)
-      let wire = try container.decode(WireFieldValue.self, forKey: .value)
-      guard let value = wire.value else {
-        throw DecodingError.dataCorruptedError(
-          forKey: .value,
-          in: container,
-          debugDescription: "A condition needs a value."
-        )
-      }
-      self.value = value
-    }
-
-    /// Encodes the condition, tagging the value with its type.
-    public func encode(to encoder: any Encoder) throws {
-      var container = encoder.container(keyedBy: CodingKeys.self)
-      try container.encode(fieldName, forKey: .fieldName)
-      try container.encode(comparator, forKey: .comparator)
-      try container.encode(WireFieldValue(value, typeTagging: .always), forKey: .value)
     }
   }
 }

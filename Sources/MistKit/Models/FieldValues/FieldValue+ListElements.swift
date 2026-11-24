@@ -30,8 +30,11 @@
 internal import Foundation
 
 extension FieldValue {
+  /// Whether this is a list value, empty or not.
+  public var isList: Bool { fieldType.isList }
+
   /// The elements of a list value as single values; `nil` for a single value.
-  internal var listElements: [FieldValue]? {
+  public var listElements: [FieldValue]? {
     switch self {
     case .string(.list(let values)): values.map { .string(.value($0)) }
     case .int64(.list(let values)): values.map { .int64(.value($0)) }
@@ -46,9 +49,16 @@ extension FieldValue {
   }
 
   // swiftlint:disable cyclomatic_complexity
-  /// An empty list of `elementType`; `nil` for a list element type.
-  internal static func emptyList(of elementType: FieldType) -> FieldValue? {
-    switch elementType {
+  /// An empty list typed from a field's type.
+  ///
+  /// CloudKit lists carry their element type even when empty, so an empty
+  /// list can only be built when the type is known.
+  ///
+  /// - Parameter type: A list type (`LIST<STRING>`) or its element type
+  ///   (`STRING`).
+  /// - Returns: The empty list, or `nil` for a nested list type.
+  public static func emptyList(of type: FieldType) -> FieldValue? {
+    switch type.elementType {
     case .string: .string(.list([]))
     case .int64: .int64(.list([]))
     case .double: .double(.list([]))
@@ -62,9 +72,12 @@ extension FieldValue {
   }
   // swiftlint:enable cyclomatic_complexity
 
-  /// A list of single `elements`, all of one kind; `nil` when `elements` is
-  /// empty, mixes kinds or holds a list.
-  internal static func list(of elements: [FieldValue]) -> FieldValue? {
+  /// A list of single `elements`, all of one kind.
+  ///
+  /// - Parameter elements: Single values of one kind.
+  /// - Returns: The list, or `nil` when `elements` is empty (the element type
+  ///   is unknown), mixes kinds or holds a list.
+  public static func list(of elements: [FieldValue]) -> FieldValue? {
     guard let first = elements.first?.fieldType, !first.isList,
       elements.allSatisfy({ $0.fieldType == first })
     else {

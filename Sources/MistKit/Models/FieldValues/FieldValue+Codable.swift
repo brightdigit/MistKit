@@ -27,140 +27,50 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-
 // MARK: - Codable
 
 extension FieldValue {
-  private static let millisecondsPerSecond: Double = 1_000
-
-  /// Initialize field value from decoder
+  /// Decodes a CloudKit field dictionary that carries its type,
+  /// `{"value": …, "type": …}`.
+  ///
+  /// This is the shape ``WireFieldValue`` writes with
+  /// ``FieldTypeTagging/always`` and the shape ``encode(to:)`` writes, so
+  /// every value reads back as the kind it was written: a `TIMESTAMP` as
+  /// `.date`, a `BYTES` as `.bytes`, a whole-valued `DOUBLE` as `.double`,
+  /// and an empty list with its element type.
+  ///
+  /// - Throws: `DecodingError.dataCorrupted` when the dictionary has no
+  ///   `type`, or its `value` is `null` (a cleared field isn't a
+  ///   `FieldValue`); otherwise the same errors as ``WireFieldValue``'s
+  ///   decoding.
   public init(from decoder: any Decoder) throws {
-    let container = try decoder.singleValueContainer()
-
-    if let value = try Self.decodeBasicTypes(from: container) {
-      self = value
-      return
+    let wire = try WireFieldValue(from: decoder)
+    guard let value = wire.value else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath,
+          debugDescription: "A FieldValue can't be null."
+        )
+      )
     }
-
-    if let value = try Self.decodeComplexTypes(from: container) {
-      self = value
-      return
+    guard wire.typeTagging == .always else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath,
+          debugDescription: "A FieldValue needs a type: {\"value\": …, \"type\": …}."
+        )
+      )
     }
-
-    throw DecodingError.dataCorruptedError(
-      in: container,
-      debugDescription: "Unable to decode FieldValue"
-    )
+    self = value
   }
 
-  /// Decode basic field value types (string, int64, double)
-  private static func decodeBasicTypes(from container: any SingleValueDecodingContainer) throws
-    -> FieldValue?
-  {
-    if let value = try? container.decode(String.self) {
-      return .string(.value(value))
-    }
-    if let value = try? container.decode(Int.self) {
-      return .int64(.value(value))
-    }
-    if let value = try? container.decode(Double.self) {
-      return .double(.value(value))
-    }
-    return nil
-  }
-
-  /// Decode complex field value types (homogeneous lists, location, reference, asset)
-  private static func decodeComplexTypes(from container: any SingleValueDecodingContainer) throws
-    -> FieldValue?
-  {
-    if let value = try Self.decodeHomogeneousList(from: container) {
-      return value
-    }
-    if let value = try? container.decode(Location.self) {
-      return .location(.value(value))
-    }
-    if let value = try? container.decode(Reference.self) {
-      return .reference(.value(value))
-    }
-    if let value = try? container.decode(Asset.self) {
-      return .asset(.value(value))
-    }
-    // No `.date` branch here on purpose: a CloudKit timestamp arrives as a bare
-    // millisecond `Double`, which `decodeBasicTypes` (run first) already claims
-    // as `.double`. A date fallback at this point was therefore unreachable —
-    // it never ran, so removing it changes no behavior. Encoding still emits
-    // `.date` values as milliseconds (see `encode(to:)`).
-    return nil
-  }
-
-  /// Decode a JSON array into a homogeneous ``Arity/list`` when every element shares a kind.
-  private static func decodeHomogeneousList(
-    from container: any SingleValueDecodingContainer
-  ) throws -> FieldValue? {
-    if let values = try? container.decode([String].self) {
-      return .string(.list(values))
-    }
-    if let values = try? container.decode([Int].self) {
-      return .int64(.list(values))
-    }
-    if let values = try? container.decode([Double].self) {
-      return .double(.list(values))
-    }
-    if let values = try? container.decode([Location].self) {
-      return .location(.list(values))
-    }
-    if let values = try? container.decode([Reference].self) {
-      return .reference(.list(values))
-    }
-    if let values = try? container.decode([Asset].self) {
-      return .asset(.list(values))
-    }
-    return nil
-  }
-
-  /// Encode field value to encoder
+  /// Encodes the value as a CloudKit field dictionary with its type,
+  /// `{"value": …, "type": …}` (see ``WireFieldValue`` with
+  /// ``FieldTypeTagging/always``).
+  ///
+  /// - Throws: `EncodingError` when a number isn't finite.
   public func encode(to encoder: any Encoder) throws {
-    var container = encoder.singleValueContainer()
-    try encodeValue(to: &container)
-  }
-
-  // swiftlint:disable:next cyclomatic_complexity
-  private func encodeValue(to container: inout any SingleValueEncodingContainer) throws {
-    switch self {
-    case .string(.value(let val)):
-      try container.encode(val)
-    case .string(.list(let vals)):
-      try container.encode(vals)
-    case .bytes(.value(let val)):
-      try container.encode(val.base64EncodedString())
-    case .bytes(.list(let vals)):
-      try container.encode(vals.map { $0.base64EncodedString() })
-    case .int64(.value(let val)):
-      try container.encode(val)
-    case .int64(.list(let vals)):
-      try container.encode(vals)
-    case .double(.value(let val)):
-      try container.encode(val)
-    case .double(.list(let vals)):
-      try container.encode(vals)
-    case .date(.value(let val)):
-      try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
-    case .date(.list(let vals)):
-      try container.encode(vals.map { $0.timeIntervalSince1970 * Self.millisecondsPerSecond })
-    case .location(.value(let val)):
-      try container.encode(val)
-    case .location(.list(let vals)):
-      try container.encode(vals)
-    case .reference(.value(let val)):
-      try container.encode(val)
-    case .reference(.list(let vals)):
-      try container.encode(vals)
-    case .asset(.value(let val)):
-      try container.encode(val)
-    case .asset(.list(let vals)):
-      try container.encode(vals)
-    }
+    try WireFieldValue(self, typeTagging: .always).encode(to: encoder)
   }
 }
 

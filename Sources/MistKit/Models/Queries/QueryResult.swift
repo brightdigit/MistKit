@@ -33,11 +33,16 @@ internal import MistKitOpenAPI
 ///
 /// Contains the matching records along with an optional continuation marker
 /// for fetching the next page of results.
-public struct QueryResult: Codable, Sendable {
+public struct QueryResult: Codable, Hashable, Sendable {
   /// Records matching the query
   public let records: [RecordInfo]
   /// Marker to pass into the next query request to fetch the next page
   public let continuationMarker: String?
+
+  /// Whether more records follow: `true` when ``continuationMarker`` is set.
+  public var hasMore: Bool {
+    continuationMarker != nil
+  }
 
   /// Initialize a query result
   public init(

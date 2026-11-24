@@ -51,14 +51,6 @@ public struct Reference: Codable, Hashable, Sendable {
   /// The action to take (`NONE`, `DELETE_SELF`, `VALIDATE`, or nil)
   public let action: Action?
 
-  /// The zone to send on the wire: ``zoneID`` unless it's the default zone.
-  internal var wireZoneID: ZoneID? {
-    guard let zoneID, !zoneID.isDefaultZone else {
-      return nil
-    }
-    return zoneID
-  }
-
   /// Initialize a reference value
   public init(recordName: String, zoneID: ZoneID? = nil, action: Action? = nil) {
     self.recordName = recordName

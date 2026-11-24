@@ -76,4 +76,14 @@ extension QueryDescriptor.Comparator {
     }
     self = match
   }
+
+  /// Creates the comparator for any CloudKit comparator, giving
+  /// ``FilterComparator/near`` the distance `nearMeters`.
+  ///
+  /// - Parameters:
+  ///   - comparator: The CloudKit comparator.
+  ///   - nearMeters: The radius, in metres, for ``FilterComparator/near``.
+  public init(_ comparator: FilterComparator, nearMeters: Double) {
+    self = Self(comparator) ?? .near(meters: nearMeters)
+  }
 }

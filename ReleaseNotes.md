@@ -1,3 +1,8 @@
+## Unreleased
+
+* **Breaking:** `FieldValue`'s `Codable` now encodes and decodes only the CloudKit field dictionary with its type, `{"value": …, "type": …}` (`WireFieldValue` with `.always` tagging), so every kind round-trips (TIMESTAMP, BYTES, whole-valued DOUBLE, empty lists). Bare JSON values (`"Hi"`, `5`, `[…]`) and untagged dictionaries are now decoding errors, and JSON written by earlier versions' untagged encoding (e.g. an encoded `RecordInfo`) no longer decodes. `QueryDescriptor.Condition` uses plain `Codable`; its saved format is unchanged. CloudKit requests and responses are unaffected (`FieldValueRequest` / `FieldValueResponse`). MistDemo's web API and JSON output use the tagged shape
+* Add `CloudKitError.invalidFieldValue(recordName:fieldName:underlying:)`: `modifyRecords` throws it, with nothing sent, when a field holds a `NaN` or infinite number, and `modifyAllRecords` encodes every request before sending the first so nothing is saved. Add the `RecordFieldErrorContext` protocol (`recordName`, `fieldName`), adopted by `CloudKitError` and `ConversionError`, and `CloudKitError(encodingError:recordNames:)` to name the record and field behind an `EncodingError` from the wire types
+
 ## 1.0.0-beta.5
 
 * Make `FieldValue` lists homogeneous by construction: each kind carries `Arity` (`.value` / `.list`), so mixed and nested lists are unrepresentable. Response OpenAPI accepts live `*_LIST` tags (e.g. `STRING_LIST`); record-field list writes are tagged; deprecated scalar factories cover `.string("x")`-style call sites (#481)

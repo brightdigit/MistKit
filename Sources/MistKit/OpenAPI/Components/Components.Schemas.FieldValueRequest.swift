@@ -184,7 +184,7 @@ extension Components.Schemas.FieldValueRequest {
     }
     return Components.Schemas.ReferenceValue(
       recordName: reference.recordName,
-      zoneID: reference.wireZoneID.map(Components.Schemas.ZoneID.init(from:)),
+      zoneID: reference.zoneID?.requestZone.map(Components.Schemas.ZoneID.init(from:)),
       action: action
     )
   }

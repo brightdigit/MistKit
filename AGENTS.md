@@ -136,6 +136,8 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 
 **Homogeneous lists (issue #481):** Write `.string(.list(["a","b"]))` or `.string(.list([]))` — empty lists keep their element type. Deprecated scalar factories (`FieldValue.string(_: String)`, etc.) forward to `.value` for migration; there is no polyfill for the old heterogeneous `.list([FieldValue])`. Accessors: `stringValue` unwraps `.value` only; `stringListValue` unwraps `.list`; deprecated `listValue` flattens to `[FieldValue]` of `.value`s.
 
+**`FieldValue`'s own `Codable` is strict:** it encodes and decodes only `{"value": …, "type": …}`, the `WireFieldValue` `.always` shape, by delegating to `WireFieldValue` (`FieldValue+Codable.swift`). Untagged input and `{"value": null}` are decoding errors, so every kind round-trips (TIMESTAMP, BYTES, whole-valued DOUBLE, empty lists). CloudKit request/response conversion does not use it: requests go through `FieldValueRequest`, responses through `FieldValueResponse`.
+
 **Request type tagging (issue #375 / #481):** Most scalar request values omit `type` and let CloudKit infer it from the value structure. Three scalar types are ambiguous on the wire and **must** carry an explicit `type`, otherwise CloudKit infers the wrong type and rejects the write with `BAD_REQUEST`:
 - `TIMESTAMP` (`.date(.value)`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
 - `BYTES` (`.bytes(.value)`) — domain `Data`, encoded as a base64 string on the wire, otherwise read as `STRING`

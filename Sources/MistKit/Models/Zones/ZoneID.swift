@@ -47,9 +47,33 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   /// `nil` when the server omits the key.
   public let zoneType: ZoneType?
 
-  /// Whether this names ``defaultZone`` (by name, for the current user).
+  /// Whether this names ``defaultZone``.
+  ///
+  /// Matched by name only: CloudKit reports every zone with its owner, the
+  /// signed-in user's default zone included.
   public var isDefaultZone: Bool {
-    zoneName == Self.defaultZone.zoneName && ownerName == nil
+    zoneName == Self.defaultZone.zoneName
+  }
+
+  /// The zone's identity: its name and owner, without ``zoneType``.
+  ///
+  /// A zone CloudKit reports carries its type, while one built from a name
+  /// (or read from a reference) doesn't, so compare identities rather than
+  /// zone IDs when either may have come from the server.
+  public var identity: ZoneID {
+    ZoneID(zoneName: zoneName, ownerName: ownerName)
+  }
+
+  /// The zone to name in a request: `nil` for the default zone, which
+  /// CloudKit assumes when a request names none.
+  public var requestZone: ZoneID? {
+    isDefaultZone ? nil : self
+  }
+
+  /// The zone as a client keeps it: ``defaultZone`` for the default zone,
+  /// whoever CloudKit says owns it, and ``identity`` otherwise.
+  public var normalized: ZoneID {
+    isDefaultZone ? Self.defaultZone : identity
   }
 
   /// Initialize a zone identifier

@@ -60,8 +60,8 @@ extension PredicateParser {
     }
     let range = start..<previous.range.upperBound
     guard !elements.isEmpty else {
-      guard let element = fieldType(of: field)?.elementType,
-        let empty = FieldValue.emptyList(of: element)
+      guard let type = fieldType(of: field),
+        let empty = FieldValue.emptyList(of: type)
       else {
         throw PredicateSyntaxError(.untypedEmptyList, range)
       }

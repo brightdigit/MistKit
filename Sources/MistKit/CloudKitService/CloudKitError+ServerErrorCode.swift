@@ -89,7 +89,8 @@ extension CloudKitError {
     case .httpError, .httpErrorWithDetails, .httpErrorWithRawResponse, .invalidResponse,
       .incompleteResponse, .conversionFailed, .recordOperationFailed, .zoneOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,
-      .decodingError, .networkError, .unsupportedOperationType, .paginationLimitExceeded,
+      .decodingError, .invalidFieldValue, .networkError, .unsupportedOperationType,
+      .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey,
       .missingAssetDownloadURL:
       return nil

@@ -32,11 +32,10 @@ internal import MistKit
 
 /// Request payloads for the web command's CRUD endpoints.
 ///
-/// `fields` decodes directly into MistKit's `FieldValue`, which has a custom
-/// Codable that accepts raw JSON primitives (string → `.string`, integer →
-/// `.int64`, floating-point → `.double`) along with the complex CloudKit
-/// shapes (location, reference, asset, list). So the browser can send the
-/// natural `{"title":"Hi","index":5}` shape without a custom request type.
+/// `fields` decodes directly into MistKit's `FieldValue`, which reads a
+/// CloudKit field dictionary that carries its type, so the browser sends
+/// `{"title":{"value":"Hi","type":"STRING"},"index":{"value":5,"type":"INT64"}}`
+/// without a custom request type. A field without a `type` is a bad request.
 internal enum WebRequests {
   /// One sort descriptor: a field name plus a direction. Field names follow
   /// CloudKit Web Services / CloudKit JS naming — including the implicit

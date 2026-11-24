@@ -51,6 +51,51 @@ extension QueryDescriptorTests {
       #expect(try JSONDecoder().decode(Condition.self, from: data) == condition)
     }
 
+    /// Conditions written before `FieldValue` coded its own type (when the
+    /// condition wrapped its value in a tagged `WireFieldValue`) still read.
+    @Test("conditions saved in the earlier format still decode")
+    internal func savedFormat() throws {
+      let json = Data(
+        """
+        [
+        {"fieldName":"startedAt","comparator":{"greaterThan":{}},\
+        "value":{"type":"TIMESTAMP","value":1790812800000}},
+        {"fieldName":"score","comparator":{"equals":{}},\
+        "value":{"type":"DOUBLE","value":3}},
+        {"fieldName":"tags","comparator":{"in":{}},\
+        "value":{"type":"STRING_LIST","value":[]}},
+        {"fieldName":"thumb","comparator":{"equals":{}},\
+        "value":{"type":"BYTES","value":"AP8="}}
+        ]
+        """.utf8
+      )
+      let conditions = try JSONDecoder().decode([Condition].self, from: json)
+      #expect(
+        conditions == [
+          Condition(
+            fieldName: "startedAt",
+            comparator: .greaterThan,
+            value: .date(.value(Date(timeIntervalSince1970: 1_790_812_800)))
+          ),
+          Condition(fieldName: "score", comparator: .equals, value: .double(.value(3))),
+          Condition(fieldName: "tags", comparator: .in, value: .string(.list([]))),
+          Condition(
+            fieldName: "thumb",
+            comparator: .equals,
+            value: .bytes(.value(Data([0, 255])))
+          ),
+        ]
+      )
+    }
+
+    @Test("an untagged value doesn't decode")
+    internal func untaggedValue() {
+      let json = Data(#"{"fieldName":"a","comparator":{"equals":{}},"value":3}"#.utf8)
+      #expect(throws: DecodingError.self) {
+        try JSONDecoder().decode(Condition.self, from: json)
+      }
+    }
+
     @Test("a cleared value doesn't decode")
     internal func clearedValue() {
       let json = Data(

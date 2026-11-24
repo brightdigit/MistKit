@@ -97,6 +97,12 @@ extension FieldValueFieldTypeTests {
   /// milliseconds CloudKit expects (the request side of issue #375/#376).
   @Suite("Timestamp Wire Round-Trip")
   internal struct TimestampWireRoundTrip {
+    /// The `{"value": …, "type": …}` dictionary a `FieldValue` encodes as.
+    private struct TaggedMilliseconds: Decodable {
+      let type: String
+      let value: Double
+    }
+
     @Test("ISO 8601 timestamp field encodes to CloudKit milliseconds")
     internal func iso8601EncodesToMilliseconds() throws {
       let date = try #require(
@@ -105,7 +111,9 @@ extension FieldValueFieldTypeTests {
       let fieldValue = try #require(FieldValue(value: date, fieldType: .timestamp))
 
       let data = try JSONEncoder().encode(fieldValue)
-      let milliseconds = try JSONDecoder().decode(Double.self, from: data)
+      let wire = try JSONDecoder().decode(TaggedMilliseconds.self, from: data)
+      #expect(wire.type == "TIMESTAMP")
+      let milliseconds = wire.value
 
       // CloudKit encodes TIMESTAMP as milliseconds since the Unix epoch.
       #expect(milliseconds == date.timeIntervalSince1970 * 1_000)
@@ -119,7 +127,9 @@ extension FieldValueFieldTypeTests {
       let fieldValue = try #require(FieldValue(value: date, fieldType: .timestamp))
 
       let data = try JSONEncoder().encode(fieldValue)
-      let milliseconds = try JSONDecoder().decode(Double.self, from: data)
+      let wire = try JSONDecoder().decode(TaggedMilliseconds.self, from: data)
+      #expect(wire.type == "TIMESTAMP")
+      let milliseconds = wire.value
 
       #if arch(wasm32)
         // On wasm32, Int is 32-bit; the Int product overflows at compile time,

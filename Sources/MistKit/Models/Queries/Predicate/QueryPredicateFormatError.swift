@@ -38,6 +38,15 @@ public enum QueryPredicateFormatError: LocalizedError, Hashable, Sendable {
   /// negated and token comparators.
   case unrepresentableComparator(fieldName: String, comparator: FilterComparator)
 
+  /// The field whose condition has no text form.
+  public var fieldName: String {
+    switch self {
+    case .unrepresentableValue(let fieldName),
+      .unrepresentableComparator(let fieldName, _):
+      fieldName
+    }
+  }
+
   /// A description of the error.
   public var errorDescription: String? {
     switch self {

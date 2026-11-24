@@ -74,7 +74,9 @@ extension CloudKitService {
   /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
   ///   record, `.failure` (a ``RecordOperationFailure``) for one that CloudKit
   ///   rejected.
-  /// - Throws: CloudKitError if the operation fails
+  /// - Throws: CloudKitError if the operation fails;
+  ///   ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``,
+  ///   with nothing sent, when a field holds a `NaN` or infinite number.
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
@@ -125,6 +127,14 @@ extension CloudKitService {
 
       return try (modifyResponse.records ?? []).map { try RecordResult(from: $0) }
     } catch {
+      // Encoding the body fails before anything is sent when a number isn't
+      // finite; name the record and field instead of wrapping `ClientError`.
+      if let fieldError = CloudKitError(
+        encodingError: error,
+        recordNames: operations.map(\.recordName)
+      ) {
+        throw fieldError
+      }
       // `mapToCloudKitError` passes a `CloudKitError` through unchanged and
       // unwraps OpenAPIRuntime's `ClientError`, so a transport failure surfaces
       // as `.networkError(URLError)` like every other operation, not as

@@ -41,6 +41,14 @@ public enum QueryDescriptorError: LocalizedError, Hashable, Sendable {
   /// `NOT_IN`.
   case unsupportedValue(fieldName: String)
 
+  /// The field whose condition failed.
+  public var fieldName: String {
+    switch self {
+    case .valueMismatch(let fieldName, _), .unsupportedValue(let fieldName):
+      fieldName
+    }
+  }
+
   /// A description of the error.
   public var errorDescription: String? {
     switch self {

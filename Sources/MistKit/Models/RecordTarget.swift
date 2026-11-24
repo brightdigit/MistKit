@@ -53,6 +53,16 @@ extension OperationFailure where Target == RecordTarget {
 }
 
 extension OperationResult where Success == RecordInfo, Target == RecordTarget {
+  /// The record name of the record the result is for, saved or failed.
+  public var recordName: String {
+    switch self {
+    case .success(let record):
+      record.recordName
+    case .failure(let failure):
+      failure.recordName
+    }
+  }
+
   internal init(
     from item: Components.Schemas.ModifyResponse.recordsPayloadPayload
   ) throws(ConversionError) {

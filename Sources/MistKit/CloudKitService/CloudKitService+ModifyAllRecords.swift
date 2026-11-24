@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// A record operation and the zone its record is in.
 ///
@@ -54,6 +55,31 @@ extension CloudKitService {
     let operations: [ZonedRecordOperation]
   }
 
+  /// The field error that encoding a request's operations would throw, if any:
+  /// a `NaN` or infinite number. Operations that can't be converted at all are
+  /// left for ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
+  /// to report.
+  private static func encodingFailure(
+    in operations: [ZonedRecordOperation]
+  ) -> CloudKitError? {
+    guard
+      let apiOperations = try? operations.map({
+        try Components.Schemas.RecordOperation(from: $0.operation)
+      })
+    else {
+      return nil
+    }
+    do {
+      _ = try JSONEncoder.shared.encode(apiOperations)
+      return nil
+    } catch {
+      return CloudKitError(
+        encodingError: error,
+        recordNames: operations.map(\.operation.recordName)
+      )
+    }
+  }
+
   /// Groups `operations` by zone and splits each zone into requests.
   private static func modifyRequests(
     for operations: [ZonedRecordOperation],
@@ -62,8 +88,9 @@ extension CloudKitService {
   ) -> [ModifyRequest] {
     var zoneOrder: [ZoneID] = []
     var byZone: [ZoneID: [ZonedRecordOperation]] = [:]
+    let atomicZones = Set(atomicZones.map(\.normalized))
     for zoned in operations {
-      let zoneID = zoned.zoneID ?? .defaultZone
+      let zoneID = (zoned.zoneID ?? .defaultZone).normalized
       if byZone[zoneID] == nil {
         zoneOrder.append(zoneID)
       }
@@ -117,10 +144,19 @@ extension CloudKitService {
   ///   them again should expect a `CONFLICT` (or `EXISTS` for a create) for a
   ///   record that was in fact saved, and re-fetch it to find out.
   ///
+  /// Every request is encoded before the first is sent. When one can't be (a
+  /// field holding a `NaN` or infinite number), nothing is sent: `completed`
+  /// is empty, `unsent` holds every operation, and `underlying` is
+  /// ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``
+  /// naming the record and field. ``CloudKitError/recordName`` and
+  /// ``CloudKitError/fieldName`` read through to it.
+  ///
   /// - Parameters:
   ///   - operations: The operations and their zones (any length).
   ///   - atomicZones: Zones whose requests are atomic. Only custom zones in a
   ///     private database support atomic commits; the default zone ignores it.
+  ///     Zones are matched by ``ZoneID/normalized``, so a zone CloudKit
+  ///     reported (with its type) matches one built from its name and owner.
   ///   - database: The database to modify.
   ///   - batchSize: Operations per request, clamped to
   ///     `1...maxRecordsPerRequest`.
@@ -140,6 +176,13 @@ extension CloudKitService {
       atomicZones: atomicZones,
       batchSize: batchSize
     )
+    // Encode every request before sending the first, so a field CloudKit can't
+    // take stops the whole call with nothing saved.
+    for request in requests {
+      if let fieldError = Self.encodingFailure(in: request.operations) {
+        throw .modifyIncomplete(completed: [], unsent: operations, underlying: fieldError)
+      }
+    }
     var results: [RecordResult] = []
     for (index, request) in requests.enumerated() {
       do throws(CloudKitError) {
@@ -151,7 +194,7 @@ extension CloudKitService {
         results += try await modifyRecords(
           request.operations.map(\.operation),
           atomic: request.atomic,
-          zoneID: request.zoneID.isDefaultZone ? nil : request.zoneID,
+          zoneID: request.zoneID.requestZone,
           database: database
         )
       } catch {

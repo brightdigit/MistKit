@@ -8,18 +8,25 @@ internal import Testing
 internal struct FieldValueTests {
   /// Cases that survive a full JSON encode → decode round-trip unchanged.
   ///
-  /// Exercises both encode paths in `FieldValue+Codable`: scalar `.value` arms and
-  /// homogeneous `.list` / complex `.value` arms. Heterogeneous lists are
-  /// unrepresentable after issue #481.
+  /// Every value is written with its `type`, so the ambiguous scalars
+  /// (whole-valued `DOUBLE`, `TIMESTAMP`, `BYTES`) and empty lists come back
+  /// as the kind they were written.
   private static let roundTripCases: [FieldValue] = [
     .string(.value("test")),
     .int64(.value(123)),
-    // Fractional on purpose: a whole-valued double decodes back as `.int64`.
     .double(.value(3.14)),
+    .double(.value(5)),
+    .bytes(.value(Data("abc123".utf8))),
+    .date(.value(Date(timeIntervalSince1970: 1_700_000_000.5))),
     .string(.list(["item1", "item2"])),
+    .string(.list([])),
     .int64(.list([1, 2, 42])),
+    .double(.list([1, 2.5])),
+    .bytes(.list([Data("a".utf8)])),
+    .date(.list([Date(timeIntervalSince1970: 1_700_000_000)])),
     .location(.value(Location(latitude: 37.7749, longitude: -122.4194, horizontalAccuracy: 10.0))),
     .reference(.value(Reference(recordName: "test-record"))),
+    .reference(.list([Reference(recordName: "a"), Reference(recordName: "b")])),
     .asset(
       .value(
         Asset(fileChecksum: "abc123", size: 1_024, downloadURL: "https://example.com/file")
@@ -116,32 +123,43 @@ internal struct FieldValueTests {
     #expect(decoded == value)
   }
 
-  /// Tests that `.date` encodes as CloudKit milliseconds.
-  ///
-  /// `.date` does not round-trip: the decoder has no date branch on purpose
-  /// (a bare millisecond number is claimed by `.int64`/`.double` first — see
-  /// `decodeComplexTypes`), so this asserts the encoded wire value directly.
-  @Test("FieldValue date encodes as milliseconds")
-  internal func fieldValueDateEncodesMilliseconds() throws {
-    let date = Date(timeIntervalSince1970: 1_700_000_000)
-    let data = try JSONEncoder().encode(FieldValue.date(.value(date)))
-    let milliseconds = try JSONDecoder().decode(Double.self, from: data)
-    #expect(milliseconds == date.timeIntervalSince1970 * 1_000)
+  /// Tests that a value encodes as a field dictionary that carries its type.
+  @Test(
+    "FieldValue encodes as {\"value\": …, \"type\": …}",
+    arguments: [
+      (
+        FieldValue.date(.value(Date(timeIntervalSince1970: 1_700_000_000))),
+        #"{"type":"TIMESTAMP","value":1700000000000}"#
+      ),
+      (.bytes(.value(Data("abc123".utf8))), #"{"type":"BYTES","value":"YWJjMTIz"}"#),
+      (.double(.value(5)), #"{"type":"DOUBLE","value":5}"#),
+      (.string(.value("Chen")), #"{"type":"STRING","value":"Chen"}"#),
+      (.int64(.list([])), #"{"type":"INT64_LIST","value":[]}"#),
+    ]
+  )
+  internal func fieldValueEncodesTagged(_ value: FieldValue, _ json: String) throws {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+    let data = try encoder.encode(value)
+    #expect(String(decoding: data, as: UTF8.self) == json)
   }
 
-  /// Tests that `.bytes` encodes as a base64 string payload.
-  ///
-  /// Encoding emits `Data.base64EncodedString()`. Decoding still has no bytes
-  /// branch, so the payload reads back as `.string`.
-  @Test("FieldValue bytes encodes as its base64 string payload")
-  internal func fieldValueBytesEncodesAsString() throws {
-    let payload = Data("abc123".utf8)
-    let encoded = payload.base64EncodedString()
-    let bytesData = try JSONEncoder().encode(FieldValue.bytes(.value(payload)))
-    let stringData = try JSONEncoder().encode(FieldValue.string(.value(encoded)))
-    #expect(bytesData == stringData)
-
-    let decoded = try JSONDecoder().decode(FieldValue.self, from: bytesData)
-    #expect(decoded == .string(.value(encoded)))
+  /// Tests that input without a `type`, or with a null value, is a decoding error.
+  @Test(
+    "FieldValue rejects a value without a type",
+    arguments: [
+      #""Chen""#,
+      "42",
+      #"["a","b"]"#,
+      #"{"value":"Chen"}"#,
+      #"{"value":1700000000000}"#,
+      #"{"value":null}"#,
+      #"{"value":null,"type":"STRING"}"#,
+    ]
+  )
+  internal func fieldValueRejectsUntagged(_ json: String) {
+    #expect(throws: DecodingError.self) {
+      try JSONDecoder().decode(FieldValue.self, from: Data(json.utf8))
+    }
   }
 }

@@ -141,6 +141,15 @@ public enum CloudKitError: LocalizedError, Sendable {
   case subscriptionLikelyDuplicate(SubscriptionOperationFailure)
   case underlyingError(any Error)
   case decodingError(DecodingError)
+  /// A field's value couldn't be written as JSON — a `DOUBLE`, a location's
+  /// number or a timestamp that is `NaN` or infinite — so the request wasn't
+  /// sent.
+  ///
+  /// `recordName` is `nil` for a create that leaves naming to CloudKit.
+  /// `underlying` is the `JSONEncoder` error, whose coding path named the
+  /// record and field. See
+  /// ``CloudKitError/init(encodingError:recordNames:)``.
+  case invalidFieldValue(recordName: String?, fieldName: String, underlying: EncodingError)
   case networkError(URLError)
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, records: [RecordInfo])
