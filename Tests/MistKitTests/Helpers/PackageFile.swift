@@ -36,7 +36,7 @@ internal import Foundation
 /// because that's where the sandboxed runners put the files.
 /// - WASI: swift-build runs the test binary with `--dir .`, so the package root
 ///   is the working directory and `#filePath` (a host path) isn't visible.
-/// - Android: the `android-copy-files: Examples` CI input copies `Examples/`
+/// - Android: CI stages `Examples/*/schema.ckdb` and copies it (`android-copy-files`)
 ///   next to the test binary, which runs from that folder on the emulator.
 /// - macOS, Linux, Windows: `#filePath` locates the checkout.
 internal enum PackageFile {

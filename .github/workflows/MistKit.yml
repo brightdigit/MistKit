@@ -200,6 +200,11 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
+      - name: Stage test data for the emulator
+        run: |
+          mkdir -p .android-test-data
+          git ls-files 'Examples/*/schema.ckdb' | xargs -I{} cp --parents {} .android-test-data/
+          find .android-test-data -type f
       - uses: brightdigit/swift-build@v1
         with:
           type: android
@@ -209,7 +214,9 @@ jobs:
           # The example-schema tests read Examples/*/schema.ckdb relative to the
           # working directory (Tests/MistKitTests/Helpers/PackageFile.swift); the
           # emulator runs the test binary from the copied folder, not the checkout.
-          android-copy-files: "Examples"
+          # Only the staged schema files go: `adb push` can't create symlinks,
+          # and copying all of Examples/ is megabytes the tests never read.
+          android-copy-files: ".android-test-data/Examples"
       # Note: Code coverage is not supported on Android builds
       # The Swift Android SDK does not include LLVM coverage tools (llvm-profdata, llvm-cov)
 
