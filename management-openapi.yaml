@@ -15,6 +15,13 @@ info:
 
     See `.claude/docs/research/135-management-api-request-format.md`.
 
+    ## Live verification
+    Verified against the live service on 2026-11-24
+    (`iCloud.com.brightdigit.MistDemo`). Every element below held. Beyond
+    CKTool JS: `RequestError.message` is a kebab-case code (for example
+    `invalid-or-expired-session`), an unknown or inaccessible container is
+    `403`, and the environment path segment is case-sensitive.
+
     ## Authentication
     Send a management token, created in CloudKit Console → Settings, in the
     `X-Apple-CloudKit-Management-Token` header. There's no request signing and
@@ -118,7 +125,7 @@ components:
           description: The HTTP status code
         message:
           type: string
-          description: An error code string, such as `AUTHENTICATION_FAILED`
+          description: A kebab-case error code, such as `invalid-or-expired-session`, `authentication-failed` or `authorization-failed`
         reason:
           type: string
           description: A readable description of the failure

@@ -2,8 +2,9 @@
 
 **Researched:** 2026-10-29, for Mistico W0-3b (brightdigit/Mistico#49).
 **Status:** request/response contract read from Apple's published client
-library. **No live call has been made**; everything below is what CKTool JS
-sends, not a captured wire exchange.
+library, then **verified live on 2026-11-24** against
+`iCloud.com.brightdigit.MistDemo` (see "Live verification" below). It is now
+the OpenAPI spec `management-openapi.yaml`.
 
 ## Sources (primary)
 
@@ -37,7 +38,7 @@ X-Apple-CloudKit-Management-Token: <management token>
   `code` (Int32, HTTP status), `message` (error code string), `reason`,
   `detailedMessage?`, `requestUuid?`, `retryAfterSeconds?`.
 - CKTool JS also sends `X-CK-CLIENT: cktooljs-<version>`. MistKit doesn't; it
-  isn't part of the security contract. Confirm live that it isn't required.
+  isn't part of the security contract, and live calls succeed without it.
 
 ## Other schema operations (Phase 2+, not implemented)
 
@@ -60,4 +61,32 @@ lifespan of one year and can be revoked from the Settings section of CloudKit
 Dashboard." Created in CloudKit Console → account Settings; shown once.
 
 Not documented anywhere found: which team role (Account Holder / Admin /
-Developer) may create or use one. Confirm against a live container.
+Developer) may create or use one. Still unconfirmed: the 2026-11-24 live run
+used one account's token only.
+
+## Live verification (2026-11-24)
+
+Run with `swift run mistdemo export-schema` and `curl` against
+`iCloud.com.brightdigit.MistDemo`. Recorded bodies (request UUIDs scrubbed)
+are in `Tests/MistKitTests/Management/RecordedManagementFixtures.swift`.
+
+| Request | Status | Body |
+|---|---|---|
+| `DEVELOPMENT` export, valid token | `200`, `content-type: text/plain` | the schema (1,675 bytes) |
+| `PRODUCTION` export, valid token | `200` | byte-identical to development |
+| invalid token | `401`, `application/json` | `{"code":401,"message":"invalid-or-expired-session","reason":"Failed to validate management token","requestUuid":…}` |
+| no token header | `401` | `message: authentication-failed`, `reason: There was a problem with your request.` |
+| unknown container | **`403`** | `message: authorization-failed`, `reason: User doesn't have access to container or container does not exist` |
+| lower-case `development` | `400` | `message: Request unparseable or not as per supported schema` |
+
+Findings beyond CKTool JS's declarations:
+- `message` is a kebab-case code, not SCREAMING_CASE.
+- An unknown container is `403`, not `404`; it is indistinguishable from a
+  container the token's user can't access.
+- `code` always equalled the HTTP status. No response carried
+  `detailedMessage` or `retryAfterSeconds`; every one carried `requestUuid`
+  (also sent as the `x-apple-request-uuid` header).
+- The environment segment is case-sensitive (upper case only).
+- The live MistDemo schema has drifted from the committed
+  `Examples/MistDemo/schema.ckdb`.
+

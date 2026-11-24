@@ -40,11 +40,15 @@ extension MistDemoKeys {
       isSecret: true
     )
 
-    /// `--team-id` / `CLOUDKIT_TEAM_ID`: the Apple Developer team that owns
+    /// `--team-id` / `DEVELOPMENT_TEAM`: the Apple Developer team that owns
     /// the container.
+    ///
+    /// Reads the same `DEVELOPMENT_TEAM` that `.env` already sets for Xcode
+    /// signing (`project.yml`), rather than a second `CLOUDKIT_`-prefixed copy
+    /// of the team ID.
     internal static let teamID = OptionalConfigKey<String>(
-      "team.id",
-      envPrefix: MistDemoKeys.envPrefix
+      cli: "team.id",
+      env: "DEVELOPMENT_TEAM"
     )
 
     /// `--raw` / `CLOUDKIT_RAW`: print the schema text exactly as exported.

@@ -25,6 +25,13 @@ import HTTPTypes
 ///
 /// See `.claude/docs/research/135-management-api-request-format.md`.
 ///
+/// ## Live verification
+/// Verified against the live service on 2026-11-24
+/// (`iCloud.com.brightdigit.MistDemo`). Every element below held. Beyond
+/// CKTool JS: `RequestError.message` is a kebab-case code (for example
+/// `invalid-or-expired-session`), an unknown or inaccessible container is
+/// `403`, and the environment path segment is case-sensitive.
+///
 /// ## Authentication
 /// Send a management token, created in CloudKit Console → Settings, in the
 /// `X-Apple-CloudKit-Management-Token` header. There's no request signing and

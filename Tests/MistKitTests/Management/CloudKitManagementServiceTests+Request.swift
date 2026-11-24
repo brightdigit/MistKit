@@ -51,7 +51,7 @@ extension CloudKitManagementServiceTests {
     )
     internal func percentEncoding(identifier: String, encoded: String) async throws {
       let transport = RecordingTransport(
-        response: ProvisionalManagementFixtures.textResponse("DEFINE SCHEMA")
+        response: RecordedManagementFixtures.textResponse("DEFINE SCHEMA")
       )
       let service = CloudKitManagementService(
         teamIdentifier: identifier,
@@ -71,7 +71,7 @@ extension CloudKitManagementServiceTests {
     @Test("Authenticates with the management token header only")
     internal func onlyTokenAuth() async throws {
       let (service, transport) = makeService(
-        response: ProvisionalManagementFixtures.textResponse("DEFINE SCHEMA")
+        response: RecordedManagementFixtures.textResponse("DEFINE SCHEMA")
       )
       _ = try await service.exportSchemaText(environment: .development)
       let sent = try #require(await transport.sent.first)
@@ -85,7 +85,7 @@ extension CloudKitManagementServiceTests {
     @Test("Sends one request per call, with no caching")
     internal func oneRequestPerCall() async throws {
       let (service, transport) = makeService(
-        response: ProvisionalManagementFixtures.textResponse("DEFINE SCHEMA")
+        response: RecordedManagementFixtures.textResponse("DEFINE SCHEMA")
       )
       _ = try await service.exportSchemaText(environment: .development)
       #expect(await transport.sent.count == 1)

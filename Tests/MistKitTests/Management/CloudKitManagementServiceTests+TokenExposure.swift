@@ -47,19 +47,19 @@ extension CloudKitManagementServiceTests {
 
     @Test("The service never prints the token")
     internal func service() {
-      let (service, _) = makeService(response: ProvisionalManagementFixtures.textResponse(""))
+      let (service, _) = makeService(response: RecordedManagementFixtures.textResponse(""))
       #expect(!Self.reveals(service))
     }
 
     @Test(
       "Thrown errors never print the token",
       arguments: [
-        ProvisionalManagementFixtures.jsonResponse(
-          ProvisionalManagementFixtures.requestErrorJSON,
+        RecordedManagementFixtures.jsonResponse(
+          RecordedManagementFixtures.invalidTokenErrorJSON,
           statusCode: 401
         ),
-        ProvisionalManagementFixtures.jsonResponse(#"{"code": 500}"#, statusCode: 500),
-        ProvisionalManagementFixtures.textResponse("Bad Gateway", statusCode: 502),
+        RecordedManagementFixtures.jsonResponse(#"{"code": 500}"#, statusCode: 500),
+        RecordedManagementFixtures.textResponse("Bad Gateway", statusCode: 502),
         ResponseConfig(statusCode: 200, body: Data([0xFF])),
         ResponseConfig.timeout(),
       ]

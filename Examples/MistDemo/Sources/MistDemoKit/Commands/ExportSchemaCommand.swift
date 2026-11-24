@@ -50,7 +50,7 @@ public struct ExportSchemaCommand: MistDemoCommand {
 
     OPTIONS:
       --environment <env>        development (default) | production
-      --team-id <id>             Team that owns the container (CLOUDKIT_TEAM_ID)
+      --team-id <id>             Team that owns the container (DEVELOPMENT_TEAM)
       --management-token <tok>   CloudKit Console → Settings token
       --raw                      Print the schema text exactly as exported
 

@@ -45,57 +45,83 @@ extension CloudKitManagementServiceTests {
       }
     }
 
-    @Test("A JSON RequestError body becomes requestFailed with every field")
-    internal func requestError() async throws {
+    @Test(
+      "Each recorded RequestError becomes requestFailed with its fields",
+      arguments: [
+        (
+          RecordedManagementFixtures.invalidTokenErrorJSON, 401,
+          "invalid-or-expired-session", "Failed to validate management token"
+        ),
+        (
+          RecordedManagementFixtures.missingTokenErrorJSON, 401,
+          "authentication-failed", "There was a problem with your request."
+        ),
+        (
+          RecordedManagementFixtures.unknownContainerErrorJSON, 403,
+          "authorization-failed",
+          "User doesn't have access to container or container does not exist"
+        ),
+        (
+          RecordedManagementFixtures.badRequestErrorJSON, 400,
+          "Request unparseable or not as per supported schema",
+          "There was a problem with your request."
+        ),
+      ]
+    )
+    internal func recordedRequestErrors(
+      json: String,
+      statusCode: Int,
+      message: String,
+      reason: String
+    ) async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.jsonResponse(
-          ProvisionalManagementFixtures.requestErrorJSON,
-          statusCode: 401
-        )
+        response: RecordedManagementFixtures.jsonResponse(json, statusCode: statusCode)
       )
-      await #expect {
-        _ = try await service.exportSchemaText(environment: .development)
-      } throws: { error in
-        guard case .requestFailed(let failure) = error as? CloudKitManagementError else {
-          return false
-        }
-        return failure
-          == ManagementRequestFailure(
-            statusCode: 401,
-            code: 401,
-            message: "AUTHENTICATION_FAILED",
-            reason: "Management token is invalid or expired",
-            detailedMessage: "Generate a new token in CloudKit Console",
-            requestUUID: "6E1D9A6B-0000-4000-8000-000000000001",
-            retryAfterSeconds: 30
-          )
+      let error = await exportTextError(service)
+      guard case .requestFailed(let failure) = error as? CloudKitManagementError else {
+        Issue.record("Expected requestFailed, got \(String(describing: error))")
+        return
       }
+      #expect(failure.statusCode == statusCode)
+      #expect(failure.code == statusCode)
+      #expect(failure.message == message)
+      #expect(failure.reason == reason)
+      #expect(failure.requestUUID?.hasPrefix("00000000-0000-4000-8000-") == true)
+      #expect(failure.detailedMessage == nil)
+      #expect(failure.retryAfterSeconds == nil)
     }
 
-    @Test("A RequestError with only the required keys decodes")
-    internal func minimalRequestError() async throws {
+    @Test("A RequestError with every optional key decodes them all")
+    internal func fullRequestError() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.jsonResponse(
-          #"{"code": 404, "message": "NOT_FOUND", "reason": "Unknown container"}"#,
-          statusCode: 404
+        response: RecordedManagementFixtures.jsonResponse(
+          RecordedManagementFixtures.fullRequestErrorJSON,
+          statusCode: 503
         )
       )
-      await #expect {
-        _ = try await service.exportSchemaText(environment: .development)
-      } throws: { error in
-        guard case .requestFailed(let failure) = error as? CloudKitManagementError else {
-          return false
-        }
-        return failure.statusCode == 404 && failure.message == "NOT_FOUND"
-          && failure.reason == "Unknown container" && failure.detailedMessage == nil
-          && failure.requestUUID == nil && failure.retryAfterSeconds == nil
+      let error = await exportTextError(service)
+      guard case .requestFailed(let failure) = error as? CloudKitManagementError else {
+        Issue.record("Expected requestFailed, got \(String(describing: error))")
+        return
       }
+      #expect(
+        failure
+          == ManagementRequestFailure(
+            statusCode: 503,
+            code: 503,
+            message: "service-unavailable",
+            reason: "Try again later",
+            detailedMessage: "The service is temporarily unavailable",
+            requestUUID: "00000000-0000-4000-8000-000000000009",
+            retryAfterSeconds: 30
+          )
+      )
     }
 
     @Test("A non-JSON error body becomes httpError carrying the body text")
     internal func plainError() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.textResponse("Bad Gateway", statusCode: 502)
+        response: RecordedManagementFixtures.textResponse("Bad Gateway", statusCode: 502)
       )
       await #expect {
         _ = try await service.exportSchemaText(environment: .development)
@@ -121,16 +147,16 @@ extension CloudKitManagementServiceTests {
       let failure = ManagementRequestFailure(
         statusCode: 401,
         code: 401,
-        message: "AUTHENTICATION_FAILED",
-        reason: "Management token is invalid or expired",
+        message: "invalid-or-expired-session",
+        reason: "Failed to validate management token",
         detailedMessage: nil,
         requestUUID: nil,
         retryAfterSeconds: nil
       )
       #expect(
         CloudKitManagementError.requestFailed(failure).errorDescription
-          == "CloudKit Management API error 401 AUTHENTICATION_FAILED: "
-          + "Management token is invalid or expired"
+          == "CloudKit Management API error 401 invalid-or-expired-session: "
+          + "Failed to validate management token"
       )
       #expect(
         CloudKitManagementError.httpError(statusCode: 502, body: "Bad Gateway").errorDescription

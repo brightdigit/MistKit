@@ -44,7 +44,7 @@ extension CloudKitManagementServiceTests {
 
     @Test("An empty export is empty text, and isn't a schema")
     internal func emptyBody() async throws {
-      let (service, _) = makeService(response: ProvisionalManagementFixtures.textResponse(""))
+      let (service, _) = makeService(response: RecordedManagementFixtures.textResponse(""))
       #expect(try await service.exportSchemaText(environment: .development).isEmpty)
       await #expect {
         _ = try await service.exportSchema(environment: .development)

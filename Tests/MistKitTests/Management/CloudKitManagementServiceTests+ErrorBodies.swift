@@ -41,8 +41,8 @@ extension CloudKitManagementServiceTests {
     @Test("The HTTP status wins over the body's code")
     internal func statusWinsOverCode() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.jsonResponse(
-          #"{"code": 401, "message": "AUTHENTICATION_FAILED", "reason": "r"}"#,
+        response: RecordedManagementFixtures.jsonResponse(
+          #"{"code": 401, "message": "invalid-or-expired-session", "reason": "r"}"#,
           statusCode: 403
         )
       )
@@ -59,7 +59,7 @@ extension CloudKitManagementServiceTests {
     internal func incompleteRequestError() async throws {
       let json = #"{"code": 500, "message": "INTERNAL_ERROR"}"#
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.jsonResponse(json, statusCode: 500)
+        response: RecordedManagementFixtures.jsonResponse(json, statusCode: 500)
       )
       let error = await exportTextError(service)
       guard case .httpError(let statusCode, let body) = error as? CloudKitManagementError else {
@@ -124,7 +124,7 @@ extension CloudKitManagementServiceTests {
         transport: StreamingTransport(
           statusCode: 401,
           headers: headers,
-          chunks: [Data(ProvisionalManagementFixtures.requestErrorJSON.utf8)]
+          chunks: [Data(RecordedManagementFixtures.invalidTokenErrorJSON.utf8)]
         )
       )
       let error = await exportTextError(service)
@@ -132,7 +132,7 @@ extension CloudKitManagementServiceTests {
         Issue.record("Expected requestFailed, got \(String(describing: error))")
         return
       }
-      #expect(failure.message == "AUTHENTICATION_FAILED")
+      #expect(failure.message == "invalid-or-expired-session")
     }
   }
 }

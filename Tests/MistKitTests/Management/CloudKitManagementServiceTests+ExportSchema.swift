@@ -45,8 +45,8 @@ extension CloudKitManagementServiceTests {
     )
     internal func request(environment: Environment, pathEnvironment: String) async throws {
       let (service, transport) = makeService(
-        response: ProvisionalManagementFixtures.textResponse(
-          ProvisionalManagementFixtures.exportedSchemaText
+        response: RecordedManagementFixtures.textResponse(
+          RecordedManagementFixtures.exportedSchemaText
         )
       )
       _ = try await service.exportSchemaText(environment: environment)
@@ -70,41 +70,58 @@ extension CloudKitManagementServiceTests {
     @Test("Returns the raw schema text unchanged")
     internal func rawText() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.textResponse(
-          ProvisionalManagementFixtures.exportedSchemaText
+        response: RecordedManagementFixtures.textResponse(
+          RecordedManagementFixtures.exportedSchemaText
         )
       )
       let text = try await service.exportSchemaText(environment: .development)
-      #expect(text == ProvisionalManagementFixtures.exportedSchemaText)
+      #expect(text == RecordedManagementFixtures.exportedSchemaText)
     }
 
     @Test("Parses the export into record types with index flags")
     internal func parsedExport() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.textResponse(
-          ProvisionalManagementFixtures.exportedSchemaText
+        response: RecordedManagementFixtures.textResponse(
+          RecordedManagementFixtures.exportedSchemaText
         )
       )
       let exported = try await service.exportSchema(environment: .production)
       #expect(exported.environment == .production)
-      #expect(exported.text == ProvisionalManagementFixtures.exportedSchemaText)
-      #expect(exported.schema.roles == ["Organizer"])
-      #expect(exported.schema.recordTypes.map(\.name) == ["Player", "Match"])
+      #expect(exported.text == RecordedManagementFixtures.exportedSchemaText)
+      #expect(exported.schema.roles.isEmpty)
+      #expect(exported.schema.recordTypes.map(\.name) == ["Note", "Users", "cloudkit.share"])
 
-      let player = try #require(exported.schema.recordType(named: "Player"))
-      let displayName = try #require(player.field(named: "displayName"))
-      #expect(displayName.isQueryable && displayName.isSortable && displayName.isSearchable)
-      let country = try #require(player.field(named: "country"))
-      #expect(!country.isQueryable && !country.isSortable && !country.isSearchable)
+      let note = try #require(exported.schema.recordType(named: "Note"))
+      let title = try #require(note.field(named: "title"))
+      #expect(title.isQueryable && title.isSortable && title.isSearchable)
+      let modified = try #require(note.field(named: "modified"))
+      #expect(modified.isQueryable && !modified.isSortable && !modified.isSearchable)
+      #expect(note.field(named: "secret")?.type == SchemaFieldType(.string, isEncrypted: true))
+      #expect(note.field(named: "tags")?.type == SchemaFieldType(.string, isList: true))
+      let createTime = try #require(note.field(named: "___createTime"))
+      #expect(createTime.isSortable && !createTime.isQueryable)
+      #expect(
+        note.grants.first == SchemaGrant(permissions: [.read, .create, .write], role: "_creator")
+      )
 
-      let match = try #require(exported.schema.recordType(named: "Match"))
-      #expect(match.field(named: "players")?.type == SchemaFieldType(.reference, isList: true))
+      let users = try #require(exported.schema.recordType(named: "Users"))
+      #expect(users.field(named: "roles")?.type == SchemaFieldType(.int64, isList: true))
+      let share = try #require(exported.schema.recordType(named: "cloudkit.share"))
+      #expect(share.field(named: "cloudkit.thumbnailImageData")?.type == SchemaFieldType(.bytes))
+    }
+
+    @Test("The recorded export is stored exactly as captured")
+    internal func fixtureShape() {
+      let text = RecordedManagementFixtures.exportedSchemaText
+      #expect(text.hasPrefix("DEFINE SCHEMA\n\n    RECORD TYPE Note (\n"))
+      #expect(text.hasSuffix("        GRANT READ TO \"_world\"\n    );\n"))
+      #expect(text.utf8.count == 1_675)
     }
 
     @Test("A 200 body that isn't valid schema language throws invalidSchema with the text")
     internal func invalidSchema() async throws {
       let (service, _) = makeService(
-        response: ProvisionalManagementFixtures.textResponse("not a schema")
+        response: RecordedManagementFixtures.textResponse("not a schema")
       )
       await #expect {
         _ = try await service.exportSchema(environment: .development)

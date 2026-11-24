@@ -53,7 +53,8 @@ public enum ExportSchemaError: Error, LocalizedError {
       "Create one in CloudKit Console → Settings and set CLOUDKIT_MANAGEMENT_TOKEN "
         + "(in the environment or Examples/MistDemo/.env)."
     case .missingTeamID:
-      "Set CLOUDKIT_TEAM_ID or pass --team-id (Membership tab of the Apple Developer site)."
+      "Set DEVELOPMENT_TEAM (environment or .env, the same value Xcode signing uses) "
+        + "or pass --team-id. It's on the Membership tab of the Apple Developer site."
     }
   }
 }

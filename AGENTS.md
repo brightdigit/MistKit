@@ -106,7 +106,7 @@ swift run mistdemo demo-errors
 swift run mistdemo test-public
 swift run mistdemo test-private
 swift run mistdemo probe-encrypted   # issue #392: encrypted-field probe for one web-auth user
-swift run mistdemo export-schema [--raw] [--environment production]  # Management API (needs CLOUDKIT_MANAGEMENT_TOKEN + CLOUDKIT_TEAM_ID)
+swift run mistdemo export-schema [--raw] [--environment production]  # Management API (needs CLOUDKIT_MANAGEMENT_TOKEN + DEVELOPMENT_TEAM)
 
 # Configuration (no config-file flag — MistDemo uses Swift Configuration):
 # highest priority first — (1) CLI args, (2) CLOUDKIT_-prefixed env vars,
@@ -121,7 +121,8 @@ swift run mistdemo export-schema [--raw] [--environment production]  # Managemen
 # CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_SHAREE_WEB_AUTH_TOKEN,
 # CLOUDKIT_SHAREE_EMAIL, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
 # CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR,
-# CLOUDKIT_MANAGEMENT_TOKEN, CLOUDKIT_TEAM_ID (export-schema only).
+# CLOUDKIT_MANAGEMENT_TOKEN and DEVELOPMENT_TEAM (unprefixed; shared with
+# Xcode signing) for export-schema.
 # Capture sharer+sharee tokens: swift run mistdemo auth-tokens --sharee-email …
 swift run mistdemo query
 ```
@@ -315,10 +316,11 @@ Schema export is **not** a CloudKit Web Services endpoint. It is the Management 
 - Export: `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{DEVELOPMENT|PRODUCTION}/schema/export` → `200 text/plain` CloudKit Schema Language (same text as `cktool export-schema`). Path segments are percent-encoded (`encodeURIComponent` in CKTool JS). Environment is upper case.
 - Auth: header `X-Apple-CloudKit-Management-Token: <token>` only (or the `myacinfo` console cookie). No signing, no API token.
 - Errors: JSON `RequestError` `{code, message, reason, detailedMessage?, requestUuid?, retryAfterSeconds?}` → `CloudKitManagementError.requestFailed(ManagementRequestFailure)`; non-JSON → `.httpError`.
-- Token: "scoped to a team and user", "default lifespan of one year", revocable in CloudKit Console Settings (Apple, *Automating CloudKit Development*). Required team role is undocumented.
+- Token: "scoped to a team and user", "default lifespan of one year", revocable in CloudKit Console Settings (Apple, *Automating CloudKit Development*). Required team role is undocumented and still unverified.
 - Wrapper plumbing: `ManagementTokenMiddleware` adds the token header; `ManagementErrorBodyMiddleware` buffers non-2xx bodies (≤1 MiB) so a body the generated client couldn't decode as a `RequestError` is still readable for `.httpError`. There is **no logging middleware**, and a `ClientError` is never rethrown (its description includes the request headers): `CloudKitManagementError.translating(_:)` maps it to the transport's own error, `.httpError`, or `.invalidResponse`. Success bodies are capped at 32 MiB (`.invalidResponse`). `ManagementToken` is redacted in `description`, `debugDescription` and `Mirror`/`dump`.
 - `exportSchema(environment:)` parses the text with `CloudKitSchema(parsing:)` (`Sources/MistKit/Models/Schema/`) into record types, fields (`isQueryable`/`isSortable`/`isSearchable`), grants and roles; `exportSchemaText(environment:)` returns the raw text.
-- Unit tests use **provisional, hand-written** fixtures (`Tests/MistKitTests/Management/ProvisionalManagementFixtures.swift`). No live Management API call has been made yet.
+- **Verified live on 2026-11-24** (`iCloud.com.brightdigit.MistDemo`, `swift run mistdemo export-schema`): the whole contract held, with the token header alone (no `X-CK-CLIENT`). `RequestError.message` is a kebab-case code (`invalid-or-expired-session`, `authentication-failed`, `authorization-failed`); an unknown or inaccessible container is **403**, not 404; a lower-case environment is 400. No live response carried `detailedMessage` or `retryAfterSeconds`.
+- Unit tests use **recorded** fixtures (`Tests/MistKitTests/Management/RecordedManagementFixtures.swift`, request UUIDs scrubbed); only `fullRequestErrorJSON`, which exercises the never-observed optional keys, is hand-written.
 
 **Protocols:**
 - `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`

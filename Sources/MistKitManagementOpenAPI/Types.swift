@@ -86,7 +86,7 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RequestError/code`.
             public var code: Swift.Int32
-            /// An error code string, such as `AUTHENTICATION_FAILED`
+            /// A kebab-case error code, such as `invalid-or-expired-session`, `authentication-failed` or `authorization-failed`
             ///
             /// - Remark: Generated from `#/components/schemas/RequestError/message`.
             public var message: Swift.String
@@ -110,7 +110,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - code: The HTTP status code
-            ///   - message: An error code string, such as `AUTHENTICATION_FAILED`
+            ///   - message: A kebab-case error code, such as `invalid-or-expired-session`, `authentication-failed` or `authorization-failed`
             ///   - reason: A readable description of the failure
             ///   - detailedMessage: Extra detail about the failure
             ///   - requestUuid: The request's identifier, for Apple support

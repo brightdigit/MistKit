@@ -38,14 +38,14 @@ extension SchemaSourceTests {
     @Test("loads the parsed Management API export and never asks for a reload")
     internal func loads() async throws {
       let (service, transport) = CloudKitManagementServiceTests.makeService(
-        response: ProvisionalManagementFixtures.textResponse(
-          ProvisionalManagementFixtures.exportedSchemaText
+        response: RecordedManagementFixtures.textResponse(
+          RecordedManagementFixtures.exportedSchemaText
         )
       )
       let source = ExportedSchemaSource(service: service, environment: .production)
       let schema = try await source.loadSchema()
       #expect(
-        schema == (try CloudKitSchema(parsing: ProvisionalManagementFixtures.exportedSchemaText))
+        schema == (try CloudKitSchema(parsing: RecordedManagementFixtures.exportedSchemaText))
       )
       #expect(
         await transport.sent.first?.request.path?.hasSuffix("PRODUCTION/schema/export") == true)
@@ -56,7 +56,7 @@ extension SchemaSourceTests {
     @Test("an export that isn't valid schema language throws invalidSchema")
     internal func invalid() async {
       let (service, _) = CloudKitManagementServiceTests.makeService(
-        response: ProvisionalManagementFixtures.textResponse("not a schema")
+        response: RecordedManagementFixtures.textResponse("not a schema")
       )
       await #expect {
         _ = try await ExportedSchemaSource(service: service, environment: .development)
