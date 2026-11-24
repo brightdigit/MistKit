@@ -71,7 +71,7 @@ public struct SchemaRecordType: Sendable, Hashable, Codable {
     lhs.name == rhs.name && lhs.fields == rhs.fields && lhs.grants == rhs.grants
   }
 
-  /// Hashes everything ``==`` compares.
+  /// Hashes everything `==` compares.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(name)
     hasher.combine(fields)

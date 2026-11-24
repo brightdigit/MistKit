@@ -41,7 +41,7 @@ internal import MistKitOpenAPI
 /// written only for a tombstone, and every other `nil` key is left out.
 ///
 /// Decoding reads the same keys. A field without a `type` is typed by the
-/// decoder's ``CodingUserInfoKey/cloudKitFieldTypes``, then by its JSON shape.
+/// decoder's `CodingUserInfoKey.cloudKitFieldTypes`, then by its JSON shape.
 ///
 /// ```swift
 /// let json = try JSONEncoder.cloudKitReadable.encode(records.map { WireRecord($0) })

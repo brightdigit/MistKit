@@ -52,13 +52,13 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A nested-list element was not one of the supported basic types.
   case unmappableNestedListItem(fieldName: String, item: String)
   /// An empty list arrived without a `type` and without a schema type
-  /// (``CodingUserInfoKey/cloudKitFieldTypes``), so its element type is unknown.
+  /// (`CodingUserInfoKey.cloudKitFieldTypes`), so its element type is unknown.
   ///
   /// Raised only when decoding caller-supplied JSON (``WireFieldValue``),
   /// wrapped in a `DecodingError` whose `codingPath` ends at the field.
   case ambiguousEmptyList(fieldName: String)
   /// An `INT64` value doesn't fit in `Int` on this platform (a 32-bit target
-  /// such as WASI), so it can't become a ``FieldValue/int64(_:)`` without
+  /// such as WASI), so it can't become a ``FieldValue/int64(_:)-enum.case`` without
   /// truncation.
   case integerOutOfRange(fieldName: String, value: Int64)
   /// A record timestamp was negative.

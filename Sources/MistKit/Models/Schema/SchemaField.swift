@@ -95,7 +95,7 @@ public struct SchemaField: Sendable, Hashable, Codable {
       && lhs.isSortable == rhs.isSortable && lhs.isSearchable == rhs.isSearchable
   }
 
-  /// Hashes everything ``==`` compares.
+  /// Hashes everything `==` compares.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(name)
     hasher.combine(type)

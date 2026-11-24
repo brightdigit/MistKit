@@ -37,24 +37,25 @@ Raise `maxPages` when you know the result set is genuinely large. Narrow filters
 
 ## Batching writes
 
-CloudKit's [`/records/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html) endpoint accepts a batch of operations in a single round-trip. The practical server-side cap is around 200 operations per request. ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` does not chunk for you — split larger batches yourself:
+CloudKit's [`/records/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html) endpoint accepts a batch of operations in a single round-trip. CloudKit caps a request at 200 operations (``CloudKitService/maxRecordsPerRequest``). ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` sends exactly one request, so it does not chunk for you. For larger batches use ``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)``, which groups operations by zone, splits each zone into requests of at most `batchSize`, and checks and encodes every request before sending the first:
 
 ```swift
-let chunked = stride(from: 0, to: operations.count, by: 200).map {
-  Array(operations[$0..<min($0 + 200, operations.count)])
-}
-for chunk in chunked {
-  _ = try await service.modifyRecords(chunk, atomic: false, database: .private)
-}
+let results = try await service.modifyAllRecords(
+  operations.map { ZonedRecordOperation($0) },
+  database: .private
+)
 ```
+
+If a request fails partway through, it throws ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)`` with the results so far and the operations it never sent. See <doc:BatchingAndPagination> for atomicity across chunks and how to resume.
 
 | Choice | When to prefer |
 | --- | --- |
 | Single-op (`createRecord`, etc.) | Independent operations triggered by user actions; readability over throughput |
 | Batched (`modifyRecords`, `atomic: false`) | Throughput-bound work where independent operations can share a request |
+| Chunked (`modifyAllRecords`) | More than 200 operations, or operations spread across zones |
 | Batched (`modifyRecords`, `atomic: true`) | Semantically linked operations that must commit together |
 
-`atomic: true` is more expensive server-side and fails the entire batch on any one failure. Use it only when the operations are genuinely transactional.
+`atomic: true` is more expensive server-side and fails the entire batch on any one failure. Use it only when the operations are genuinely transactional. With `modifyAllRecords`, a zone in `atomicZones` is atomic per request, not across the whole call: 450 operations in one zone commit as three separate atomic requests.
 
 ## Asset upload transport
 

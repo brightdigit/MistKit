@@ -23,18 +23,28 @@ The generated types are described in <doc:GeneratedCodeAnalysis>; how to read an
 ## The domain enum
 
 ```swift
-public enum FieldValue: Codable, Equatable, Sendable {
-  case string(String)
-  case int64(Int)
-  case double(Double)
-  case bytes(Data)  // Binary data; base64-encoded on the wire
-  case date(Date)  // Date/time value
-  case location(Location)
-  case reference(Reference)
-  case asset(Asset)
-  case list([FieldValue])
+public enum FieldValue: Codable, Hashable, Sendable {
+  case string(Arity<String>)
+  case int64(Arity<Int>)
+  case double(Arity<Double>)
+  case bytes(Arity<Data>)  // Binary data; base64-encoded on the wire
+  case date(Arity<Date>)  // Date/time value
+  case location(Arity<Location>)
+  case reference(Arity<Reference>)
+  case asset(Arity<Asset>)
 }
+
+extension FieldValue {
+  public enum Arity<T: Codable & Equatable & Sendable>: Codable, Equatable, Sendable {
+    case value(T)
+    case list([T])
+  }
+}
+
+extension FieldValue.Arity: Hashable where T: Hashable {}
 ```
+
+Each kind carries an ``FieldValue/Arity``: a single `.value` or a `.list` of that kind. A list is therefore homogeneous by construction, nested lists are unrepresentable, and an empty list still knows its element type (`.string(.list([]))`). This matches CloudKit's `LIST<primitive-type>` schema grammar.
 
 ``Location``, ``Reference``, and ``Asset`` are MistKit's own value types, so the package has no dependency on [Core Location](https://developer.apple.com/documentation/corelocation) or the [CloudKit framework](https://developer.apple.com/documentation/cloudkit). There is no boolean case: CloudKit stores booleans as `INT64` `0`/`1`, and ``FieldValue/init(booleanValue:)`` / ``FieldValue/boolValue`` bridge that convention.
 
@@ -59,13 +69,16 @@ FieldValueResponse:
       oneOf: [StringValue, Int64Value, DoubleValue, BytesValue,
               DateValue, LocationValue, ReferenceValue, AssetValue, ListValue]
     type:
-      enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID,
-             LOCATION, TIMESTAMP, LIST]                                     # 10 values
+      enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID,
+             LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST,
+             TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]   # 17 values
+    isEncrypted:
+      type: boolean
 ```
 
 | | Request | Response |
 | --- | --- | --- |
-| `type` values | 17 — scalars, complex, and eight `*_LIST` element tags | 10 — scalars, complex, and a single `LIST` |
+| `type` values | 17 — scalars, complex, and eight `*_LIST` element tags | The same 17 (live responses tag lists `STRING_LIST`, `INT64_LIST`, …, never a flat `LIST`) |
 | `type` required? | Optional on the wire, **mandatory** for `TIMESTAMP`, `BYTES`, `DOUBLE` | Optional — usually present, and the only way to recover ambiguous scalars |
 
 Two generated types mean the compiler refuses to put a response value into a request slot. The conversions live in `OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` (domain → request) and `Models/FieldValues/FieldValue+Components.swift` plus `FieldValue+Components+Scalar.swift` (response → domain).
@@ -80,22 +93,42 @@ CloudKit infers a field's type from the JSON shape of `value`, so most values ar
 | `.bytes` (`BYTES`) | base64 string | `STRING` |
 | `.double` (`DOUBLE`) | whole-valued number (`3.0` serializes as `3`) | `INT64` |
 
-Untagged, CloudKit infers the wrong type and rejects the write with [`BAD_REQUEST "Invalid value, expected type TIMESTAMP"`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html). The request conversion is a single `default`-free switch that tags exactly these three:
+Untagged, CloudKit infers the wrong type and rejects the write with [`BAD_REQUEST "Invalid value, expected type TIMESTAMP"`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html). The request conversion is a single `default`-free switch over kind and arity. It tags these three scalars, and every list with its `*_LIST` element tag:
 
 ```swift
 internal init(from fieldValue: FieldValue) {
   switch fieldValue {
-  case .string(let value):
+  case .string(.value(let value)):
     self.init(value: .StringValue(value))
-  case .int64(let value):
+  case .string(.list(let values)):
+    self.init(
+      value: .ListValue(values.map { .StringValue($0) }),
+      _type: .STRING_LIST
+    )
+  case .int64(.value(let value)):
     self.init(value: .Int64Value(Int64(value)))
-  case .double(let value):
+  case .int64(.list(let values)):
+    self.init(
+      value: .ListValue(values.map { .Int64Value(Int64($0)) }),
+      _type: .INT64_LIST
+    )
+  case .double(.value(let value)):
     // Whole-valued doubles serialize without a fraction and would be read as INT64.
     self.init(value: .DoubleValue(value), _type: .DOUBLE)
-  case .bytes(let value):
+  case .double(.list(let values)):
+    self.init(
+      value: .ListValue(values.map { .DoubleValue($0) }),
+      _type: .DOUBLE_LIST
+    )
+  case .bytes(.value(let value)):
     // A base64 string is otherwise indistinguishable from a STRING.
     self.init(value: .BytesValue(value.base64EncodedString()), _type: .BYTES)
-  case .date(let value):
+  case .bytes(.list(let values)):
+    self.init(
+      value: .ListValue(values.map { .BytesValue($0.base64EncodedString()) }),
+      _type: .BYTES_LIST
+    )
+  case .date(.value(let value)):
     // Tag TIMESTAMP (else inferred as INT64/DOUBLE) and round to whole milliseconds:
     // CloudKit rejects a fractional TIMESTAMP value (e.g. 1747999812347.89) with
     // BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond precision.
@@ -103,27 +136,48 @@ internal init(from fieldValue: FieldValue) {
       value: .DateValue((value.timeIntervalSince1970 * 1_000).rounded()),
       _type: .TIMESTAMP
     )
-  case .location(let location):
+  case .date(.list(let values)):
+    self.init(
+      value: .ListValue(
+        values.map { .DateValue(($0.timeIntervalSince1970 * 1_000).rounded()) }
+      ),
+      _type: .TIMESTAMP_LIST
+    )
+  case .location(.value(let location)):
     self.init(location: location)
-  case .reference(let reference):
+  case .location(.list(let locations)):
+    self.init(
+      value: .ListValue(locations.map { Self.makeLocationPayload($0) }),
+      _type: .LOCATION_LIST
+    )
+  case .reference(.value(let reference)):
     self.init(reference: reference)
-  case .asset(let asset):
+  case .reference(.list(let references)):
+    self.init(
+      value: .ListValue(references.map { Self.makeReferencePayload($0) }),
+      _type: .REFERENCE_LIST
+    )
+  case .asset(.value(let asset)):
     self.init(asset: asset)
-  case .list(let list):
-    self.init(list: list)
+  case .asset(.list(let assets)):
+    self.init(
+      value: .ListValue(assets.map { Self.makeAssetPayload($0) }),
+      _type: .ASSET_LIST
+    )
   }
-}
-```
+}```
 
-Object- and array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Because the switch has no `default`, a tenth `FieldValue` case is a compile error here rather than a silent fallback.
+Object-shaped scalars (`REFERENCE`, `ASSET`, `LOCATION`) and scalar `STRING`/`INT64` are unambiguous and stay untagged. Because the switch has no `default`, a new kind is a compile error here rather than a silent fallback.
+
+A field named in `RecordOperation.encryptedFields` is the exception: CloudKit will not infer the type of an encrypted value, so MistKit fills in `STRING`, `INT64` or `LOCATION` for those untagged scalars too.
 
 ### Timestamps are whole milliseconds
 
-CloudKit rejects a fractional `TIMESTAMP`, and Swift's `Date` carries sub-millisecond precision, so `.date` values are rounded on the way out. The same rule applies to the nested `Location.timestamp`, which has no `type` tag of its own to disambiguate it. Sub-millisecond precision is therefore destroyed on every write: a `Date` in is a different `Date` out. The list path (`ListValuePayload`) applies the same rounding to `[Date]` elements.
+CloudKit rejects a fractional `TIMESTAMP`, and Swift's `Date` carries sub-millisecond precision, so `.date` values are rounded on the way out. The same rule applies to the nested `Location.timestamp`, which has no `type` tag of its own to disambiguate it. Sub-millisecond precision is therefore destroyed on every write: a `Date` in is a different `Date` out. The `.date(.list(_:))` path applies the same rounding to every element.
 
-### IN / NOT_IN filters use the list tags
+### Lists always carry their element tag
 
-The eight `*_LIST` request tags exist for one caller: ``QueryFilter`` `IN`/`NOT_IN` comparators. Without an element-type tag CloudKit rejects every `.in()` query with `HTTP 400 BadRequestException: Unexpected input`, at any array size. The tag is derived from the first element, so a heterogeneous list is tagged by element zero and an empty list is sent untagged.
+Every `.list` arity is sent with its `*_LIST` tag, for record fields as well as for ``QueryFilter`` `IN`/`NOT_IN` values. The `IN` case is where the tag was first found to matter: without it CloudKit rejects every `.in()` query with `HTTP 400 BadRequestException: Unexpected input`, at any array size. `IN` elements are scalar `.value`s, and the filter's tag comes from their kind; an empty `IN` array is sent untagged.
 
 ## Reads: recovering the type from an undiscriminated oneOf
 
@@ -165,7 +219,7 @@ internal static func makeSimpleFieldValue(
 
 ### Contradictions fail loudly
 
-A tag that contradicts the value's category — a numeric type over a string, a string type over a number — describes an internally inconsistent response. The conversion **throws** ``ConversionError/typeValueMismatch(fieldName:declaredType:value:)`` rather than coercing to whichever shape arrived. The same rule covers the complex tags: a declared `REFERENCE`, `ASSET`, `ASSETID`, `LOCATION`, or `LIST` whose decoded value is not the matching `oneOf` case throws instead of being silently reinterpreted. `ASSETID` shares `AssetValue` with `ASSET`; `LIST` is validated at the container level only — element types stay lenient.
+A tag that contradicts the value's category — a numeric type over a string, a string type over a number — describes an internally inconsistent response. The conversion **throws** ``ConversionError/typeValueMismatch(fieldName:declaredType:value:)`` rather than coercing to whichever shape arrived. The same rule covers the complex tags: a declared `REFERENCE`, `ASSET`, `ASSETID` or `LOCATION` whose decoded value is not the matching `oneOf` case, or a `*_LIST` tag over a value that is not a list, throws instead of being silently reinterpreted. `ASSETID` shares `AssetValue` with `ASSET`.
 
 Untagged responses are unaffected: they resolve purely from the value's self-describing structure, so a well-formed response never starts failing because a tag was absent. Every ``ConversionError`` surfaces to callers as ``CloudKitError/conversionFailed(_:)``.
 
@@ -173,16 +227,18 @@ Untagged responses are unaffected: they resolve purely from the value's self-des
 
 When `type` is absent the conversion falls back to first-match inference, which cannot recover the ambiguous scalars: a base64 `BYTES` reads back as `.string`, a whole-number `TIMESTAMP` as `.int64`. MistKit does **not** guess `.bytes` from an untagged string that happens to be valid base64 — ordinary strings such as `"Chen"` decode as valid base64, so that guess would corrupt real data. ``FieldValue/dataValue`` matches `.bytes` only; there is no `.string` fallback.
 
-## Lists lose their element type
+## Lists keep their element type
 
-The request enum has eight `*_LIST` tags; the response enum collapses every list to a single `LIST`, and `ListValuePayload` carries no per-element tag. A `[Date]` written as `TIMESTAMP_LIST` therefore reads back as `[.int64]`. The element type is information you must *send* and can never *read back*; MistKit re-infers elements structurally, with the same lossiness as untagged scalars.
+Live CloudKit tags list responses with the same granular `*_LIST` values the request uses, including empty lists (`STRING_LIST` with `[]`). A tagged list decodes straight to the matching kind, so a `[Date]` written as `TIMESTAMP_LIST` reads back as `.date(.list(_:))`, and an empty list keeps its kind.
+
+An *untagged* list response falls back to inference: MistKit infers one element kind from the elements, with the same lossiness as untagged scalars. An untagged empty list has no elements to infer from and can't be recovered; CloudKit does not send one in practice. When decoding caller-supplied JSON, the same case throws ``ConversionError/ambiguousEmptyList(fieldName:)`` unless a schema type is supplied (see <doc:EncodingRecordsAsJSON>).
 
 ## Assets: one schema for both directions
 
 Unlike `FieldValue`, the `AssetValue` schema is not split. One all-optional struct is referenced from both request and response, and the domain ``Asset`` mirrors it:
 
 ```swift
-public struct Asset: Codable, Equatable, Sendable {
+public struct Asset: Codable, Hashable, Sendable {
   public let fileChecksum: String?
   public let size: Int64?
   public let referenceChecksum: String?

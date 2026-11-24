@@ -44,15 +44,15 @@ Records are the main way data is stored. Think of a record as a table row with t
 
 | CloudKit type | Native framework type | MistKit ``FieldValue`` case |
 | --- | --- | --- |
-| `STRING` | `String` | ``FieldValue/string(_:)`` |
-| `INT64` | `Int` / `NSNumber` | ``FieldValue/int64(_:)`` |
-| `DOUBLE` | `Double` / `NSNumber` | ``FieldValue/double(_:)`` |
-| `BYTES` | `Data` | ``FieldValue/bytes(_:)`` |
-| `TIMESTAMP` | `Date` | ``FieldValue/date(_:)`` |
-| `LOCATION` | [`CLLocation`](https://developer.apple.com/documentation/corelocation/cllocation) | ``FieldValue/location(_:)`` |
-| `REFERENCE` | [`CKRecord.Reference`](https://developer.apple.com/documentation/cloudkit/ckrecord/reference) | ``FieldValue/reference(_:)`` |
-| `ASSET` | [`CKAsset`](https://developer.apple.com/documentation/cloudkit/ckasset) | ``FieldValue/asset(_:)`` |
-| `LIST` | `Array` | ``FieldValue/list(_:)`` |
+| `STRING` | `String` | ``FieldValue/string(_:)-enum.case`` |
+| `INT64` | `Int` / `NSNumber` | ``FieldValue/int64(_:)-enum.case`` |
+| `DOUBLE` | `Double` / `NSNumber` | ``FieldValue/double(_:)-enum.case`` |
+| `BYTES` | `Data` | ``FieldValue/bytes(_:)-enum.case`` |
+| `TIMESTAMP` | `Date` | ``FieldValue/date(_:)-enum.case`` |
+| `LOCATION` | [`CLLocation`](https://developer.apple.com/documentation/corelocation/cllocation) | ``FieldValue/location(_:)-enum.case`` |
+| `REFERENCE` | [`CKRecord.Reference`](https://developer.apple.com/documentation/cloudkit/ckrecord/reference) | ``FieldValue/reference(_:)-enum.case`` |
+| `ASSET` | [`CKAsset`](https://developer.apple.com/documentation/cloudkit/ckasset) | ``FieldValue/asset(_:)-enum.case`` |
+| `LIST` | `Array` | the `.list` ``FieldValue/Arity`` of any of the above, such as `.string(.list(["a", "b"]))` |
 
 There is no boolean type — CloudKit stores booleans as `INT64` `0`/`1`, which is why MistKit offers ``FieldValue/init(booleanValue:)`` and ``FieldValue/boolValue``.
 
@@ -522,7 +522,7 @@ public struct Reference: Codable, Equatable, Sendable {
   public let action: Action?
 }
 
-public struct Asset: Codable, Equatable, Sendable {
+public struct Asset: Codable, Hashable, Sendable {
   public let fileChecksum: String?
   public let size: Int64?
   public let referenceChecksum: String?

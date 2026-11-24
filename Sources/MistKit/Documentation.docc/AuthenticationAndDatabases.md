@@ -169,6 +169,25 @@ The standard path — ``Credentials`` plus per-call ``Database`` — covers almo
 
 A custom manager is used for *every* dispatched operation regardless of database — you opt out of the per-call resolution entirely. See <doc:RequestSigning> for the ``TokenManager`` protocol and the concrete managers.
 
+## Check credentials before you use them
+
+``CloudKitService/verifyCredentials()`` backs a "Test Connection" button or a start-up health check. It sends one cheap request per configured ``CredentialKind``, concurrently, and reports each as a ``CredentialStatus`` instead of throwing:
+
+| Kind | Request | Accepted when |
+| --- | --- | --- |
+| ``CredentialKind/webAuth`` | `users/caller` | it succeeds |
+| ``CredentialKind/serverToServer`` | public `zones/list`, key-signed | it succeeds |
+| ``CredentialKind/apiTokenOnly`` | `users/caller`, API token only | CloudKit answers `AUTHENTICATION_REQUIRED` (the token is valid; nobody has signed in yet) |
+
+```swift
+let verification = try await service.verifyCredentials()
+if let error = verification.serverToServer.error {
+  logger.error("Server-to-server key rejected: \(error)")
+}
+```
+
+One bad credential never hides the others' results. A kind the service has no credential for is ``CredentialStatus/notConfigured``, and the result holds no credential material, so it is safe to log. The only thing it throws is `CancellationError`, because a request cut short says nothing about the credential.
+
 ## Obtaining credentials from the CloudKit Console
 
 Everything below starts in the [CloudKit Console](https://icloud.developer.apple.com/dashboard/): pick your container, then open **Tokens & Keys**.
@@ -192,16 +211,24 @@ An API token alone cannot reach the private or shared database. Its main job is 
 4. Apple redirects back to your registered callback with `ckSession=…` (the web auth token).
 5. Your service stores that token next to the API token and uses both for every subsequent request — MistKit sends it as the `ckWebAuthToken` query item.
 
-MistKit surfaces step 2 as ``CloudKitError/authenticationRequired(reason:)`` on single-record conveniences, and as a per-item ``OperationFailure`` (whose ``OperationFailure/redirectURL`` carries the sign-in URL) on batch results:
+MistKit surfaces step 2 as ``CloudKitError/authenticationRequired(reason:redirectURL:)`` on single-record conveniences, and as a per-item ``OperationFailure`` (whose ``OperationFailure/redirectURL`` carries the sign-in URL) on batch results:
 
 ```swift
 do {
   _ = try await service.queryRecords(Query(recordType: "Note"), database: .private)
-} catch CloudKitError.authenticationRequired(let reason) {
-  // Send the user through the sign-in flow, then retry with the new token.
-  logger.info("Sign-in required: \(reason ?? "")")
+} catch CloudKitError.authenticationRequired(let reason, let redirectURL) {
+  // Send the user to redirectURL to sign in, then retry with the new token.
+  logger.info("Sign-in required: \(reason ?? "") \(redirectURL ?? "")")
 }
 ```
+
+To start the flow without waiting for a failure, call ``CloudKitService/fetchWebAuthSignInURL()``. It sends `users/caller` signed with the API token alone (ignoring any web-auth token the service holds) and returns the `redirectURL` from the `AUTHENTICATION_REQUIRED` answer. Open it in a browser session such as `ASWebAuthenticationSession` and read `ckWebAuthToken` from the callback:
+
+```swift
+let signInPage: URL = try await service.fetchWebAuthSignInURL()
+```
+
+Because the page is opened in a browser, MistKit returns only an `https` URL on an `apple.com` or `icloud.com` host (live CloudKit sends `https://idmsa.apple.com/…`). Anything else, or a response without a `redirectURL`, throws ``CloudKitError/incompleteResponse(reason:)``. A service with no API token throws ``CloudKitError/missingCredentials(database:availability:reason:)``.
 
 The token is valid for 30 minutes by default, or two weeks if the user ticks *Keep me signed in*, and CloudKit returns a rotated token in the `X-Apple-CloudKit-Web-Auth-Token` header of every response. MistKit adopts the rotated token automatically through ``TokenManager/didReceiveRotatedWebAuthToken(_:)`` — see <doc:RequestSigning>.
 
@@ -281,6 +308,14 @@ Where those values come from per platform — CI secrets, Kubernetes, `systemd`,
 - ``ServerToServerCredentials``
 - ``PrivateKeyMaterial``
 - ``CredentialsValidationError``
+
+### Checking credentials
+
+- ``CloudKitService/verifyCredentials()``
+- ``CredentialVerification``
+- ``CredentialStatus``
+- ``CredentialKind``
+- ``CloudKitService/fetchWebAuthSignInURL()``
 
 ### Database scoping
 

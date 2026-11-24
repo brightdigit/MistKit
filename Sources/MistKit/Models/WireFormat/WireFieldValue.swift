@@ -69,7 +69,7 @@ public struct WireFieldValue: Codable, Hashable, Sendable {
   /// Decodes a field dictionary.
   ///
   /// The type comes from the dictionary's `type`, then the decoder's
-  /// ``CodingUserInfoKey/cloudKitFieldTypes`` for this field, then the value's
+  /// `CodingUserInfoKey.cloudKitFieldTypes` for this field, then the value's
   /// JSON shape: a string reads as `STRING`, a whole number as `INT64`, any
   /// other number as `DOUBLE`, an object as a `LOCATION`, `REFERENCE` or
   /// `ASSET` by its keys, and a list by its first element.

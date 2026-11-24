@@ -43,7 +43,7 @@ public indirect enum FieldType: Sendable, Hashable, Codable {
   case int64
   /// `DOUBLE`
   case double
-  /// `TIMESTAMP`, a ``FieldValue/date(_:)`` value.
+  /// `TIMESTAMP`, a ``FieldValue/date(_:)-enum.case`` value.
   case timestamp
   /// `BYTES`
   case bytes

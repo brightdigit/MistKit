@@ -49,7 +49,8 @@ public struct ManagementRequestFailure: Sendable, Hashable, Decodable {
   public let statusCode: Int
   /// The status code the body reports (`code`).
   public let code: Int
-  /// The error code string (`message`), such as `AUTHENTICATION_FAILED`.
+  /// The error code string (`message`), a kebab-case code such as
+  /// `authentication-failed` or `invalid-or-expired-session`.
   public let message: String
   /// Why the request failed (`reason`).
   public let reason: String

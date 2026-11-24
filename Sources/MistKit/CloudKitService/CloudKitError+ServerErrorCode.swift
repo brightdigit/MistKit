@@ -32,7 +32,7 @@ extension CloudKitError {
   /// error did not originate from a coded CloudKit failure.
   ///
   /// Exposed for logging and diagnostics only. Pattern-match the dedicated
-  /// cases — ``CloudKitError/notFound(reason:)``, ``CloudKitError/throttled(reason:)``
+  /// cases — ``CloudKitError/notFound(reason:)``, ``CloudKitError/throttled(reason:retryAfter:)``
   /// and friends — for control flow; the string is not a stable contract.
   public var serverErrorCode: String? {
     serverErrorDetail?.code

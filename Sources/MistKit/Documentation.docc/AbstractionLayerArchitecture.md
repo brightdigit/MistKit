@@ -201,8 +201,8 @@ Splitting the generated types means the compiler refuses to put a response value
 let result = try await service.queryRecords(
   recordType: "Note",
   filters: [
-    .greaterThan("modifiedAt", .date(since)),
-    .listContains("tags", .string("important")),
+    .greaterThan("modifiedAt", .date(.value(since))),
+    .listContains("tags", .string(.value("important"))),
   ],
   sortBy: [.descending("modifiedAt")],
   database: .private
