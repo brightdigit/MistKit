@@ -157,7 +157,7 @@ internal static func makeSimpleFieldValue(
   if let typed = try makeTypedScalar(from: value, type: fieldType, fieldName: fieldName) {
     return typed
   }
-  return makeInferredScalar(from: value)
+  return try makeInferredScalar(from: value, fieldName: fieldName)
 }
 ```
 

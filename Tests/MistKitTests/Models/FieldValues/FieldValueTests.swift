@@ -162,4 +162,19 @@ internal struct FieldValueTests {
       try JSONDecoder().decode(FieldValue.self, from: Data(json.utf8))
     }
   }
+
+  /// An INT64 past `Int32.max` decodes where `Int` is 64 bits, and is a
+  /// decoding error (not a trap) where `Int` is 32 bits, as on WASI.
+  @Test("FieldValue INT64 beyond Int32 range decodes or throws, never traps")
+  internal func fieldValueLargeInt64() throws {
+    let json = Data(#"{"value":3000000000,"type":"INT64"}"#.utf8)
+    if Int.bitWidth == 64 {
+      let decoded = try JSONDecoder().decode(FieldValue.self, from: json)
+      #expect(decoded == .int64(.value(Int(exactly: Int64(3_000_000_000)) ?? 0)))
+    } else {
+      #expect(throws: DecodingError.self) {
+        try JSONDecoder().decode(FieldValue.self, from: json)
+      }
+    }
+  }
 }

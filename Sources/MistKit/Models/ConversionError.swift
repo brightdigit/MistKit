@@ -57,6 +57,10 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// Raised only when decoding caller-supplied JSON (``WireFieldValue``),
   /// wrapped in a `DecodingError` whose `codingPath` ends at the field.
   case ambiguousEmptyList(fieldName: String)
+  /// An `INT64` value doesn't fit in `Int` on this platform (a 32-bit target
+  /// such as WASI), so it can't become a ``FieldValue/int64(_:)`` without
+  /// truncation.
+  case integerOutOfRange(fieldName: String, value: Int64)
   /// A record timestamp was negative.
   case negativeTimestamp(milliseconds: Double)
   /// A record response was missing its `recordName`.
@@ -117,6 +121,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
     case .ambiguousEmptyList(let fieldName):
       return "Field '\(fieldName)' is an empty list with no type or schema type, "
         + "so its element type is unknown"
+    case .integerOutOfRange(let fieldName, let value):
+      return "Field '\(fieldName)' INT64 value \(value) doesn't fit in Int on this platform"
     case .negativeTimestamp(let milliseconds):
       return "Invalid negative timestamp (\(milliseconds) ms)"
     case .recordMissingRecordName:

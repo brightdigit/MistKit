@@ -33,7 +33,10 @@ internal import Testing
 @testable import MistKit
 
 extension CloudKitSchemaTests {
-  @Suite("Example schemas")
+  @Suite(
+    "Example schemas",
+    .disabled(if: Platform.isWasm, "WASI sandbox can't read the package source tree")
+  )
   internal struct ExampleSchemas {
     private static let packageRoot = URL(fileURLWithPath: #filePath)
       .deletingLastPathComponent()  // Schema

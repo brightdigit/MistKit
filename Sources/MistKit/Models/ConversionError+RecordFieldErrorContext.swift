@@ -41,7 +41,8 @@ extension ConversionError: RecordFieldErrorContext {
       .typeValueMismatch(let fieldName, _, _),
       .unmappableListItem(let fieldName, _),
       .unmappableNestedListItem(let fieldName, _),
-      .ambiguousEmptyList(let fieldName):
+      .ambiguousEmptyList(let fieldName),
+      .integerOutOfRange(let fieldName, _):
       fieldName
     default:
       nil

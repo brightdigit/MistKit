@@ -44,4 +44,4 @@ The standalone repository carries the `url:` form instead — and **`git subrepo
 
 ## CI
 
-Swift 6.4 has no Linux or Windows release toolchain, so `build-ubuntu` runs the single `swiftlang/swift:nightly-6.4.x` matrix entry, `build-windows` is commented out, there is no Android job, and macOS runs on `runs-on: xcode-27`. On that image tvOS must use `"Apple TV 4K (3rd generation)"` — there is no plain `"Apple TV"`. Restore the release lanes once Swift 6.4 ships them.
+Swift 6.4 has no Linux or Windows release toolchain, so `build-ubuntu` runs the single `swiftlang/swift:nightly-6.4.x` matrix entry, `build-windows` is commented out, there is no Android job, and macOS runs on `runs-on: xcode-27`. The lanes pin `/Applications/Xcode_27.2.app` with 27.2 simulators; on that runtime the devices are `"iPhone 18 Pro"`, `"Apple Watch Ultra 4 (49mm)"` and `"Apple TV 4K (4th generation)"` — there is no plain `"Apple TV"`. Restore the release lanes once Swift 6.4 ships them.
