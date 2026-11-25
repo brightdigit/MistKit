@@ -67,7 +67,7 @@ If a set of operations must commit together, keep it in one zone and at or under
 
 ### Nothing is sent if any request fails a client-side check
 
-Before sending the first request, `modifyAllRecords` runs the same client-side checks ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` runs, on *every* planned request, and encodes each one. If any operation fails, nothing is sent and nothing is saved. The failures caught this way are:
+Before sending the first request, `modifyAllRecords` runs the same client-side checks ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` runs, on *every* planned request. It finds a non-finite number without encoding, so each request is still encoded only once, when it is sent. If any operation fails, nothing is sent and nothing is saved. The failures caught this way are:
 
 - a field holding a `NaN` or infinite `Double`, reported as ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)`` naming the record and field;
 - an encrypted field the target database can't take (for example any `encryptedFields` on the public database);

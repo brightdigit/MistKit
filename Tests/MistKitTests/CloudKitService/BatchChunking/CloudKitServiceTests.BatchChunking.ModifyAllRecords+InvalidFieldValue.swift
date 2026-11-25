@@ -130,7 +130,7 @@ extension CloudKitServiceTests.BatchChunking.ModifyAllRecords {
     )
     #expect(error.recordName == "n3")
     #expect(error.fieldName == "score")
-    // Every request is encoded first, so none is sent.
+    // Every request is checked first, so none is sent.
     #expect(await provider.callCount(for: Self.operationID) == 0)
   }
 }

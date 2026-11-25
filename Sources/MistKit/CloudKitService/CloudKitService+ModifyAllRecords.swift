@@ -55,33 +55,29 @@ extension CloudKitService {
     let operations: [ZonedRecordOperation]
   }
 
-  /// The error a request's operations would throw before reaching CloudKit,
-  /// if any: an encrypted field `database` can't take, an operation that can't
-  /// be converted, or a `NaN` or infinite number. These are the checks
+  /// A request's operations, checked and converted for sending.
+  ///
+  /// Runs the checks
   /// ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
-  /// runs before sending, run here for every request up front.
-  private static func preflightFailure(
-    in operations: [ZonedRecordOperation],
+  /// runs before sending, and throws the same error: an encrypted field
+  /// `database` can't take, an operation that can't be converted, or a `NaN`
+  /// or infinite number. The last is found without encoding the request, so
+  /// each request is encoded once, when it's sent.
+  private static func prepare(
+    _ operations: [ZonedRecordOperation],
     database: Database
-  ) -> CloudKitError? {
+  ) throws(CloudKitError) -> [Components.Schemas.RecordOperation] {
     var apiOperations: [Components.Schemas.RecordOperation] = []
-    do throws(CloudKitError) {
-      for zoned in operations {
-        try zoned.operation.validateEncryptedFields(for: database)
-        apiOperations.append(try Components.Schemas.RecordOperation(from: zoned.operation))
+    for zoned in operations {
+      try zoned.operation.validateEncryptedFields(for: database)
+      apiOperations.append(try Components.Schemas.RecordOperation(from: zoned.operation))
+    }
+    for zoned in operations {
+      if let error = zoned.operation.nonFiniteFieldError() {
+        throw error
       }
-    } catch {
-      return error
     }
-    do {
-      _ = try JSONEncoder.shared.encode(apiOperations)
-      return nil
-    } catch {
-      return CloudKitError(
-        encodingError: error,
-        recordNames: operations.map(\.operation.recordName)
-      )
-    }
+    return apiOperations
   }
 
   /// Groups `operations` by zone and splits each zone into requests.
@@ -148,7 +144,7 @@ extension CloudKitService {
   ///   them again should expect a `CONFLICT` (or `EXISTS` for a create) for a
   ///   record that was in fact saved, and re-fetch it to find out.
   ///
-  /// Every request is checked and encoded before the first is sent. When one
+  /// Every request is checked before the first is sent. When one
   /// fails a client-side check, nothing is sent: `completed` is empty,
   /// `unsent` holds every operation, and `underlying` is the error
   /// ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
@@ -184,11 +180,14 @@ extension CloudKitService {
       atomicZones: atomicZones,
       batchSize: batchSize
     )
-    // Check and encode every request before sending the first, so an operation
-    // CloudKit can't take stops the whole call with nothing saved.
+    // Check and convert every request before sending the first, so an
+    // operation CloudKit can't take stops the whole call with nothing saved.
+    var prepared: [[Components.Schemas.RecordOperation]] = []
     for request in requests {
-      if let failure = Self.preflightFailure(in: request.operations, database: database) {
-        throw .modifyIncomplete(completed: [], unsent: operations, underlying: failure)
+      do throws(CloudKitError) {
+        prepared.append(try Self.prepare(request.operations, database: database))
+      } catch {
+        throw .modifyIncomplete(completed: [], unsent: operations, underlying: error)
       }
     }
     var results: [RecordResult] = []
@@ -199,10 +198,13 @@ extension CloudKitService {
         } catch {
           throw mapToCloudKitError(error, context: "modifyAllRecords")
         }
-        results += try await modifyRecords(
-          request.operations.map(\.operation),
+        results += try await sendModifyRecords(
+          prepared[index],
+          recordNames: request.operations.map(\.operation.recordName),
           atomic: request.atomic,
           zoneID: request.zoneID.requestZone,
+          desiredKeys: nil,
+          numbersAsStrings: nil,
           database: database
         )
       } catch {

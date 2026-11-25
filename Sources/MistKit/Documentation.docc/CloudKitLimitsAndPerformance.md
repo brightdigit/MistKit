@@ -37,7 +37,7 @@ Raise `maxPages` when you know the result set is genuinely large. Narrow filters
 
 ## Batching writes
 
-CloudKit's [`/records/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html) endpoint accepts a batch of operations in a single round-trip. CloudKit caps a request at 200 operations (``CloudKitService/maxRecordsPerRequest``). ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` sends exactly one request, so it does not chunk for you. For larger batches use ``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)``, which groups operations by zone, splits each zone into requests of at most `batchSize`, and checks and encodes every request before sending the first:
+CloudKit's [`/records/modify`](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ModifyRecords.html) endpoint accepts a batch of operations in a single round-trip. CloudKit caps a request at 200 operations (``CloudKitService/maxRecordsPerRequest``). ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` sends exactly one request, so it does not chunk for you. For larger batches use ``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)``, which groups operations by zone, splits each zone into requests of at most `batchSize`, and checks every request before sending the first:
 
 ```swift
 let results = try await service.modifyAllRecords(
