@@ -29,6 +29,7 @@
 
 internal import Foundation
 internal import HTTPTypes
+internal import Logging
 internal import OpenAPIRuntime
 
 /// Buffers the body of a non-success Management API response so it can be
@@ -39,10 +40,21 @@ internal import OpenAPIRuntime
 /// `ClientError` it throws carries the same body, which a streaming transport
 /// can't replay. Buffering it here keeps it readable for
 /// ``CloudKitManagementError/httpError(statusCode:body:)``. A body over
-/// ``maxErrorBodyBytes`` is dropped.
+/// ``maxErrorBodyBytes``, or one that fails mid-read, is dropped and logged
+/// at `.warning` on the `network` subsystem, naming the operation, the status
+/// and the error type. The body, the request and its headers (which carry the
+/// management token) are never logged.
 internal struct ManagementErrorBodyMiddleware: ClientMiddleware {
   /// The largest error body kept. Error bodies are short JSON or text.
   internal static let maxErrorBodyBytes = 1_024 * 1_024
+
+  private let logger: Logger
+
+  /// Creates the middleware.
+  /// - Parameter logger: Override for tests that capture the drop warning.
+  internal init(logger: Logger = Logger(subsystem: .network)) {
+    self.logger = logger
+  }
 
   /// Replaces a non-success response's body with a buffered copy.
   internal func intercept(
@@ -60,9 +72,17 @@ internal struct ManagementErrorBodyMiddleware: ClientMiddleware {
     // purpose: the status code still reaches CloudKitManagementError, and a
     // RequestError is a few hundred bytes, so losing a huge body loses nothing
     // a caller could act on.
-    guard
-      let data = try? await Data(collecting: responseBody, upTo: Self.maxErrorBodyBytes)
-    else {
+    let data: Data
+    do {
+      data = try await Data(collecting: responseBody, upTo: Self.maxErrorBodyBytes)
+    } catch {
+      // Only the status, operation and error type: never the body or headers.
+      logger.warning(
+        """
+        Dropped the \(response.status.code) error body of \(operationID): \
+        over \(Self.maxErrorBodyBytes) bytes or unreadable (\(type(of: error)))
+        """
+      )
       return (response, nil)
     }
     return (response, HTTPBody(data))

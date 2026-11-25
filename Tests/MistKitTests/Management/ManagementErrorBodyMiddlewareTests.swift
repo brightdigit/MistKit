@@ -29,6 +29,7 @@
 
 internal import Foundation
 internal import HTTPTypes
+internal import Logging
 internal import OpenAPIRuntime
 internal import Testing
 
@@ -46,11 +47,12 @@ internal struct ManagementErrorBodyMiddlewareTests {
 
   private static func intercept(
     status: HTTPResponse.Status,
-    body: HTTPBody?
+    body: HTTPBody?,
+    logs: CapturedLogs = CapturedLogs()
   ) async throws -> (HTTPResponse, HTTPBody?) {
     let request = HTTPRequest(method: .get, scheme: nil, authority: nil, path: "/")
     let baseURL = try #require(URL(string: "https://api.icloud.apple.com"))
-    return try await ManagementErrorBodyMiddleware().intercept(
+    return try await ManagementErrorBodyMiddleware(logger: logs.logger()).intercept(
       request,
       body: nil,
       baseURL: baseURL,
@@ -60,12 +62,15 @@ internal struct ManagementErrorBodyMiddlewareTests {
     }
   }
 
-  @Test("Buffers an error body so it can be read twice")
+  @Test("Buffers an error body so it can be read twice, logging nothing")
   internal func buffersErrorBody() async throws {
+    let logs = CapturedLogs()
     let (_, body) = try await Self.intercept(
       status: .badGateway,
-      body: Self.singleUseBody("Bad Gateway")
+      body: Self.singleUseBody("Bad Gateway"),
+      logs: logs
     )
+    #expect(await logs.entries().isEmpty)
     let buffered = try #require(body)
     #expect(buffered.iterationBehavior == .multiple)
     let first = try await Data(collecting: buffered, upTo: 1_024)
@@ -83,14 +88,23 @@ internal struct ManagementErrorBodyMiddlewareTests {
     #expect(passed === original)
   }
 
-  @Test("Drops an error body over the limit")
+  @Test("Drops an error body over the limit and logs a warning without the body")
   internal func dropsOversizedErrorBody() async throws {
     let big = String(repeating: "x", count: ManagementErrorBodyMiddleware.maxErrorBodyBytes + 1)
+    let logs = CapturedLogs()
     let (response, body) = try await Self.intercept(
       status: .internalServerError,
-      body: Self.singleUseBody(big)
+      body: Self.singleUseBody(big),
+      logs: logs
     )
     #expect(response.status == .internalServerError)
     #expect(body == nil)
+    let entries = await logs.entries()
+    #expect(entries.count == 1)
+    let entry = try #require(entries.first)
+    #expect(entry.level == .warning)
+    #expect(entry.message.contains("500"))
+    #expect(entry.message.contains("exportSchema"))
+    #expect(!entry.message.contains("xxx"))
   }
 }
