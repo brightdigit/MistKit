@@ -22,7 +22,7 @@ green resolve is not evidence the graph is sound.
 MistKit. This is why `Packages/MistKitConfiguration` uses `.package(name: "MistKit",
 path: "../..")` rather than a tagged URL, and why its `path:` line is a monorepo-local
 overlay that must be swapped for a `url:` before the standalone repo is tagged — the same
-never-merged-overlay discipline documented at `Examples/BushelCloud/Package.swift:94-98`.
+never-merged-overlay discipline documented in `Examples/SwoopMistKit/Package.swift` (formerly `Examples/BushelCloud`).
 
 Verified empirically 2026-08-31 with a two-package scratch fixture: URL-form fails at
 build; both-path form builds clean. See [[project_examples_dir_is_for_mistkit_dev]] and

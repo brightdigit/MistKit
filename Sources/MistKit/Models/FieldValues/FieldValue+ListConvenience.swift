@@ -37,35 +37,8 @@ extension FieldValue {
   }
 
   /// Flatten a homogeneous list back to `[FieldValue]` of `.value` elements.
-  ///
-  /// Prefer the typed `*ListValue` accessors. Kept for read-only consumers that
-  /// previously matched `.list([FieldValue])`.
-  @available(
-    *,
-    deprecated,
-    message: "Use stringListValue, int64ListValue, or the matching *ListValue accessor"
-  )
+  @available(*, deprecated, renamed: "listElements")
   public var listValue: [FieldValue]? {
-    switch self {
-    case .string(.list(let values)):
-      return values.map { .string(.value($0)) }
-    case .int64(.list(let values)):
-      return values.map { .int64(.value($0)) }
-    case .double(.list(let values)):
-      return values.map { .double(.value($0)) }
-    case .bytes(.list(let values)):
-      return values.map { .bytes(.value($0)) }
-    case .date(.list(let values)):
-      return values.map { .date(.value($0)) }
-    case .location(.list(let values)):
-      return values.map { .location(.value($0)) }
-    case .reference(.list(let values)):
-      return values.map { .reference(.value($0)) }
-    case .asset(.list(let values)):
-      return values.map { .asset(.value($0)) }
-    case .string(.value), .int64(.value), .double(.value), .bytes(.value),
-      .date(.value), .location(.value), .reference(.value), .asset(.value):
-      return nil
-    }
+    listElements
   }
 }

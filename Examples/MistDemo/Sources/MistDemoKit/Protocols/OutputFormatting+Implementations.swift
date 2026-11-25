@@ -34,6 +34,9 @@ internal import MistKit
 
 extension OutputFormatting {
   /// Output results in JSON format
+  ///
+  /// Record fields are written as MistKit's `FieldValue` encodes them:
+  /// `{"value": …, "type": …}`.
   internal func outputJSON<T: Encodable>(_ results: [T]) async throws {
     let jsonData: Data
     if results.count == 1 {

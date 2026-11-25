@@ -285,6 +285,6 @@ RECORD TYPE Article (
 
 ## See Also
 
-- **Detailed Guide:** [Celestra/AI_SCHEMA_WORKFLOW.md](Celestra/AI_SCHEMA_WORKFLOW.md)
+- **Detailed Guide:** [CelestraCloud AI_SCHEMA_WORKFLOW.md](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/AI_SCHEMA_WORKFLOW.md)
 - **Claude Reference:** [.claude/docs/cloudkit-schema-reference.md](../.claude/docs/cloudkit-schema-reference.md)
-- **Setup Guide:** [Celestra/CLOUDKIT_SCHEMA_SETUP.md](Celestra/CLOUDKIT_SCHEMA_SETUP.md)
+- **Setup Guide:** [CelestraCloud CLOUDKIT_SCHEMA_SETUP.md](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/CLOUDKIT_SCHEMA_SETUP.md)

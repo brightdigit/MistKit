@@ -192,7 +192,7 @@ extension FieldValue {
     guard case .Int64Value(let value) = item else {
       try reportListElementMismatch(item, fieldName: fieldName, declaredType: declaredType)
     }
-    return Int(value)
+    return try platformInt(value, fieldName: fieldName)
   }
 
   private static func requireDoubleElement(

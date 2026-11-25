@@ -23,6 +23,12 @@ cleanly: 689 root tests, 1020 MistDemo tests.
 only `6.4.x-snapshot-*` installed (no release 6.4), so swiftly refuses to run there at all
 ("uses toolchain version 6.4, but it doesn't match any of the installed toolchains").
 
+**Update 2026-11-24:** the root `.swift-version` is now `6.4.2`, matching Xcode 27.2's Swift. The 6.3.2
+crash was an SDK mismatch, not a code or swift-crypto bug: Xcode's macOS 27.2 SDK makes swiftc 6.3.x
+fail every package manifest with `unknown argument: '-target-arch-variant'` and then signal 11. With
+`swiftly install 6.4.2`, a plain `swift test` works again (1005 tests), so `xcrun` is only needed when
+swiftly lacks 6.4.2. CI never reads `.swift-version`; only swiftly and `Scripts/cloud-setup.sh` do.
+
 **Why:** a swift-frontend crash reads like a code error but is a toolchain artifact. It also corrupts
 the `Scripts/lint.sh` report, whose `swift-build` leg exits 1 for the same reason — see
 [[reference_lint_needs_mise_trust]].

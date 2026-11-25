@@ -30,7 +30,7 @@
 internal import MistKitOpenAPI
 
 /// The parts of a user's name from CloudKit user discovery.
-public struct NameComponents: Codable, Sendable {
+public struct NameComponents: Codable, Sendable, Hashable {
   /// The name prefix (e.g., "Dr.", "Mr.")
   public let namePrefix: String?
   /// The given (first) name

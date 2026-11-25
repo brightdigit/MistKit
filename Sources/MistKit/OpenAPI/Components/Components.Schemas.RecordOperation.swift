@@ -54,7 +54,10 @@ extension Components.Schemas.RecordOperation {
     // Convert fields to OpenAPI FieldValueRequest format (for requests),
     // tagging encrypted field names with isEncrypted: true.
     var apiFields: [String: Components.Schemas.FieldValueRequest] = [:]
-    apiFields.reserveCapacity(recordOperation.fields.count)
+    apiFields.reserveCapacity(recordOperation.fields.count + recordOperation.clearedFields.count)
+    for fieldName in recordOperation.clearedFields {
+      apiFields[fieldName] = .cleared
+    }
     for (fieldName, fieldValue) in recordOperation.fields {
       var request = Components.Schemas.FieldValueRequest(from: fieldValue)
       if recordOperation.encryptedFields.contains(fieldName) {
@@ -103,7 +106,7 @@ extension Components.Schemas.RecordOperation {
   // The `switch` is `default`-free on purpose, so a new `FieldValue` case breaks the
   // build here rather than silently sending an untagged encrypted field.
   // swiftlint:disable:next cyclomatic_complexity
-  private static func explicitType(
+  internal static func explicitType(
     for fieldValue: FieldValue
   ) -> Components.Schemas.FieldValueRequest._typePayload? {
     switch fieldValue {

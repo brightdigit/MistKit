@@ -31,7 +31,7 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 /// CloudKit environment types
-public enum Environment: String, Codable, Sendable {
+public enum Environment: String, Codable, Hashable, Sendable, CaseIterable {
   case development
   case production
 

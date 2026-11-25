@@ -163,18 +163,18 @@ jobs:
       matrix:
         include:
           # A swift-tools-version: 6.4 manifest needs a Swift 6.4 toolchain, so
-          # these lanes run on the xcode-27 image (Xcode 27.0) rather than
+          # these lanes run on the xcode-27 image (Xcode 27.2) rather than
           # macos-26 / Xcode 26.6, which cannot parse the manifest.
           # SPM build
           - runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
 
           # iOS build
           - type: ios
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "iPhone 17 Pro"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "iPhone 18 Pro"
+            osVersion: "27.2"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -220,46 +220,45 @@ jobs:
           # parse the manifest and are gone.
           #
           # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
-          # is marked Preview in actions/runner-images. It ships exactly one
-          # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
+          # is marked Preview in actions/runner-images. As of the 2026-11-04
+          # image it ships Xcode 27.0, 27.1 (default) and 27.2; these lanes pin
+          # /Applications/Xcode_27.2.app, whose simulator runtimes are 27.2 for
+          # every platform. 27.2 renamed the devices: iPhone 18 Pro, Apple Watch
+          # Ultra 4 (49mm), Apple TV 4K (4th generation).
           #
-          # Pin the /Applications/Xcode_27.0.app symlink, NOT the real
-          # Xcode_27_beta_4.app path: the beta number changes on every image
-          # refresh and would silently break these lanes.
-          #
-          # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
+          # tvOS uses "Apple TV 4K (4th generation)" — this image has no plain
           # "Apple TV" device. A wrong device name fails the simulator boot
           # outright.
           - type: macos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
 
           - type: ios
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "iPhone 17 Pro"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "iPhone 18 Pro"
+            osVersion: "27.2"
             download-platform: true
 
           - type: watchos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple Watch Ultra 4 (49mm)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: tvos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple TV 4K (4th generation)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: visionos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "27.0"
+            osVersion: "27.2"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -294,7 +293,9 @@ jobs:
     # lint.sh ends with `swift build --build-tests`; the manifest is
     # swift-tools-version: 6.4, so this must run on a 6.4 toolchain (ubuntu-latest
     # ships 6.3 via mise and fails to parse Package.swift).
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, which lacks
+    # libxml2.so.2, so the mise-installed SwiftLint Linux binary can't start.
+    runs-on: ubuntu-24.04
     container: swiftlang/swift:nightly-6.4.x-noble
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms]

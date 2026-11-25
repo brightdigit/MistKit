@@ -28,7 +28,7 @@
 //
 
 internal import Foundation
-internal import OpenAPIRuntime
+public import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
   internal import FoundationNetworking
@@ -52,7 +52,31 @@ extension CloudKitService {
   /// Misconfiguration (no credential set covers a given call's database +
   /// user-context combination) surfaces at call time as
   /// `CloudKitError.missingCredentials`, not at construction.
-  internal init(
+  ///
+  /// ## Transport
+  ///
+  /// Every CloudKit Web Services request built by this service is sent through
+  /// `transport` (after MistKit's authentication middleware has signed it), so
+  /// the transport sees exactly what goes on the wire. Use it to:
+  ///
+  /// - run on a server with another HTTP client (for example
+  ///   `AsyncHTTPClientTransport` from swift-openapi-async-http-client),
+  /// - replay recorded responses in a consumer's own tests, or
+  /// - decorate the default `URLSessionTransport` to observe requests and
+  ///   responses (a request log). A decorator sees signed requests, so it must
+  ///   redact the `ckAPIToken` / `ckWebAuthToken` query items and the
+  ///   `X-Apple-CloudKit-*` headers before persisting anything.
+  ///
+  /// Asset uploads to the CDN (``uploadAssetData(_:to:using:)``) do **not**
+  /// flow through `transport`; they use `URLSession` directly (see
+  /// <doc:CloudKitLimitsAndPerformance>).
+  ///
+  /// - Parameters:
+  ///   - containerIdentifier: The CloudKit container, e.g. `iCloud.com.example.App`.
+  ///   - credentials: The credential sets resolved per call.
+  ///   - environment: `.development` (default) or `.production`.
+  ///   - transport: The `ClientTransport` every API request is sent through.
+  public init(
     containerIdentifier: String,
     credentials: Credentials,
     environment: Environment = .development,
@@ -71,7 +95,16 @@ extension CloudKitService {
   /// regardless of database or whether the route requires user context.
   /// Useful for tests and bespoke auth setups where the standard
   /// `Credentials`-driven per-call selection isn't appropriate.
-  internal init(
+  ///
+  /// See ``init(containerIdentifier:credentials:environment:transport:)`` for
+  /// what flows through `transport` and what doesn't.
+  ///
+  /// - Parameters:
+  ///   - containerIdentifier: The CloudKit container, e.g. `iCloud.com.example.App`.
+  ///   - tokenManager: The token manager used for every operation.
+  ///   - environment: `.development` (default) or `.production`.
+  ///   - transport: The `ClientTransport` every API request is sent through.
+  public init(
     containerIdentifier: String,
     tokenManager: any TokenManager,
     environment: Environment = .development,
@@ -94,8 +127,8 @@ extension CloudKitService {
     /// Initialize CloudKit service with `Credentials` using default
     /// `URLSessionTransport`.
     ///
-    /// Available on platforms that support URLSession. For WASI builds, use
-    /// the generic initializer that accepts a transport parameter.
+    /// Available on platforms that support URLSession. To supply another
+    /// transport, use ``init(containerIdentifier:credentials:environment:transport:)``.
     public init(
       containerIdentifier: String,
       credentials: Credentials,
@@ -112,8 +145,8 @@ extension CloudKitService {
     /// Initialize CloudKit service with a custom `TokenManager` using default
     /// `URLSessionTransport`.
     ///
-    /// Available on platforms that support URLSession. For WASI builds, use
-    /// the generic initializer that accepts a transport parameter.
+    /// Available on platforms that support URLSession. To supply another
+    /// transport, use ``init(containerIdentifier:tokenManager:environment:transport:)``.
     public init(
       containerIdentifier: String,
       tokenManager: any TokenManager,

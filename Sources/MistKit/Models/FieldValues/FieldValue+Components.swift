@@ -109,6 +109,7 @@ extension FieldValue {
     }
     let reference = Reference(
       recordName: recordName,
+      zoneID: referenceValue.zoneID.map(ZoneID.init(referenceZone:)),
       action: action
     )
     self = .reference(.value(reference))

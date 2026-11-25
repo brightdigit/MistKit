@@ -26,7 +26,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [OpenAPI extension filename convention](feedback_openapi_extension_filenames.md) — New files in Extensions/OpenAPI/ use bare TypeName.swift; drop the +MistKit suffix
 - [No silent policy defaults](feedback_no_silent_policy_defaults.md) — Parameters that encode meaningful policy (signing method, attribution) must be non-defaulted; prefer @available(*, deprecated) overloads to defaults
 - [Sendable API fallback over @available bump](feedback_sendable_api_fallback.md) — Prefer dual-path #available + nonisolated(unsafe) cached fallback over bumping @available when cascade is wide
-- [Examples/ dir is MistKit-dev dogfooding](project_examples_dir_is_for_mistkit_dev.md) — Bushel/CelestraCloud Examples test MistKit-under-development; their MISTKIT_BRANCH pin & setup-mistkit wiring aren't end-user deployment patterns
+- [Examples/ dir is MistKit-dev dogfooding](project_examples_dir_is_for_mistkit_dev.md) — the SwoopMistKit (BushelCloud) Example tests MistKit-under-development; their MISTKIT_BRANCH pin & setup-mistkit wiring aren't end-user deployment patterns
 - [Check merge strategy before release deletions](feedback_check_merge_strategy_before_release_deletions.md) — Squash/rebase merge means git history alone won't preserve removed files; archive branch+tag is load-bearing, not optional
 - [Feature PRs: squash or rebase, never merge](feedback_feature_pr_merge_squash_or_rebase.md) — 1 commit → rebase; multiple commits → squash; never `gh pr merge --merge` for feature branches
 - [CI-only flake gate](feedback_ci_only_flake_gate.md) — Gate cooperative-executor flake helpers (e.g. isFlakyTimeoutSimulator) on ProcessInfo CI env AND platform, so local sim runs stay strict
@@ -45,7 +45,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; retain release branches; notes are a flat bullet list for new entries
 - [Use git trees, not git worktree](feedback_use_git_trees_not_git_worktree.md) — Manage worktrees with `git trees add/rm/list/clean`; `add` pushes to origin unless `--no-push`
 - [git trees add bases new worktrees on main](reference_git_trees_add_bases_on_main.md) — not on the invoking worktree's branch; reset onto the intended base, then first push needs --force-with-lease
-- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — MistDemo/Bushel/Celestra/MKC are tools-version 6.4; examples.yml + MistDemo.yml use 6.4 nightly / Xcode 27
+- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — MistDemo/SwoopMistKit/MKC are tools-version 6.4; examples.yml + MistDemo.yml use 6.4 nightly / Xcode 27
 - [ConfigKey bases must be dash-case](reference_configkey_cli_flag_dash_case.md) — snake_case silently breaks CLI flags and secret redaction; ENV works either way, so it hides the bug
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
 - [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds
@@ -64,3 +64,6 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Use xcrun for Swift](reference_use_xcrun_for_swift.md) — the swiftly-managed `swift` crashes swift-frontend here; `xcrun swift build/test` works and also fixes MistDemo's 6.4 pin
 - [Lint needs mise trust](reference_lint_needs_mise_trust.md) — an untrusted `mise.toml` silently downgrades SwiftLint and skips Periphery, inventing phantom findings
 - [Android emulator flake](reference_android_emulator_flake.md) — an Android job that fails with `adb ... TCP port 5554` after emitting the test modules is a flake; re-run, don't edit source
+- [Management API request format](reference_management_api_request_format.md) — schema export is `api.icloud.apple.com/v1/database/teams/…/schema/export` with `X-Apple-CloudKit-Management-Token`; from CKTool JS 1.3.2, live-verified 2026-11-24; `message` codes are kebab-case, unknown container is 403 (#135)
+- [Examples: SwoopMistKit, no CelestraCloud](project_examples_swoopmistkit.md) — 2026-11-24: `Examples/BushelCloud` → `Examples/SwoopMistKit` (repo renamed; package still BushelCloud); `Examples/CelestraCloud` removed
+- [Change tracking is custom-zone only](project_change_tracking_custom_zones_only.md) — changes/zone and records/changes reject _defaultZone; confirmed 2026-11-24

@@ -40,9 +40,12 @@ internal import MistKitOpenAPI
 /// ``OperationResult/failure(_:)`` on a ``RecordResult`` (a ``RecordOperationFailure``)
 /// and never become a `RecordInfo`. A response record missing its `recordName` is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
-public struct RecordInfo: Codable, Sendable {
+public struct RecordInfo: Codable, Hashable, Sendable, Identifiable {
   /// The record name
   public let recordName: String
+  /// The zone CloudKit reported the record in, or `nil` when the response
+  /// omitted it.
+  public let zoneID: ZoneID?
   /// The record type, or `nil` for tombstones and other typeless responses
   public let recordType: String?
   /// The record change tag for optimistic locking
@@ -63,11 +66,17 @@ public struct RecordInfo: Codable, Sendable {
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
+  /// The record's identity within its zone: its ``recordName``.
+  public var id: String { recordName }
+
   internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
     guard let recordName = record.recordName else {
       try ConversionError.recordMissingRecordName.reportAndThrow()
     }
     self.recordName = recordName
+    self.zoneID = try record.zoneID.map { schema throws(ConversionError) in
+      try ZoneID(from: schema)
+    }
     self.recordType = record.recordType
     self.recordChangeTag = record.recordChangeTag
     if let created = record.created {
@@ -107,6 +116,7 @@ public struct RecordInfo: Codable, Sendable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.recordName = try container.decode(String.self, forKey: .recordName)
+    self.zoneID = try container.decodeIfPresent(ZoneID.self, forKey: .zoneID)
     self.recordType = try container.decodeIfPresent(String.self, forKey: .recordType)
     self.recordChangeTag = try container.decodeIfPresent(
       String.self, forKey: .recordChangeTag
@@ -126,6 +136,7 @@ public struct RecordInfo: Codable, Sendable {
   ///
   /// - Parameters:
   ///   - recordName: The unique record name
+  ///   - zoneID: The record's zone, or `nil` when unknown
   ///   - recordType: The CloudKit record type, or `nil` for a tombstone
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
@@ -135,6 +146,7 @@ public struct RecordInfo: Codable, Sendable {
   ///   - deleted: Whether the record has been deleted
   public init(
     recordName: String,
+    zoneID: ZoneID? = nil,
     recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],
@@ -144,6 +156,7 @@ public struct RecordInfo: Codable, Sendable {
     deleted: Bool = false
   ) {
     self.recordName = recordName
+    self.zoneID = zoneID
     self.recordType = recordType
     self.recordChangeTag = recordChangeTag
     self.fields = fields

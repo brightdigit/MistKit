@@ -232,8 +232,8 @@ function generateNoteImage(title) {
 }
 
 // Returns the flat Asset descriptor from an image field, or null when the
-// field is missing/empty. MistKit returns `image` as a bare Asset shape;
-// CloudKit JS wraps it in `{ value: ... }`. Both formats are handled.
+// field is missing/empty. MistKit and CloudKit JS both wrap it in
+// `{ value: ... }`; a bare Asset shape is still accepted.
 function existingImageDescriptor(note) {
     const field = note && note.raw && note.raw.fields && note.raw.fields.image;
     if (!field) return null;
@@ -485,6 +485,19 @@ function buildFields() {
     return out;
 }
 
+// MistKit's FieldValue reads `{ value, type }` field dictionaries only.
+function mistKitFields(fields) {
+    const typed = {};
+    for (const [k, v] of Object.entries(fields)) {
+        let type;
+        if (k === 'image') type = 'ASSET';
+        else if (typeof v === 'number') type = Number.isInteger(v) ? 'INT64' : 'DOUBLE';
+        else type = 'STRING';
+        typed[k] = { value: v, type };
+    }
+    return typed;
+}
+
 function ckJsFields(fields) {
     const wrapped = {};
     for (const [k, v] of Object.entries(fields)) {
@@ -624,7 +637,7 @@ async function saveNote() {
                 zoneOwner,
             });
             uploadedRecordName = receipt.recordName;
-            // FieldValue's Asset case decodes the bare Asset shape directly.
+            // mistKitFields tags it `ASSET` for FieldValue.
             fields.image = receipt.asset;
         }
         if (currentMode === 'mistkit') {
@@ -633,7 +646,7 @@ async function saveNote() {
                     recordType,
                     database: currentDatabase,
                     recordName: note.recordName,
-                    fields,
+                    fields: mistKitFields(fields),
                     recordChangeTag: note.recordChangeTag,
                     zoneName,
                     zoneOwner,
@@ -643,7 +656,7 @@ async function saveNote() {
                     recordType,
                     database: currentDatabase,
                     recordName: uploadedRecordName || undefined,
-                    fields,
+                    fields: mistKitFields(fields),
                     zoneName,
                     zoneOwner,
                 });

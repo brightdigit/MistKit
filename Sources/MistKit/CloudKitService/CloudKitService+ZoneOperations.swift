@@ -42,11 +42,11 @@ internal import OpenAPIRuntime
 extension CloudKitService {
   /// List zones in the target database.
   ///
-  /// > Note: The default is `.private` because the public database only
-  /// > contains the default zone (`_defaultZone`); listing zones against
-  /// > `.public` is degenerate. Pass `.shared` for the shared database.
+  /// > Note: The public database only contains the default zone
+  /// > (`_defaultZone`), so listing zones is mostly useful against `.private`
+  /// > and `.shared`.
   public func listZones(
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> [ZoneInfo] {
     do {
       let client = try self.client(for: database)
@@ -76,7 +76,7 @@ extension CloudKitService {
   ///
   /// - Parameters:
   ///   - zoneIDs: Array of zone identifiers to lookup
-  ///   - database: The CloudKit database scope to query (defaults to `.private`)
+  ///   - database: The CloudKit database scope to query
   /// - Returns: Array of ZoneInfo objects for the requested zones
   /// - Throws: CloudKitError if the lookup fails
   ///
@@ -91,7 +91,7 @@ extension CloudKitService {
   /// ```
   public func lookupZones(
     zoneIDs: [ZoneID],
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> [ZoneInfo] {
     do {
       let client = try self.client(for: database)
@@ -137,7 +137,7 @@ extension CloudKitService {
   /// - Parameters:
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch).
   ///     Sent on the wire as `metaSyncToken`.
-  ///   - database: The CloudKit database scope to query (defaults to `.private`)
+  ///   - database: The CloudKit database scope to query
   /// - Returns: ZoneChangesResult containing changed zones and new sync token
   /// - Throws: CloudKitError if the fetch fails
   @available(
@@ -149,7 +149,7 @@ extension CloudKitService {
   )
   public func fetchZoneChanges(
     syncToken: String? = nil,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> ZoneChangesResult {
     do {
       let client = try self.client(for: database)

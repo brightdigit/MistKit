@@ -8,5 +8,6 @@ coverage:
 ignore:
   - "Tests"
   - "Sources/MistKitOpenAPI"
+  - "Sources/MistKitManagementOpenAPI"
   - "Examples"
   - "Packages/MistKitConfiguration"

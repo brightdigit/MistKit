@@ -154,10 +154,18 @@ extension Credentials {
         underlying: error
       )
     }
-    return try ServerToServerAuthManager(
-      keyID: s2s.keyID,
-      pemString: pem
-    )
+    do {
+      return try ServerToServerAuthManager(
+        keyID: s2s.keyID,
+        pemString: pem
+      )
+    } catch {
+      // Not a P-256 PEM: the same misconfiguration as an unreadable file.
+      throw CloudKitError.invalidPrivateKey(
+        path: s2s.privateKey.filePath,
+        underlying: error
+      )
+    }
   }
 
   private func makeAPITokenManager(

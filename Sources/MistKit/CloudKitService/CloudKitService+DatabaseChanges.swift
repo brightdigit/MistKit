@@ -52,7 +52,7 @@ extension CloudKitService {
   /// - Parameters:
   ///   - syncToken: Token from a previous fetch (`nil` = initial fetch).
   ///   - resultsLimit: Optional maximum number of zone changes to return.
-  ///   - database: The CloudKit database scope to query (defaults to `.private`).
+  ///   - database: The CloudKit database scope to query.
   /// - Returns: ``DatabaseChangesResult`` containing the per-zone outcomes and
   ///   a new sync token.
   /// - Throws: ``CloudKitError`` if the fetch fails.
@@ -73,7 +73,7 @@ extension CloudKitService {
   public func fetchDatabaseChanges(
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> DatabaseChangesResult {
     do {
       let client = try self.client(for: database)
@@ -114,7 +114,7 @@ extension CloudKitService {
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     ``CloudKitError/zonePaginationLimitExceeded(maxPages:zones:)``
   ///     (defaults to 1,000).
-  ///   - database: The CloudKit database scope to query (defaults to `.private`).
+  ///   - database: The CloudKit database scope to query.
   /// - Returns: The accumulated per-zone outcomes and the final sync token.
   /// - Throws: ``CloudKitError``. When `maxPages` is exceeded, throws
   ///   ``CloudKitError/zonePaginationLimitExceeded(maxPages:zones:)`` whose
@@ -128,7 +128,7 @@ extension CloudKitService {
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
     maxPages: Int = 1_000,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> (zones: [ZoneChangeResult], syncToken: String?) {
     var allZones: [ZoneChangeResult] = []
     var currentToken = syncToken

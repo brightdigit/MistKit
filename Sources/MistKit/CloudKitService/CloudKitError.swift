@@ -62,7 +62,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   case authenticationFailed(reason: String?)
   /// HTTP 421 / `AUTHENTICATION_REQUIRED`. The request needs a user-attributed
   /// credential; the caller must complete the web-auth sign-in flow.
-  case authenticationRequired(reason: String?)
+  ///
+  /// `redirectURL` is the sign-in page CloudKit sends with the failure, when
+  /// it sends one. See ``CloudKitError/redirectURL``.
+  case authenticationRequired(reason: String?, redirectURL: String? = nil)
   /// HTTP 409 / `CONFLICT`. The supplied `recordChangeTag` did not match the
   /// server's copy — the record changed since it was fetched.
   case conflict(reason: String?)
@@ -76,9 +79,16 @@ public enum CloudKitError: LocalizedError, Sendable {
   case notFound(reason: String?)
   /// HTTP 429 / `THROTTLED`. The caller is being rate limited; back off and
   /// retry.
-  case throttled(reason: String?)
+  ///
+  /// `retryAfter` is the number of seconds CloudKit asked the caller to wait,
+  /// when it sent one. MistKit never retries on its own; see
+  /// ``CloudKitError/isRetryable``.
+  case throttled(reason: String?, retryAfter: Int? = nil)
   /// HTTP 503 / `TRY_AGAIN_LATER`. CloudKit is temporarily unavailable.
-  case tryAgainLater(reason: String?)
+  ///
+  /// `retryAfter` is the number of seconds CloudKit asked the caller to wait,
+  /// when it sent one.
+  case tryAgainLater(reason: String?, retryAfter: Int? = nil)
   /// HTTP 412 / `VALIDATING_REFERENCE_ERROR`. A reference field pointed at a
   /// record that failed validation — typically a missing target record.
   case validatingReferenceError(reason: String?)
@@ -131,6 +141,15 @@ public enum CloudKitError: LocalizedError, Sendable {
   case subscriptionLikelyDuplicate(SubscriptionOperationFailure)
   case underlyingError(any Error)
   case decodingError(DecodingError)
+  /// A field's value couldn't be written as JSON — a `DOUBLE`, a location's
+  /// number or a timestamp that is `NaN` or infinite — so the request wasn't
+  /// sent.
+  ///
+  /// `recordName` is `nil` for a create that leaves naming to CloudKit.
+  /// `underlying` is the `JSONEncoder` error, whose coding path named the
+  /// record and field. See
+  /// ``CloudKitError/init(encodingError:recordNames:)``.
+  case invalidFieldValue(recordName: String?, fieldName: String, underlying: EncodingError)
   case networkError(URLError)
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, records: [RecordInfo])
@@ -138,6 +157,26 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// `zones` payload carries every zone collected before the cap was hit so
   /// callers can resume from the partial result.
   case zonePaginationLimitExceeded(maxPages: Int, zones: [ZoneInfo])
+  /// ``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)``
+  /// stopped at a request that failed (or at cancellation), so only part of
+  /// the batch is known to be applied.
+  ///
+  /// - `completed`: the results of every request that came back, in send
+  ///   order; empty when the first request failed.
+  /// - `unsent`: the failed request's operations and every later request's,
+  ///   in send order.
+  /// - `underlying`: the error the failed request threw.
+  ///
+  /// CloudKit may have applied the failed request's operations (for example
+  /// when the connection dropped after the request was sent), so a caller
+  /// that re-sends `unsent` should expect a `CONFLICT` for a record that was
+  /// in fact saved. ``reason``, ``retryAfter``, ``redirectURL`` and
+  /// ``isRetryable`` read through to `underlying`.
+  indirect case modifyIncomplete(
+    completed: [RecordResult],
+    unsent: [ZonedRecordOperation],
+    underlying: CloudKitError
+  )
   case missingCredentials(
     database: Database,
     availability: CredentialAvailability = .notConfigured,
@@ -152,8 +191,13 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// For the cases that model a CloudKit `serverErrorCode` this is the status
   /// Apple documents for that code, except for
   /// ``unknownServerError(code:statusCode:reason:)``, which reports the status
-  /// actually observed on the wire.
+  /// actually observed on the wire. For
+  /// ``modifyIncomplete(completed:unsent:underlying:)`` it is the underlying
+  /// error's.
   public var httpStatusCode: Int? {
+    if case .modifyIncomplete(_, _, let underlying) = self {
+      return underlying.httpStatusCode
+    }
     if let serverErrorDetail {
       return serverErrorDetail.statusCode
     }

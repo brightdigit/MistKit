@@ -40,7 +40,7 @@ extension CloudKitService {
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     ``CloudKitError/zonePaginationLimitExceeded(maxPages:zones:)``
   ///     (defaults to 1,000)
-  ///   - database: The CloudKit database scope to query (defaults to `.private`)
+  ///   - database: The CloudKit database scope to query
   /// - Returns: Array of all changed zones and final sync token.
   /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
   ///   ``CloudKitError/zonePaginationLimitExceeded(maxPages:zones:)`` whose
@@ -79,7 +79,7 @@ extension CloudKitService {
   public func fetchAllZoneChanges(
     syncToken: String? = nil,
     maxPages: Int = 1_000,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> (zones: [ZoneInfo], syncToken: String?) {
     var allZones: [ZoneInfo] = []
     var currentToken = syncToken

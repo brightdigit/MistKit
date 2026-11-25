@@ -171,7 +171,9 @@ jobs:
   build-android:
     name: Build on Android
     needs: configure
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, and swift.org
+    # publishes no ubuntu26.04 host toolchain, so the Android SDK setup 404s.
+    runs-on: ubuntu-24.04
     if: ${{ false && needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
@@ -219,13 +221,13 @@ jobs:
           # MistKitConfiguration is swift-tools-version: 6.4 — Xcode 26.6 cannot
           # parse it. Same xcode-27-only gate as Packages/MistKitConfiguration CI.
           - runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
 
           - type: ios
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "iPhone 17 Pro"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "iPhone 18 Pro"
+            osVersion: "27.2"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -280,46 +282,45 @@ jobs:
           # swift-tools-version: 6.4. Same gate as MistKitConfiguration CI.
           #
           # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
-          # is marked Preview in actions/runner-images. It ships exactly one
-          # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
+          # is marked Preview in actions/runner-images. As of the 2026-11-04
+          # image it ships Xcode 27.0, 27.1 (default) and 27.2; these lanes pin
+          # /Applications/Xcode_27.2.app, whose simulator runtimes are 27.2 for
+          # every platform. 27.2 renamed the devices: iPhone 18 Pro, Apple Watch
+          # Ultra 4 (49mm), Apple TV 4K (4th generation).
           #
-          # Pin the /Applications/Xcode_27.0.app symlink, NOT the real
-          # Xcode_27_beta_N.app path: the beta number changes on every image
-          # refresh and would silently break these lanes.
-          #
-          # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
+          # tvOS uses "Apple TV 4K (4th generation)" — this image has no plain
           # "Apple TV" device. A wrong device name fails the simulator boot
           # outright.
           - type: macos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
 
           - type: ios
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "iPhone 17 Pro"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "iPhone 18 Pro"
+            osVersion: "27.2"
             download-platform: true
 
           - type: watchos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple Watch Ultra 4 (49mm)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: tvos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple TV 4K (4th generation)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: visionos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "27.0"
+            osVersion: "27.2"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -350,7 +351,9 @@ jobs:
 
   lint:
     name: Linting
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, which lacks
+    # libxml2.so.2, so the mise-installed SwiftLint Linux binary can't start.
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
     # Shared with MistKit's lint job: serialize across workflows so a cold

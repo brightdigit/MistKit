@@ -15,7 +15,7 @@ let result = try await service.queryRecords(
   Query(
     recordType: "Article",
     filters: [
-      .greaterThan("publishedDate", .date(oneWeekAgo)),
+      .greaterThan("publishedDate", .date(.value(oneWeekAgo))),
       .equals("status", .string(.value("published")))
     ],
     sortBy: [.descending("publishedDate")]
@@ -78,8 +78,8 @@ let article = try await service.createRecord(
   fields: [
     "title": .string(.value("Hello, CloudKit")),
     "body": .string(.value("First post.")),
-    "wordCount": .int64(2),
-    "publishedDate": .date(Date())
+    "wordCount": .int64(.value(2)),
+    "publishedDate": .date(.value(Date()))
   ],
   database: .private
 )
@@ -144,7 +144,7 @@ Pass `recordChangeTag` to refuse the delete if the record changed since you read
 
 ## Batching
 
-When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:)``, ``RecordOperation/update(recordType:recordName:fields:recordChangeTag:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
+When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:encryptedFields:)``, ``RecordOperation/update(recordType:recordName:fields:clearedFields:recordChangeTag:encryptedFields:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
 
 ```swift
 let results = try await service.modifyRecords(
@@ -191,7 +191,7 @@ Choose `atomic: true` when the operations are semantically linked (paired update
 
 ## Looking up
 
-Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)`` to fetch known records by name:
+Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)`` to fetch known records by name:
 
 ```swift
 let results = try await service.lookupRecords(
@@ -230,7 +230,7 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 - ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
 - ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``
-- ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)``
+- ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)``
 
 ### Write operations
 

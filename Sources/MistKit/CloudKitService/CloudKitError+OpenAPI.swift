@@ -54,7 +54,9 @@ extension CloudKitError {
       self.init(
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         statusCode: statusCode,
-        reason: errorResponse.reason
+        reason: errorResponse.reason,
+        retryAfter: errorResponse.retryAfter,
+        redirectURL: errorResponse.redirectURL
       )
     }
   }

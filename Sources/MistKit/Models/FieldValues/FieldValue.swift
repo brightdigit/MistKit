@@ -34,7 +34,7 @@ public import Foundation
 /// Each kind carries ``Arity`` so a field is either a single value or a homogeneous
 /// list of that kind. Heterogeneous and nested lists are unrepresentable — matching
 /// CloudKit's `LIST<primitive-type>` schema grammar (issue #481).
-public enum FieldValue: Codable, Equatable, Sendable {
+public enum FieldValue: Codable, Hashable, Sendable {
   case string(Arity<String>)
   case int64(Arity<Int>)
   case double(Arity<Double>)
@@ -56,3 +56,5 @@ extension FieldValue {
     case list([T])
   }
 }
+
+extension FieldValue.Arity: Hashable where T: Hashable {}

@@ -47,7 +47,7 @@ extension CloudKitServiceTests.LookupZones {
       let zone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 
       await #expect {
-        _ = try await service.lookupZones(zoneIDs: [zone])
+        _ = try await service.lookupZones(zoneIDs: [zone], database: .private)
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError
@@ -66,7 +66,7 @@ extension CloudKitServiceTests.LookupZones {
       let zone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 
       await #expect {
-        _ = try await service.lookupZones(zoneIDs: [zone])
+        _ = try await service.lookupZones(zoneIDs: [zone], database: .private)
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError

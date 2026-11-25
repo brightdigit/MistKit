@@ -64,10 +64,10 @@ The initialisers live in `Sources/MistKit/CloudKitService/CloudKitService+Initia
 | --- | --- | --- |
 | ``CloudKitService/init(containerIdentifier:credentials:environment:)`` | public (non-WASI) | Standard. Per-call database, per-call token manager resolution, `URLSessionTransport`. |
 | ``CloudKitService/init(containerIdentifier:tokenManager:environment:)`` | public (non-WASI) | Bespoke. One manager for every dispatched call regardless of database. |
-| `init(containerIdentifier:credentials:environment:transport:)` | internal | Same, with an injected `ClientTransport` — used by MistKit's tests. |
-| `init(containerIdentifier:tokenManager:environment:transport:)` | internal | Same, with an injected `ClientTransport`. |
+| ``CloudKitService/init(containerIdentifier:credentials:environment:transport:)`` | public | Same, with an injected `ClientTransport` — AsyncHTTPClient, fixture replay, or a request-log decorator. |
+| ``CloudKitService/init(containerIdentifier:tokenManager:environment:transport:)`` | public | Same, with an injected `ClientTransport`. |
 
-A public transport-accepting initializer is on the roadmap; see <doc:ConfiguringMistKit>.
+What the injected transport sees (signed requests, no CDN asset uploads) is covered in <doc:ConfiguringMistKit>.
 
 Operations are split across focused extension files (`CloudKitService+Operations.swift`, `+WriteOperations.swift`, `+ZoneOperations.swift`, `+UserOperations.swift`, `+AssetOperations.swift`, etc.). Each extension method takes a `database:` where applicable, resolves a `TokenManager`, builds a fresh generated `Client` with that manager wired into `AuthenticationMiddleware`, and dispatches the request.
 
@@ -201,8 +201,8 @@ Splitting the generated types means the compiler refuses to put a response value
 let result = try await service.queryRecords(
   recordType: "Note",
   filters: [
-    .greaterThan("modifiedAt", .date(since)),
-    .listContains("tags", .string("important")),
+    .greaterThan("modifiedAt", .date(.value(since))),
+    .listContains("tags", .string(.value("important"))),
   ],
   sortBy: [.descending("modifiedAt")],
   database: .private

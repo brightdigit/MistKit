@@ -57,7 +57,7 @@ extension CloudKitService {
   ///   - desiredKeys: Field names limiting the fields returned per record.
   ///   - resultsLimit: Maximum number of records to fetch.
   ///   - desiredRecordTypes: Record-type names limiting the change feed.
-  ///   - database: The CloudKit database scope to query (defaults to `.private`).
+  ///   - database: The CloudKit database scope to query.
   /// - Returns: ``RecordZoneChangesResult`` with one entry per requested zone.
   /// - Throws: ``CloudKitError`` if the fetch fails.
   ///
@@ -82,7 +82,7 @@ extension CloudKitService {
     desiredKeys: [String]? = nil,
     resultsLimit: Int? = nil,
     desiredRecordTypes: [String]? = nil,
-    database: Database = .private
+    database: Database
   ) async throws(CloudKitError) -> RecordZoneChangesResult {
     do {
       let client = try self.client(for: database)

@@ -34,7 +34,9 @@ internal import Foundation
 /// Uses `.millisecondsSince1970` so timestamps in `RecordInfo.created` /
 /// `RecordInfo.modified` arrive in the browser as epoch-millis numbers
 /// that JS can pass to `new Date(ms)` — the same shape CloudKit Web
-/// Services returns to CloudKit JS.
+/// Services returns to CloudKit JS. Record fields encode as MistKit's
+/// `FieldValue` does, `{"value": …, "type": …}`, the same wrapping CloudKit
+/// JS hands the browser, so `app.js` reads `field.value` in both modes.
 internal enum WebJSON {
   internal static func encoder() -> JSONEncoder {
     let encoder = JSONEncoder()

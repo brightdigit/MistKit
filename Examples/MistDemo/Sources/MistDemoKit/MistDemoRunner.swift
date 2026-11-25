@@ -57,6 +57,7 @@ public enum MistDemoRunner {
     await registry.register(LookupZonesCommand.self)
     await registry.register(CreateZoneCommand.self)
     await registry.register(ListZonesCommand.self)
+    await registry.register(ExportSchemaCommand.self)
     await registry.register(ModifyZonesCommand.self)
     await registry.register(DiscoverCommand.self)
     await registry.register(LookupAllRecordsCommand.self)

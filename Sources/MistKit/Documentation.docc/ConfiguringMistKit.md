@@ -1,6 +1,6 @@
 # Configuring MistKit
 
-MistKit itself has no configuration package dependency — you pass a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom transport to ``CloudKitService``. For reading CloudKit credentials from CLI / environment / `.env`, validating them, and building a service, use the separate [MistKitConfiguration](https://github.com/brightdigit/MistKitConfiguration) package (`CloudKitConfigurationKeys` → `validated()` → `makeCloudKitService()`).
+MistKit itself has no configuration package dependency — you pass a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom `ClientTransport` to ``CloudKitService``. For reading CloudKit credentials from CLI / environment / `.env`, validating them, and building a service, use the separate [MistKitConfiguration](https://github.com/brightdigit/MistKitConfiguration) package (`CloudKitConfigurationKeys` → `validated()` → `makeCloudKitService()`).
 
 ## Overview
 
@@ -79,15 +79,29 @@ The configuration question for your app is: which credentials does the deploymen
 
 ## Custom transport
 
-The public initializers use `URLSessionTransport` from [`swift-openapi-urlsession`](https://github.com/apple/swift-openapi-urlsession) and are available on every platform except WASI (`#if !os(WASI)`). ``CloudKitService`` stores its `ClientTransport` internally, but the initializers that accept a transport are not part of the public surface today — MistKit's own tests use them to substitute a mock transport that asserts on outgoing requests and returns canned responses.
+The convenience initializers use `URLSessionTransport` from [`swift-openapi-urlsession`](https://github.com/apple/swift-openapi-urlsession) and are available on every platform except WASI (`#if !os(WASI)`). To send requests through something else, pass any OpenAPIRuntime `ClientTransport` to ``CloudKitService/init(containerIdentifier:credentials:environment:transport:)`` or ``CloudKitService/init(containerIdentifier:tokenManager:environment:transport:)``:
 
-Consequences for consumers:
+```swift
+import MistKit
+import OpenAPIAsyncHTTPClient
 
-- **Apple platforms and Linux** — construct the service with the public initializers; URLSession is wired up for you.
-- **Instrumentation** — configure the `middleware` logging subsystem (below) rather than wrapping the transport.
-- **WASI** — has no public ``CloudKitService`` initializer yet, and the web-services API needs ECDSA signing and an HTTP transport that WASI lacks. For CloudKit access from a browser, use [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs).
+let service = CloudKitService(
+  containerIdentifier: "iCloud.com.example.MyApp",
+  credentials: credentials,
+  environment: .production,
+  transport: AsyncHTTPClientTransport()
+)
+```
 
-A public transport-accepting initializer (for AsyncHTTPClient on the server, for example) is tracked on the [project roadmap in the README](https://github.com/brightdigit/MistKit#roadmap).
+The transport receives each request **after** MistKit's authentication middleware has signed it, so it sees exactly what goes on the wire. That makes it the hook for:
+
+- **Server-side HTTP clients** — AsyncHTTPClient, or any other `ClientTransport`.
+- **Fixture replay in your own tests** — a transport that returns recorded CloudKit responses, with no `@testable import MistKit`.
+- **Request logging** — a decorator that wraps `URLSessionTransport`, records the request and response, and forwards. Because the request is already signed, redact the `ckAPIToken` / `ckWebAuthToken` query items and the `X-Apple-CloudKit-*` headers before persisting anything.
+
+Implementing `ClientTransport` needs `OpenAPIRuntime` and `HTTPTypes` as direct dependencies of your target. For lighter instrumentation, the `middleware` logging subsystem (below) traces requests without a custom transport.
+
+- **WASI** — has no `URLSessionTransport`, so the convenience initializers are unavailable; the transport-accepting initializers compile, but the web-services API also needs ECDSA signing that WASI lacks. For CloudKit access from a browser, use [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs).
 
 > Warning: Asset uploads do **not** flow through the configured `transport`. They use `URLSession.shared` directly to avoid HTTP/2 connection reuse between CloudKit's API host and the CDN, which surfaces as 421 Misdirected Request errors. See <doc:CloudKitLimitsAndPerformance> for the full rationale.
 

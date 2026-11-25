@@ -42,5 +42,18 @@ extension QueryFilterTests {
       #expect(components.comparator == .CONTAINS_ALL_TOKENS)
       #expect(components.fieldName == "content")
     }
+
+    @Test("QueryFilter creates containsAnyTokens filter")
+    internal func containsAnyTokensFilter() {
+      let filter = QueryFilter.containsAnyTokens("content", "apple swift")
+      let components = Components.Schemas.Filter(from: filter)
+      #expect(components.comparator == .CONTAINS_ANY_TOKENS)
+      #expect(components.fieldName == "content")
+      guard case .StringValue(let tokens) = components.fieldValue?.value else {
+        Issue.record("expected a string value")
+        return
+      }
+      #expect(tokens == "apple swift")
+    }
   }
 }

@@ -32,14 +32,16 @@ extension CloudKitError {
   /// error did not originate from a coded CloudKit failure.
   ///
   /// Exposed for logging and diagnostics only. Pattern-match the dedicated
-  /// cases — ``CloudKitError/notFound(reason:)``, ``CloudKitError/throttled(reason:)``
+  /// cases — ``CloudKitError/notFound(reason:)``, ``CloudKitError/throttled(reason:retryAfter:)``
   /// and friends — for control flow; the string is not a stable contract.
   public var serverErrorCode: String? {
     serverErrorDetail?.code
   }
 
   /// Code, documented HTTP status, summary, and reason for every case that
-  /// models a CloudKit `serverErrorCode`; `nil` for all other cases.
+  /// models a CloudKit `serverErrorCode`; the underlying error's for
+  /// ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``; `nil`
+  /// for all other cases.
   ///
   /// The switch is deliberately exhaustive: adding a case to ``CloudKitError``
   /// stops compiling here until the new case is classified. Wire strings and
@@ -53,7 +55,7 @@ extension CloudKitError {
       return ServerErrorCodeDetail(code: .atomicError, reason: reason)
     case .authenticationFailed(let reason):
       return ServerErrorCodeDetail(code: .authenticationFailed, reason: reason)
-    case .authenticationRequired(let reason):
+    case .authenticationRequired(let reason, _):
       return ServerErrorCodeDetail(code: .authenticationRequired, reason: reason)
     case .badRequest(let reason):
       return ServerErrorCodeDetail(code: .badRequest, reason: reason)
@@ -67,9 +69,9 @@ extension CloudKitError {
       return ServerErrorCodeDetail(code: .notFound, reason: reason)
     case .quotaExceeded(let reason, _):
       return ServerErrorCodeDetail(code: .quotaExceeded, reason: reason)
-    case .throttled(let reason):
+    case .throttled(let reason, _):
       return ServerErrorCodeDetail(code: .throttled, reason: reason)
-    case .tryAgainLater(let reason):
+    case .tryAgainLater(let reason, _):
       return ServerErrorCodeDetail(code: .tryAgainLater, reason: reason)
     case .validatingReferenceError(let reason):
       return ServerErrorCodeDetail(code: .validatingReferenceError, reason: reason)
@@ -82,10 +84,13 @@ extension CloudKitError {
         summary: ServerErrorCodeDetail.unrecognizedSummary,
         reason: reason
       )
+    case .modifyIncomplete(_, _, let underlying):
+      return underlying.serverErrorDetail
     case .httpError, .httpErrorWithDetails, .httpErrorWithRawResponse, .invalidResponse,
       .incompleteResponse, .conversionFailed, .recordOperationFailed, .zoneOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,
-      .decodingError, .networkError, .unsupportedOperationType, .paginationLimitExceeded,
+      .decodingError, .invalidFieldValue, .networkError, .unsupportedOperationType,
+      .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey,
       .missingAssetDownloadURL:
       return nil
@@ -108,7 +113,18 @@ extension CloudKitError {
   ///   - code: The raw `serverErrorCode` string from the failure body.
   ///   - statusCode: The HTTP status the failure arrived with.
   ///   - reason: The server-supplied `reason`, when present.
-  internal init(serverErrorCode code: String?, statusCode: Int, reason: String?) {
+  ///   - retryAfter: The server-supplied `retryAfter` seconds, kept on
+  ///     ``CloudKitError/throttled(reason:retryAfter:)`` and
+  ///     ``CloudKitError/tryAgainLater(reason:retryAfter:)``.
+  ///   - redirectURL: The server-supplied sign-in page, kept on
+  ///     ``CloudKitError/authenticationRequired(reason:redirectURL:)``.
+  internal init(
+    serverErrorCode code: String?,
+    statusCode: Int,
+    reason: String?,
+    retryAfter: Int? = nil,
+    redirectURL: String? = nil
+  ) {
     guard let code else {
       self = .httpErrorWithDetails(statusCode: statusCode, reason: reason)
       return
@@ -118,7 +134,8 @@ extension CloudKitError {
     self = Self.make(
       from: CloudKitServerErrorCode(rawValue: code),
       statusCode: statusCode,
-      reason: reason
+      reason: reason,
+      hints: (retryAfter: retryAfter, redirectURL: redirectURL)
     )
   }
 
@@ -131,7 +148,8 @@ extension CloudKitError {
   private static func make(
     from code: CloudKitServerErrorCode,
     statusCode: Int,
-    reason: String?
+    reason: String?,
+    hints: (retryAfter: Int?, redirectURL: String?)
   ) -> CloudKitError {
     switch code {
     case .accessDenied:
@@ -141,7 +159,7 @@ extension CloudKitError {
     case .authenticationFailed:
       return .authenticationFailed(reason: reason)
     case .authenticationRequired:
-      return .authenticationRequired(reason: reason)
+      return .authenticationRequired(reason: reason, redirectURL: hints.redirectURL)
     case .badRequest:
       return .badRequest(reason: reason)
     case .conflict:
@@ -155,9 +173,9 @@ extension CloudKitError {
     case .quotaExceeded:
       return .quotaExceeded(reason: reason, hint: nil)
     case .throttled:
-      return .throttled(reason: reason)
+      return .throttled(reason: reason, retryAfter: hints.retryAfter)
     case .tryAgainLater:
-      return .tryAgainLater(reason: reason)
+      return .tryAgainLater(reason: reason, retryAfter: hints.retryAfter)
     case .validatingReferenceError:
       return .validatingReferenceError(reason: reason)
     case .zoneNotFound:

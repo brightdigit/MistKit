@@ -35,6 +35,7 @@ extension CloudKitService {
   /// - Parameters:
   ///   - recordNames: Record names to fetch
   ///   - desiredKeys: Optional array of field names to fetch
+  ///   - zoneID: The zone the records are in; `nil` for the default zone
   ///   - database: The CloudKit database scope to read from (`.public`, `.private`, `.shared`)
   /// - Returns: Array of RecordInfo for the matched records
   /// - Throws: CloudKitError if the operation fails
@@ -52,13 +53,14 @@ extension CloudKitService {
   ///   for list views that only need a projection.
   /// - Note: This is the single-request primitive — CloudKit caps it at
   ///   ``maxRecordsPerRequest`` record names. For larger inputs use
-  ///   ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``, which
+  ///   ``lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)``, which
   ///   chunks automatically.
   /// - Returns: A ``RecordResult`` per requested record — `.success` for a found
   ///   record, `.failure` (e.g. `NOT_FOUND`) for one CloudKit could not return.
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordResult] {
     do {
@@ -72,6 +74,7 @@ extension CloudKitService {
           ),
           body: .json(
             .init(
+              zoneID: zoneID.map { Components.Schemas.ZoneID(from: $0) },
               records: recordNames.map { recordName in
                 .init(
                   recordName: recordName,

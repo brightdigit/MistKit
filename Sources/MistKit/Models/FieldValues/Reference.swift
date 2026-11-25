@@ -28,7 +28,7 @@
 //
 
 /// Reference dictionary as defined in CloudKit Web Services
-public struct Reference: Codable, Equatable, Sendable {
+public struct Reference: Codable, Hashable, Sendable {
   /// Reference action types supported by CloudKit Web Services.
   /// Native `CKRecord.ReferenceAction` only has `none` and `deleteSelf`;
   /// `validate` is a Web Services case that verifies the target record exists
@@ -41,12 +41,20 @@ public struct Reference: Codable, Equatable, Sendable {
 
   /// The record name being referenced
   public let recordName: String
+  /// The zone of the referenced record, or `nil` for the default zone.
+  ///
+  /// A reference can only point within its record's own zone. The wire form
+  /// carries `zoneID` only when it names a zone other than
+  /// ``ZoneID/defaultZone``, so references to default-zone records encode as
+  /// they always have.
+  public let zoneID: ZoneID?
   /// The action to take (`NONE`, `DELETE_SELF`, `VALIDATE`, or nil)
   public let action: Action?
 
   /// Initialize a reference value
-  public init(recordName: String, action: Action? = nil) {
+  public init(recordName: String, zoneID: ZoneID? = nil, action: Action? = nil) {
     self.recordName = recordName
+    self.zoneID = zoneID
     self.action = action
   }
 }

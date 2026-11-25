@@ -201,6 +201,15 @@ fi
 # build still run there; run ./Scripts/lint.sh locally for full coverage.
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
 	RUN_SWIFTLINT=0
+	# The toolchain may expose only a `swift` symlink on PATH; put the
+	# toolchain's bin directory (which holds swift-format) on PATH too.
+	if ! command -v swift-format >/dev/null 2>&1 && command -v swift >/dev/null 2>&1; then
+		SWIFT_TOOLCHAIN_BIN="$(dirname "$(readlink -f "$(command -v swift)")")"
+		if [ -x "$SWIFT_TOOLCHAIN_BIN/swift-format" ]; then
+			PATH="$SWIFT_TOOLCHAIN_BIN:$PATH"
+			export PATH
+		fi
+	fi
 else
 	RUN_SWIFTLINT=1
 fi

@@ -36,7 +36,7 @@ internal import MistKitOpenAPI
 /// record name. Codable keeps the CloudKit wire shape flat —
 /// `emailAddress`, `phoneNumber`, and `userRecordName` at the top level —
 /// rather than nesting contact fields.
-public struct UserIdentityLookupInfo: Codable, Sendable {
+public struct UserIdentityLookupInfo: Codable, Sendable, Hashable {
   private enum CodingKeys: String, CodingKey {
     case emailAddress
     case phoneNumber

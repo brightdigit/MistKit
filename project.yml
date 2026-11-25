@@ -8,8 +8,6 @@ packages:
     path: .
   Bushel:
     path: Examples/MistDemo
-  Celestra:
-    path: Examples/CelestraCloud
 aggregateTargets:
   Lint:
     buildScripts:

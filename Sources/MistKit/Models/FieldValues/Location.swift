@@ -30,7 +30,7 @@
 public import Foundation
 
 /// Location dictionary as defined in CloudKit Web Services
-public struct Location: Codable, Equatable, Sendable {
+public struct Location: Codable, Hashable, Sendable {
   /// The latitude coordinate
   public let latitude: Double
   /// The longitude coordinate
