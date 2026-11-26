@@ -1,0 +1,12 @@
+# Code owners for MistKit. See GOVERNANCE.md for roles.
+# Later rules take precedence over earlier ones.
+
+# Default owner for everything
+*                                   @leogdion
+
+# Security-sensitive areas: authentication, request signing, and CI secrets
+/Sources/MistKit/Authentication/    @leogdion
+/.github/workflows/                 @leogdion
+/.github/CODEOWNERS                 @leogdion
+/SECURITY.md                        @leogdion
+/GOVERNANCE.md                      @leogdion
