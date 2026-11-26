@@ -61,8 +61,7 @@ Must happen **before** the merge, so example CI actually tests this branch.
 ./Scripts/release.sh pins --roll-to v1.0.0-beta.5
 git add Examples/*/.github/workflows/*.yml
 git commit -m "ci(examples): pin MISTKIT_BRANCH to v1.0.0-beta.5"
-git subrepo push Examples/BushelCloud
-git subrepo push Examples/CelestraCloud
+git subrepo push Examples/SwoopMistKit
 git push
 ```
 
@@ -147,8 +146,7 @@ Builds the body from `ReleaseNotes.md`, swapping `## 1.0.0-beta.5` for
 ./Scripts/release.sh pins --roll-to 1.0.0-beta.5
 ./Scripts/release.sh pins --expect-tag 1.0.0-beta.5
 git commit -am "ci(examples): pin MISTKIT_BRANCH to released 1.0.0-beta.5"
-git subrepo push Examples/BushelCloud
-git subrepo push Examples/CelestraCloud
+git subrepo push Examples/SwoopMistKit
 git push
 ```
 

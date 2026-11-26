@@ -32,7 +32,7 @@ let package = Package(
     // and break `brightdigit/MistKitConfiguration`, whose own manifest deliberately
     // carries `.package(url: …MistKit.git, from: "1.0.0-beta.4")` — the form that makes a
     // tag of this package usable downstream. Re-apply the swap after every push, the same
-    // never-merged-overlay discipline `Examples/BushelCloud/Package.swift` documents.
+    // never-merged-overlay discipline `Examples/SwoopMistKit/Package.swift` documents.
     .package(name: "MistKit", path: "../.."),
     .package(
       url: "https://github.com/brightdigit/ConfigKeyKit.git",

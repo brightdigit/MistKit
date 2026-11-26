@@ -35,6 +35,8 @@ internal import Testing
 extension CloudKitServiceTests.LookupUsersByEmail {
   @Suite("Success Cases")
   internal struct SuccessCases {
+    private typealias Lookup = CloudKitServiceTests.LookupUsersByEmail
+
     @Test("lookupUsersByEmail() returns a single identity")
     internal func returnsSingleIdentity() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -44,7 +46,7 @@ extension CloudKitServiceTests.LookupUsersByEmail {
       let service = try await CloudKitServiceTests.LookupUsersByEmail
         .makeSuccessfulService(identityCount: 1)
 
-      let identities = try await service.lookupUsersByEmail(["user@example.com"])
+      let identities = try await Lookup.lookupUsersByEmail(service, ["user@example.com"])
 
       #expect(identities.count == 1)
       #expect(identities.first?.userRecordName == .recordName("_user-0"))
@@ -59,11 +61,10 @@ extension CloudKitServiceTests.LookupUsersByEmail {
       let service = try await CloudKitServiceTests.LookupUsersByEmail
         .makeSuccessfulService(identityCount: 3)
 
-      let identities = try await service.lookupUsersByEmail([
-        "a@example.com",
-        "b@example.com",
-        "c@example.com",
-      ])
+      let identities = try await Lookup.lookupUsersByEmail(
+        service,
+        ["a@example.com", "b@example.com", "c@example.com"]
+      )
 
       #expect(identities.count == 3)
     }
@@ -77,7 +78,7 @@ extension CloudKitServiceTests.LookupUsersByEmail {
       let service = try await CloudKitServiceTests.LookupUsersByEmail
         .makeSuccessfulService(identityCount: 0)
 
-      let identities = try await service.lookupUsersByEmail(["unknown@example.com"])
+      let identities = try await Lookup.lookupUsersByEmail(service, ["unknown@example.com"])
 
       #expect(identities.isEmpty)
     }

@@ -12,8 +12,8 @@ MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit W
 - **Target Platforms**: Cross-platform including macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows
 - **Default Branch**: `main`
 - **API Reference**: The `openapi.yaml` file contains the OpenAPI 3.0.3 specification for Apple's CloudKit Web Services
-- **Code Generation**: Generated client code lives in `Sources/MistKitOpenAPI/` (its own target/product) and is committed
-- **Targets/products**: `MistKit` (curated wrapper) and `MistKitOpenAPI` (raw generated client + types, `public`). `import MistKit` for the curated API; add `import MistKitOpenAPI` only to reach raw generated types
+- **Code Generation**: Generated client code lives in `Sources/MistKitOpenAPI/` and `Sources/MistKitManagementOpenAPI/` (each its own target/product) and is committed
+- **Targets/products**: `MistKit` (curated wrapper), `MistKitOpenAPI` (raw generated CloudKit Web Services client + types, `public`) and `MistKitManagementOpenAPI` (raw generated CloudKit Management API client from `management-openapi.yaml`, `public`). `import MistKit` for the curated API; add `import MistKitOpenAPI` / `import MistKitManagementOpenAPI` only to reach raw generated types
 
 ## Development Commands
 
@@ -46,7 +46,8 @@ swift package generate-xcodeproj
 
 ### OpenAPI Code Generation
 ```bash
-# Generate OpenAPI client code (run this after modifying openapi.yaml)
+# Generate OpenAPI client code (run this after modifying openapi.yaml or
+# management-openapi.yaml; it regenerates both targets)
 ./Scripts/generate-openapi.sh
 
 # Or manually with swift-openapi-generator
@@ -104,6 +105,8 @@ swift run mistdemo demo-in-filter
 swift run mistdemo demo-errors
 swift run mistdemo test-public
 swift run mistdemo test-private
+swift run mistdemo probe-encrypted   # issue #392: encrypted-field probe for one web-auth user
+swift run mistdemo export-schema [--raw] [--environment production]  # Management API (needs CLOUDKIT_MANAGEMENT_TOKEN + DEVELOPMENT_TEAM)
 
 # Configuration (no config-file flag — MistDemo uses Swift Configuration):
 # highest priority first — (1) CLI args, (2) CLOUDKIT_-prefixed env vars,
@@ -117,8 +120,13 @@ swift run mistdemo test-private
 # Recognized keys: CLOUDKIT_CONTAINER_ID, CLOUDKIT_DATABASE, CLOUDKIT_ENVIRONMENT,
 # CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_SHAREE_WEB_AUTH_TOKEN,
 # CLOUDKIT_SHAREE_EMAIL, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
-# CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR.
+# CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR,
+# CLOUDKIT_MANAGEMENT_TOKEN and DEVELOPMENT_TEAM (unprefixed; shared with
+# Xcode signing) for export-schema.
 # Capture sharer+sharee tokens: swift run mistdemo auth-tokens --sharee-email …
+#   (add --output env for KEY=value-only stdout)
+# Refresh the MistDemo Integration CI secrets after a 421 AUTHENTICATION_REQUIRED
+# (from repo root): ./Scripts/refresh-web-auth-tokens.sh [--update-env] [--rerun]
 swift run mistdemo query
 ```
 
@@ -129,24 +137,30 @@ swift run mistdemo query
 MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
 
 **Type Layers:**
-1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValues/FieldValue.swift`)
-2. **API Request Layer**: `FieldValueRequest` - Optional type field; CloudKit infers type from value structure, except for ambiguous scalars (see below) and IN/NOT_IN list filters, which are tagged explicitly
-3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
+1. **Domain Layer**: `FieldValue` enum — each kind carries `Arity<T>` (`.value` / `.list`), so lists are homogeneous by construction and nesting is unrepresentable (`Sources/MistKit/Models/FieldValues/FieldValue.swift`). There is no `case list([FieldValue])` (issue #481).
+2. **API Request Layer**: `FieldValueRequest` - Optional type field; CloudKit infers type from value structure, except for ambiguous scalars (see below) and list values / IN/NOT_IN filters, which are tagged with the granular `*_LIST` family
+3. **API Response Layer**: `FieldValueResponse` - Optional type field; list responses use `STRING_LIST` / `INT64_LIST` / … (not a flat `LIST` tag — verified live 2026-09-09)
 
-**Request type tagging (issue #375):** Most request values omit `type` and let CloudKit infer it from the value structure. Three scalar types are ambiguous on the wire and **must** carry an explicit `type`, otherwise CloudKit infers the wrong type and rejects the write with `BAD_REQUEST`:
-- `TIMESTAMP` (`.date`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
-- `BYTES` (`.bytes`) — domain `Data`, encoded as a base64 string on the wire, otherwise read as `STRING`
-- `DOUBLE` (`.double`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
+**Homogeneous lists (issue #481):** Write `.string(.list(["a","b"]))` or `.string(.list([]))` — empty lists keep their element type. Deprecated scalar factories (`FieldValue.string(_: String)`, etc.) forward to `.value` for migration; there is no polyfill for the old heterogeneous `.list([FieldValue])`. Accessors: `stringValue` unwraps `.value` only; `stringListValue` unwraps `.list`; deprecated `listValue` flattens to `[FieldValue]` of `.value`s.
 
-Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
+**`FieldValue`'s own `Codable` is strict:** it encodes and decodes only `{"value": …, "type": …}`, the `WireFieldValue` `.always` shape, by delegating to `WireFieldValue` (`FieldValue+Codable.swift`). Untagged input and `{"value": null}` are decoding errors, so every kind round-trips (TIMESTAMP, BYTES, whole-valued DOUBLE, empty lists). CloudKit request/response conversion does not use it: requests go through `FieldValueRequest`, responses through `FieldValueResponse`.
 
-**Timestamps must be whole milliseconds.** CloudKit rejects a fractional `TIMESTAMP` (e.g. `1747999812347.89`) with `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`, and Swift's `Date` carries sub-millisecond precision — so `.date` values are `.rounded()` on the way out, not just tagged. **The same constraint applies to `LocationValue.timestamp`** (`Components.Schemas.FieldValueRequest.swift:89`), which is a second, nested millisecond field with no `type` tag of its own to disambiguate it; that instance was found only via a live CelestraCloud integration failure (PR #377, commit `1eb639a`). Sub-millisecond precision is therefore destroyed on every write: a `Date` in is a different `Date` out.
+**Request type tagging (issue #375 / #481):** Most scalar request values omit `type` and let CloudKit infer it from the value structure. Three scalar types are ambiguous on the wire and **must** carry an explicit `type`, otherwise CloudKit infers the wrong type and rejects the write with `BAD_REQUEST`:
+- `TIMESTAMP` (`.date(.value)`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
+- `BYTES` (`.bytes(.value)`) — domain `Data`, encoded as a base64 string on the wire, otherwise read as `STRING`
+- `DOUBLE` (`.double(.value)`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
+
+**Encrypted fields must also be tagged (issue #392).** A field named in `RecordOperation.encryptedFields` is sent with `isEncrypted: true`, and CloudKit will not infer the type of an encrypted value. Verified live on 2026-09-14 (`iCloud.com.brightdigit.MistDemo`/development/private, web-auth): `{"value":"…","isEncrypted":true}` with no `type` is rejected with `BAD_REQUEST "invalid attempt to set value type ENCRYPTED_BYTES for field 'secret' for type 'Note', defined to be: ENCRYPTED_STRING"`, while `{"value":"…","type":"STRING","isEncrypted":true}` succeeds and CloudKit echoes `"type":"STRING","isEncrypted":true` with the plaintext value on the modify response, `records/lookup` and `records/query`. Since #481 every list arity already carries its `*_LIST` tag and `.double`/`.bytes`/`.date` scalars carry theirs, so `Components.Schemas.RecordOperation.explicitType(for:)` only has to supply `STRING`, `INT64` and `LOCATION` for untagged `.value` scalars — it fills in `_type` only when the request conversion left it `nil`. Use `swift run mistdemo probe-encrypted` (Examples/MistDemo) to re-verify against a live account.
+
+Object-shaped values (`REFERENCE`, `ASSET`, `LOCATION`) and scalar `STRING`/`INT64` stay untagged. **List arities always tag** `STRING_LIST` / `INT64_LIST` / … (including record-field writes, not only IN/NOT_IN). Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
+
+**Timestamps must be whole milliseconds.** CloudKit rejects a fractional `TIMESTAMP` (e.g. `1747999812347.89`) with `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`, and Swift's `Date` carries sub-millisecond precision — so `.date` values (scalar and list elements) are `.rounded()` on the way out, not just tagged. **The same constraint applies to `LocationValue.timestamp`**, which is a second, nested millisecond field with no `type` tag of its own to disambiguate it; that instance was found only via a live CelestraCloud integration failure (PR #377, commit `1eb639a`). Sub-millisecond precision is therefore destroyed on every write: a `Date` in is a different `Date` out.
 
 **Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case (decoded with `Data(base64Encoded:)`; malformed tagged base64 throws `ConversionError.typeValueMismatch` with the unwrapped string). `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`). Do **not** infer `.bytes` from untagged base64 — ordinary strings such as `"Chen"` decode as valid base64. Domain `.bytes` is `Data`; `bytesValue` re-encodes to base64 and `dataValue` matches `.bytes` only (no `.string` fallback). The generated `BytesValue` in `Sources/MistKitOpenAPI/` stays `String`.
 
 When a scalar `type` *contradicts* the value's category — a numeric type (`TIMESTAMP`/`DOUBLE`/`INT64`) over a non-number, or a string type (`STRING`/`BYTES`) over a non-string — the response is internally inconsistent and the conversion **throws** `ConversionError.typeValueMismatch` (via `requireNumeric`/`requireString`) rather than coercing to the value's shape. This matches the codebase's existing fail-loud `unmappableFieldValue` philosophy.
 
-**Complex/list contradiction validation (issue #376):** the same fail-loud check now extends to the complex/list response `type` tags. A declared `REFERENCE`/`ASSET`/`ASSETID`/`LOCATION`/`LIST` whose decoded value isn't the matching `oneOf` case (`ReferenceValue`/`AssetValue`/`LocationValue`/`ListValue`) **throws** `ConversionError.typeValueMismatch` instead of silently coercing to the value's shape (`makeTypedComplex` in `FieldValue+Components.swift`, gated by the `ExpectedComplexValue` mapping). `ASSETID` shares `AssetValue` with `ASSET`; the `LIST` tag is validated only at the container level (element types stay lenient). Untagged responses are unaffected — they still resolve purely from the value's self-describing structure via `makeComplexFieldValue`, so well-formed responses never start failing.
+**Complex/list contradiction validation (issues #376 / #481):** the same fail-loud check extends to complex and list response `type` tags. A declared `REFERENCE`/`ASSET`/`ASSETID`/`LOCATION` whose decoded value isn't the matching `oneOf` case **throws** `ConversionError.typeValueMismatch`. Granular list tags (`STRING_LIST`, …) require a `ListValue` container and decode to the matching `.kind(.list(...))`; a list tag over a non-list value throws. Untagged list responses infer a homogeneous element kind from the elements (or stay unrecoverable only when empty and untagged — live CloudKit still sends `STRING_LIST` for empty lists). `ASSETID` shares `AssetValue` with `ASSET`.
 
 **Why Separate Request/Response Types?**
 - CloudKit API has asymmetric behavior: requests tag type only when ambiguous, responses may always include it
@@ -177,12 +191,15 @@ When a scalar `type` *contradicts* the value's category — a numeric type (`TIM
 MistKit/
 ├── Sources/
 │   ├── MistKit/           # Curated wrapper (CloudKitService, domain types, auth)
-│   └── MistKitOpenAPI/    # Generated OpenAPI client + types (public, committed)
+│   ├── MistKitOpenAPI/    # Generated CloudKit Web Services client + types (public, committed)
+│   └── MistKitManagementOpenAPI/ # Generated Management API client (from management-openapi.yaml)
 ├── Tests/
 │   └── MistKitTests/
 ├── Scripts/
-│   └── generate-openapi.sh # Script to generate OpenAPI code → Sources/MistKitOpenAPI/
+│   ├── generate-openapi.sh # Generates both OpenAPI targets
+│   └── refresh-web-auth-tokens.sh # Recapture MistDemo web-auth tokens → GitHub secrets
 ├── openapi.yaml           # CloudKit Web Services OpenAPI specification
+├── management-openapi.yaml # CloudKit Management API OpenAPI specification
 └── openapi-generator-config.yaml # Configuration for code generation
 ```
 
@@ -200,11 +217,14 @@ MistKit/
 | `CloudKitService+RecordZoneChanges.swift` | `fetchRecordZoneChanges(zones:...)` — `changes/zone` |
 | `CloudKitService+RecordZoneChangesPagination.swift` | `fetchAllRecordZoneChanges(zones:...)` — per-zone auto-pagination |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` → `[ZoneChangeResult]`, `createZone(...)`, `deleteZone(...)` |
-| `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
-| `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
+| `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:database:)`, `fetchAllRecordChanges(zoneID:syncToken:resultsLimit:desiredKeys:desiredRecordTypes:maxPages:database:)` |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)` *(there is no no-argument address-book form: GET `users/discover` returns HTTP 500, #28, so it is not wrapped)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
+| `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
+| `CloudKitService+QueryPages.swift` | `queryRecordPages(_:limit:desiredKeys:continuationMarker:zoneID:database:)` — `AsyncThrowingStream` of query pages, with the stuck-marker guard |
+| `CloudKitService+ModifyAllRecords.swift` | `modifyAllRecords(_:atomicZones:database:batchSize:)` — groups `ZonedRecordOperation`s by zone, chunks at `maxRecordsPerRequest`, `atomic` per zone |
+| `CloudKitService+WebAuthSignIn.swift` | `fetchWebAuthSignInURL()` — the `redirectURL` of an API-token-only `users/caller` (`AUTHENTICATION_REQUIRED`) |
 | `CloudKitService+ShareOperations.swift` | `resolveShares(_:)`, `acceptShares(_:)` *(public DB + web-auth, fixed — no `database:` parameter)* |
 | `CloudKitService+CreateShare.swift` | `createShare(...)` *(private custom zone + web-auth; returns ``CreatedShare``)* |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
@@ -220,8 +240,8 @@ MistKit/
 `RecordManaging` declares only `queryAllRecords(recordType:)` (`Sources/MistKit/RecordManagement/RecordManaging.swift`) and stays zone-unaware — callers needing a specific zone should call `CloudKitService` directly.
 
 **Sync/Change Operations:**
-- `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
-- `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
+- `fetchRecordChanges(zoneID:syncToken:…:database:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`. Filter by type with `desiredRecordTypes:`; there is no `recordType:` parameter.
+- `fetchAllRecordChanges(zoneID:syncToken:…:maxPages:database:)` — auto-paginates using `moreComing` (with a `maxPages` ceiling) and returns a `(records:, syncToken:)` tuple
 - `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`. **Deprecated** (`@available(*, deprecated)`): Apple deprecated `zones/changes` in favor of `changes/database`. Same for `fetchAllZoneChanges`.
 
   **Wire key is `metaSyncToken`, not `syncToken` (issue #430).** Verified against a live container (`iCloud.com.brightdigit.MistDemo`/`development`/private, web-auth): the response's top-level keys are exactly `[moreComing, metaSyncToken, zones]`, and a request sending `syncToken` is *silently ignored* — CloudKit replays page one instead of advancing, so `fetchZoneChanges`/`fetchAllZoneChanges` pagination never actually worked. Only `zones/changes` is affected; `changes/database`, `changes/zone` and `records/changes` all genuinely use `syncToken` — **do not rename those**. The rename is confined to `openapi.yaml`; every Swift-facing name (`ZoneChangesResult.syncToken`, its `init(syncToken:)` label, the `fetchZoneChanges(syncToken:)`/`fetchAllZoneChanges(syncToken:)` argument labels) is deliberately unchanged, so this is not source-breaking — `MistKitOpenAPI` is an `internal import`. `Tests/.../FetchZoneChanges/CloudKitServiceTests.FetchZoneChanges+WireFormat.swift` pins the sent and read keys.
@@ -232,7 +252,7 @@ MistKit/
 
 **User-Identity Operations (public DB + web-auth required):**
 - `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces Apple's deprecated `users/current` endpoint (the `fetchCurrentUser()` wrapper was removed in #421). Only valid against the public database with web-auth credentials.
-- `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
+- There is no wrapper for GET `/users/discover` (the address-book form): Apple returns HTTP 500 (#28). Use POST via `discoverUserIdentities(lookupInfos:)` / `discoverAllUserIdentities(lookupInfos:batchSize:)`.
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
 
@@ -249,8 +269,8 @@ Set `ShortGUIDDictionary.shouldFetchRootRecord` to have CloudKit include the sha
 
 | Primitive (single request) | Auto-chunking convenience |
 |----------------------------|---------------------------|
-| `lookupRecords(recordNames:desiredKeys:database:)` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` |
-| `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` *(overloads the no-arg address-book form)* |
+| `lookupRecords(recordNames:desiredKeys:zoneID:database:)` | `lookupAllRecords(recordNames:desiredKeys:zoneID:database:batchSize:)` |
+| `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` |
 
 The `users/lookup/email` and `users/lookup/id` primitives (`lookupUsersByEmail` / `lookupUsersByRecordName`) are **deprecated by Apple** in favor of POST `users/discover` (verified against Apple's archived CloudKit Web Services reference), so they intentionally get **no** chunking convenience — callers needing >200 should use `discoverAllUserIdentities(lookupInfos:)`. `users/lookup/contacts` is likewise deprecated and unwrapped.
 
@@ -292,8 +312,22 @@ Likewise `zones/modify` takes **no** `atomic` request flag and `ZoneOperation` h
 operation's `zone` as having "a single `zoneID` key". Do not add these speculatively;
 confirm against a live response first.
 
+### CloudKit Management API (issue #135 Phase 1)
+
+Schema export is **not** a CloudKit Web Services endpoint. It is the Management API behind `cktool` / CKTool JS. It has its **own spec, `management-openapi.yaml`**, generated into its own target, `Sources/MistKitManagementOpenAPI/` (never hand-edit), rather than being added to `openapi.yaml`, because it lives on a different host with different auth and error shapes. `CloudKitManagementService` (`Sources/MistKit/Management/`) is the curated wrapper over the generated `Client`, the same way `CloudKitService` wraps `MistKitOpenAPI`: generated types stay out of the public API. Facts below come from Apple's CKTool JS 1.3.2 npm packages (`@apple/cktool.api.database` `exportSchemaOp`, `@apple/cktool.core` `Configuration`, `@apple/cktool.api.base` security schemes); see `.claude/docs/research/135-management-api-request-format.md`.
+
+- Base URL `https://api.icloud.apple.com` (CKTool JS default `serverUrl`), **not** `api.apple-cloudkit.com`.
+- Export: `GET /v1/database/teams/{teamId}/containers/{containerId}/environments/{DEVELOPMENT|PRODUCTION}/schema/export` → `200 text/plain` CloudKit Schema Language (same text as `cktool export-schema`). Path segments are percent-encoded (`encodeURIComponent` in CKTool JS). Environment is upper case.
+- Auth: header `X-Apple-CloudKit-Management-Token: <token>` only (or the `myacinfo` console cookie). No signing, no API token.
+- Errors: JSON `RequestError` `{code, message, reason, detailedMessage?, requestUuid?, retryAfterSeconds?}` → `CloudKitManagementError.requestFailed(ManagementRequestFailure)`; non-JSON → `.httpError`.
+- Token: "scoped to a team and user", "default lifespan of one year", revocable in CloudKit Console Settings (Apple, *Automating CloudKit Development*). Required team role is undocumented and still unverified.
+- Wrapper plumbing: `ManagementTokenMiddleware` adds the token header; `ManagementErrorBodyMiddleware` buffers non-2xx bodies (≤1 MiB) so a body the generated client couldn't decode as a `RequestError` is still readable for `.httpError`; a body over the cap, or one that fails mid-read, is dropped with a `.warning` on the `network` subsystem naming only the operation, status and error type. There is **no logging middleware**, and a `ClientError` is never rethrown (its description includes the request headers): `CloudKitManagementError.translating(_:)` maps it to the transport's own error, `.httpError`, or `.invalidResponse`. Success bodies are capped at 32 MiB (`.invalidResponse`). `ManagementToken` is redacted in `description`, `debugDescription` and `Mirror`/`dump`.
+- `exportSchema(environment:)` parses the text with `CloudKitSchema(parsing:)` (`Sources/MistKit/Models/Schema/`) into record types, fields (`isQueryable`/`isSortable`/`isSearchable`), grants and roles; `exportSchemaText(environment:)` returns the raw text.
+- **Verified live on 2026-11-24** (`iCloud.com.brightdigit.MistDemo`, `swift run mistdemo export-schema`): the whole contract held, with the token header alone (no `X-CK-CLIENT`). `RequestError.message` is a kebab-case code (`invalid-or-expired-session`, `authentication-failed`, `authorization-failed`); an unknown or inaccessible container is **403**, not 404; a lower-case environment is 400. No live response carried `detailedMessage` or `retryAfterSeconds`.
+- Unit tests use **recorded** fixtures (`Tests/MistKitTests/Management/RecordedManagementFixtures.swift`, request UUIDs scrubbed); only `fullRequestErrorJSON`, which exercises the never-observed optional keys, is hand-written.
+
 **Protocols:**
-- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
+- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; the `RecordTypeSetType` of `CloudKitRecordCollection`, conformed to by `RecordTypeSet`
 
 ### Key Design Principles
 1. **Protocol-Oriented**: Define protocols for all major components (TokenManager, NetworkClient, etc.)
@@ -324,6 +358,8 @@ logger.error("…")
 **For consumers:** install a `LogHandler` (e.g. `StreamLogHandler.standardOutput`) via `LoggingSystem.bootstrap` and set the level per-subsystem. Protocol traces — request/response bodies, headers, query params — are emitted at `.debug`. The middleware guards expensive work (1 MiB body collection, query-param parsing) behind `logger.logLevel <= .debug`, so the default `.info` level pays no overhead.
 
 There is no built-in redaction. Sensitive data (tokens, raw bodies) appears only at `.debug`; control exposure via `logLevel`.
+
+At `.debug` the middleware logs only the first 64 KiB of a JSON response body (`responseBodyLogCap`). A body over the cap is **not** dropped: the consumed prefix is replayed ahead of the untouched remainder through `ReplayingBodyIterator` (`Sources/MistKit/OpenAPI/ReplayingBodyIterator.swift`). Before that helper existed, every debug-level response over 64 KiB failed with "HTTPBody attempted to create a second iterator" — found live when `records/query` on a private default zone with a few hundred KB of records broke only under `--verbose`.
 
 ### Asset Upload Transport Design
 
@@ -378,7 +414,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
 - `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
 
-**IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values, and tags the list's element type explicitly via `cloudKitListType(for:)` (`.STRING_LIST`, `.INT64_LIST`, …). The v1.0.0-alpha.5 fix (issue #192 / PR #205) **added that `type` tag** — without it CloudKit cannot determine the element type and rejects every `.in()` query with `HTTP 400 BadRequestException: Unexpected input`, at any array size. `ListValuePayload` was already in use and was never the problem; the `value` key structure is unchanged. The element type is derived from the *first* element, so a heterogeneous list is tagged by element zero, and an empty list is sent untagged.
+**IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values, and tags the list's element type explicitly via `cloudKitListType(for:)` (`.STRING_LIST`, `.INT64_LIST`, …). The v1.0.0-alpha.5 fix (issue #192 / PR #205) **added that `type` tag** — without it CloudKit cannot determine the element type and rejects every `.in()` query with `HTTP 400 BadRequestException: Unexpected input`, at any array size. `ListValuePayload` was already in use and was never the problem; the `value` key structure is unchanged. After #481, IN elements are scalar `.value` arities; `cloudKitListType` is total on element kind (a `.list` arity as an IN element yields no tag). Empty IN arrays are sent untagged.
 
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
@@ -455,7 +491,7 @@ Run via `swift run mistdemo test-public` or `swift run mistdemo test-private` (p
 
 The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in the standalone `MistKitOpenAPI` target at `Sources/MistKitOpenAPI/` (`accessModifier: public` so downstream code can `import MistKitOpenAPI` as an escape hatch). It is committed.
 
-> **IMPORTANT: Never manually edit files in `Sources/MistKitOpenAPI/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
+> **IMPORTANT: Never manually edit files in `Sources/MistKitOpenAPI/` or `Sources/MistKitManagementOpenAPI/`.** These files are auto-generated from `openapi.yaml` and `management-openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify the spec and regenerate using `./Scripts/generate-openapi.sh` (CI's "Check generated OpenAPI output" job diffs both targets).
 
 The `openapi.yaml` file serves as the source of truth for:
 - All available endpoints and their HTTP methods
@@ -472,7 +508,7 @@ see the `/device/` note below.
   Apple in favor of `/changes/database`)*
 - Changes: `/changes/database`, `/changes/zone`
 - Subscriptions: `/subscriptions/list`, `/subscriptions/lookup`, `/subscriptions/modify`
-- Users: `/users/caller`, `/users/discover` (POST; GET is `@available(*, unavailable)` — Apple
+- Users: `/users/caller`, `/users/discover` (POST only; GET is not wrapped — Apple
   returns HTTP 500, see #28), `/users/lookup/email`, `/users/lookup/id`
   *(`/users/lookup/contacts` and `/users/current` are deprecated and unwrapped)*
 - Assets: `/assets/upload`, `/assets/rereference`
@@ -517,26 +553,22 @@ the router instead.
 
 For detailed schema workflows and integration:
 
-- **AI Schema Workflow** (`Examples/CelestraCloud/.claude/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
+- **AI Schema Workflow** ([`CelestraCloud/.claude/AI_SCHEMA_WORKFLOW.md`](https://github.com/brightdigit/CelestraCloud/blob/mistkit/.claude/AI_SCHEMA_WORKFLOW.md), in the standalone CelestraCloud repo) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
 - **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
 
 ## Examples
 
 The `Examples/` directory contains working applications that dogfood MistKit-under-development (see also the README "Examples" list). These are MistKit-dev test beds, not end-user deployment templates.
 
-### BushelCloud — the canonical MistKit pattern demonstration
+### SwoopMistKit (BushelCloud) — the canonical MistKit pattern demonstration
 
-`Examples/BushelCloud/` is the most complete reference implementation of MistKit's core patterns — the backend that syncs macOS restore images, Xcode, and Swift versions for the [Bushel app](https://getbushel.app):
+`Examples/SwoopMistKit/` (git subrepo of [brightdigit/SwoopMistKit](https://github.com/brightdigit/SwoopMistKit), formerly `brightdigit/BushelCloud`; the package inside is still named `BushelCloud`) is the most complete reference implementation of MistKit's core patterns — the backend that syncs macOS restore images, Xcode, and Swift versions for the [Bushel app](https://getbushel.app):
 
 - **Server-to-Server authentication** — loading an ECDSA `.pem` key and wiring `ServerToServerAuthManager` into `CloudKitService` (`Sources/BushelCloudKit/CloudKit/BushelCloudKitService.swift`, `PEMValidator.swift`).
 - **Batch / chunked record operations** — working within CloudKit's 200-operations-per-request limit and aggregating results across batches (`CloudKit/SyncEngine.swift`, `CloudKit/BushelCloudKitService.swift`).
 - **Multi-source data integration** — fetching and deduplicating from many upstream APIs (`DataSources/` — IPSW, MESU, AppleDB, XcodeReleases, SwiftVersion, …; `DataSourcePipeline+Deduplication.swift`).
 - **CloudKit reference usage** — creating and resolving reference fields between record types (`DataSources/DataSourcePipeline+ReferenceResolution.swift`, `Extensions/XcodeVersionRecord+CloudKit.swift`).
 - **Cross-platform logging** — swift-log with MistKit's subsystem organization (`Configuration/BushelConfiguration.swift`).
-
-### CelestraCloud — query filtering, sorting & web etiquette
-
-`Examples/CelestraCloud/` is a command-line RSS reader (backend for the [Celestra app](https://celestr.app)) demonstrating MistKit's `QueryFilter`/`QuerySort` APIs, GUID-based duplicate detection, and respectful HTTP client patterns. See its own `CLAUDE.md`.
 
 ### MistDemo — interactive auth & endpoint demo
 
@@ -608,3 +640,11 @@ Versioned, in-repo agent memory is the source of truth for how to work in this r
 **Proactive maintenance:** when the human corrects you or gives an always/never instruction, append to `.claude/agent-notes.md` without being asked. When you learn a durable project fact, write a memory file under `.claude/memory/` and add a one-line index entry in `MEMORY.md`.
 
 **No native/global project memory:** `.claude/memory/` replaces Claude Code's `~/.claude/projects/<project>/memory/`, Cursor memories, and similar stores for this project. Do not save project-scoped memories there. The only allowed native-store entry is a pointer that memories live in-repo at `.claude/memory/`.
+
+### Wire format, retry hints, schema text (Mistico #119)
+
+- **Public wire codecs** (`Sources/MistKit/Models/WireFormat/`): `WireFieldValue` (`{"value": …, "type": …}`, `nil` = cleared field `{"value": null}`), `WireRecordOperation`, `ModifyRecordsRequestBody`. `FieldTypeTagging.whenRequired` matches what MistKit sends; `.always` tags every value like a response. Deletes write only `recordName` + `recordChangeTag`. `RecordOperation.clearedFields` goes out as `{"value": null}` (the `ClearedValue` member of `FieldValueRequest.value` in `openapi.yaml`).
+- **Errors**: `ErrorResponse.retryAfter`/`redirectURL` decode onto `CloudKitError.throttled(reason:retryAfter:)`, `.tryAgainLater(reason:retryAfter:)`, `.authenticationRequired(reason:redirectURL:)` (defaulted associated values). Public `reason`, `retryAfter`, `redirectURL`, `isRetryable`. MistKit never retries.
+- **Zones**: `lookupRecords`/`lookupAllRecords` take `zoneID:`; `Reference.zoneID` is sent only outside `_defaultZone`; `RecordInfo.zoneID` comes from the response.
+- **Queries**: `QueryFilter.near(_:_:distance:)` (meters, `Filter.distance`), `QueryFilter.recordName(equals:)` / `(notEquals:)` (`___recordID` as REFERENCE), `FilterComparator` + `SchemaFieldType.allowedComparators` + `requiresSortableIndex`.
+- **Schema text**: `CloudKitSchema.schemaText` writes the `cktool` layout and round-trips with `init(parsing:)`; `annotatingSourceLines()`, `SchemaField.sourceLine`/`SchemaRecordType.sourceLine` (ignored by `==`), `writtenIdentifier(_:)` quoting, `SchemaField.implicitSystemFields`, `fieldsIncludingImplicit`, `SchemaPrimitiveType.canBeEncrypted`; models are `Codable` with `var` properties. Parser strictness: bare `_names` and `GRANT`/`PREFERRED`/`QUERYABLE`/`SORTABLE`/`SEARCHABLE` must be quoted; trailing `,` before `)` and a missing final `;` are tolerated; duplicates and `ENCRYPTED` on a non-encryptable type are errors.

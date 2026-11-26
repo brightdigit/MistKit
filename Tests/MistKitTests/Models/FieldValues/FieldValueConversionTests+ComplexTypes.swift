@@ -23,7 +23,7 @@ extension FieldValueConversionTests {
         course: 45.0,
         timestamp: Date(timeIntervalSince1970: 1_000_000)
       )
-      let fieldValue = FieldValue.location(location)
+      let fieldValue = FieldValue.location(.value(location))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .LocationValue(let value) = components.value {
@@ -47,7 +47,7 @@ extension FieldValueConversionTests {
         return
       }
       let location = Location(latitude: 0.0, longitude: 0.0)
-      let fieldValue = FieldValue.location(location)
+      let fieldValue = FieldValue.location(.value(location))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .LocationValue(let value) = components.value {
@@ -71,7 +71,7 @@ extension FieldValueConversionTests {
         return
       }
       let reference = Reference(recordName: "test-record-123")
-      let fieldValue = FieldValue.reference(reference)
+      let fieldValue = FieldValue.reference(.value(reference))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .ReferenceValue(let value) = components.value {
@@ -89,7 +89,7 @@ extension FieldValueConversionTests {
         return
       }
       let reference = Reference(recordName: "test-record-456", action: .deleteSelf)
-      let fieldValue = FieldValue.reference(reference)
+      let fieldValue = FieldValue.reference(.value(reference))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .ReferenceValue(let value) = components.value {
@@ -109,7 +109,7 @@ extension FieldValueConversionTests {
       let reference = Reference(
         recordName: "test-record-789", action: Reference.Action.none
       )
-      let fieldValue = FieldValue.reference(reference)
+      let fieldValue = FieldValue.reference(.value(reference))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .ReferenceValue(let value) = components.value {
@@ -127,7 +127,7 @@ extension FieldValueConversionTests {
         return
       }
       let reference = Reference(recordName: "test-record-validate", action: .validate)
-      let fieldValue = FieldValue.reference(reference)
+      let fieldValue = FieldValue.reference(.value(reference))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .ReferenceValue(let value) = components.value {
@@ -152,7 +152,7 @@ extension FieldValueConversionTests {
         receipt: "receipt_xyz",
         downloadURL: "https://example.com/file.jpg"
       )
-      let fieldValue = FieldValue.asset(asset)
+      let fieldValue = FieldValue.asset(.value(asset))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .AssetValue(let value) = components.value {
@@ -174,7 +174,7 @@ extension FieldValueConversionTests {
         return
       }
       let asset = Asset()
-      let fieldValue = FieldValue.asset(asset)
+      let fieldValue = FieldValue.asset(.value(asset))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .AssetValue(let value) = components.value {

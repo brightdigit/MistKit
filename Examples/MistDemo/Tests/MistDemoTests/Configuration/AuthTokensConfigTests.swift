@@ -54,6 +54,7 @@ internal struct AuthTokensConfigTests {
     #expect(config.host == "127.0.0.1")
     #expect(config.openBrowser == true)
     #expect(config.shareeEmail == nil)
+    #expect(config.output == .text)
   }
 
   @Test("Memberwise init accepts sharee email")
@@ -84,5 +85,30 @@ internal struct AuthTokensConfigTests {
     let config = try await AuthTokensConfig(configuration: configuration)
     #expect(config.apiToken == "tok")
     #expect(config.shareeEmail == "sharee@example.com")
+  }
+
+  @Test("Configuration init parses --output env alongside sharee.email")
+  internal func parsesOutputEnv() async throws {
+    let configuration = Self.configuration(values: [
+      (MistDemoKeys.Auth.apiToken, "tok"),
+      (MistDemoKeys.Auth.shareeEmail, "sharee@example.com"),
+      (MistDemoKeys.Output.authTokenOutput, "ENV"),
+    ])
+
+    let config = try await AuthTokensConfig(configuration: configuration)
+    #expect(config.output == .env)
+    #expect(config.shareeEmail == "sharee@example.com")
+  }
+
+  @Test("Configuration init throws on an unknown --output")
+  internal func invalidOutputThrows() async {
+    let configuration = Self.configuration(values: [
+      (MistDemoKeys.Auth.apiToken, "tok"),
+      (MistDemoKeys.Output.authTokenOutput, "shell"),
+    ])
+
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await AuthTokensConfig(configuration: configuration)
+    }
   }
 }

@@ -15,8 +15,8 @@ let result = try await service.queryRecords(
   Query(
     recordType: "Article",
     filters: [
-      .greaterThan("publishedDate", .date(oneWeekAgo)),
-      .equals("status", .string("published"))
+      .greaterThan("publishedDate", .date(.value(oneWeekAgo))),
+      .equals("status", .string(.value("published")))
     ],
     sortBy: [.descending("publishedDate")]
   ),
@@ -70,16 +70,16 @@ Use ``CloudKitService/listZones(database:)`` to discover which zones a database 
 
 ## Creating
 
-Use ``CloudKitService/createRecord(recordType:recordName:fields:zoneID:database:)`` for a single create. Fields are a `[String: FieldValue]` dictionary — every CloudKit scalar plus references, locations, assets, and lists are modeled in ``FieldValue``:
+Use ``CloudKitService/createRecord(recordType:recordName:fields:encryptedFields:zoneID:database:)`` for a single create. Fields are a `[String: FieldValue]` dictionary — every CloudKit scalar plus references, locations, assets, and lists are modeled in ``FieldValue``:
 
 ```swift
 let article = try await service.createRecord(
   recordType: "Article",
   fields: [
-    "title": .string("Hello, CloudKit"),
-    "body": .string("First post."),
-    "wordCount": .int64(2),
-    "publishedDate": .date(Date())
+    "title": .string(.value("Hello, CloudKit")),
+    "body": .string(.value("First post.")),
+    "wordCount": .int64(.value(2)),
+    "publishedDate": .date(.value(Date()))
   ],
   database: .private
 )
@@ -87,15 +87,40 @@ let article = try await service.createRecord(
 
 Omit `recordName` to let CloudKit generate one; pass an explicit string when you need a stable identifier you can lookup later.
 
+### Encrypted fields
+
+A field declared `ENCRYPTED` in the container schema (for example `"secret" ENCRYPTED STRING`) is stored under the user's CloudKit service key and can only be written or read on the **private** and **shared** databases with **web-auth** credentials. Name such fields in `encryptedFields:` and MistKit sends the field dictionary with `isEncrypted: true` — and an explicit `type`, which CloudKit requires for encrypted values even where a plain write could leave it out:
+
+```swift
+let note = try await service.createRecord(
+  recordType: "Note",
+  fields: [
+    "title": .string(.value("Grocery list")),
+    "secret": .string(.value("door code 4471"))
+  ],
+  encryptedFields: ["secret"],
+  database: .private
+)
+```
+
+Nothing is encrypted on the client. The value travels as plaintext over TLS and Apple's servers encrypt it; on every read (`records/lookup`, `records/query`, `records/changes`) it comes back decrypted, and the names CloudKit flagged are in ``RecordInfo/encryptedFields``. What the flag buys is encryption at rest under a per-user key, and interoperability with a native app whose schema already marks the field `ENCRYPTED`; it does not hide the value from Apple.
+
+Rules CloudKit enforces, and how they surface:
+
+- **No filtering.** Encrypted fields have no index. A `filterBy` on one fails the whole query with ``CloudKitError/badRequest(reason:)`` — the reason reads `Field 'secret' has a value type of ENCRYPTED_STRING and cannot be queried using filter type EQUALS`. A `sortBy` on an encrypted field is accepted but has no meaningful order.
+- **Not on the public database, not on references or assets.** MistKit rejects these before the request is sent, as ``CloudKitError/badRequest(reason:)``, because CloudKit only encrypts scalar and list values and the public database has no per-user keys. Assets are always encrypted in transit and at rest on their own.
+- **Existing fields cannot be converted.** Only a new schema field can be declared `ENCRYPTED`. The schema declaration governs, and the request flag has to agree with it in both directions: writing `isEncrypted` to a field the schema declares plain fails with `Attempt to save encrypted data in non encrypted field type`, and omitting it on a field the schema declares `ENCRYPTED` fails with `invalid attempt to set value type ENCRYPTED_BYTES for field 'secret' for type 'Note', defined to be: ENCRYPTED_STRING`. Both arrive as a per-record ``CloudKitError/badRequest(reason:)``.
+- **Advanced Data Protection.** A user who has turned on Advanced Data Protection cannot obtain a web-auth token at all, so none of this is reachable for them — see the note in <doc:AuthenticationAndDatabases>.
+
 ## Updating
 
-Use ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:zoneID:database:)``. Pass `recordChangeTag` to opt into optimistic concurrency — CloudKit rejects the write if the record has been modified since you read it:
+Use ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:encryptedFields:zoneID:database:)``. Pass `recordChangeTag` to opt into optimistic concurrency — CloudKit rejects the write if the record has been modified since you read it:
 
 ```swift
 let updated = try await service.updateRecord(
   recordType: "Article",
   recordName: existing.recordName,
-  fields: ["title": .string("Hello, CloudKit (revised)")],
+  fields: ["title": .string(.value("Hello, CloudKit (revised)"))],
   recordChangeTag: existing.recordChangeTag,
   database: .private
 )
@@ -119,19 +144,19 @@ Pass `recordChangeTag` to refuse the delete if the record changed since you read
 
 ## Batching
 
-When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:)``, ``RecordOperation/update(recordType:recordName:fields:recordChangeTag:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
+When you need to create, update, and delete in one round-trip, use ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)`` with an array of ``RecordOperation`` values. The convenience factories ``RecordOperation/create(recordType:recordName:fields:encryptedFields:)``, ``RecordOperation/update(recordType:recordName:fields:clearedFields:recordChangeTag:encryptedFields:)``, and ``RecordOperation/delete(recordType:recordName:recordChangeTag:)`` keep call sites readable:
 
 ```swift
 let results = try await service.modifyRecords(
   [
     .create(
       recordType: "Article",
-      fields: ["title": .string("New")]
+      fields: ["title": .string(.value("New"))]
     ),
     .update(
       recordType: "Article",
       recordName: "existing-id",
-      fields: ["title": .string("Renamed")],
+      fields: ["title": .string(.value("Renamed"))],
       recordChangeTag: existing.recordChangeTag
     ),
     .delete(
@@ -166,7 +191,7 @@ Choose `atomic: true` when the operations are semantically linked (paired update
 
 ## Looking up
 
-Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)`` to fetch known records by name:
+Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)`` to fetch known records by name:
 
 ```swift
 let results = try await service.lookupRecords(
@@ -205,12 +230,12 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 - ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
 - ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``
-- ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)``
+- ``CloudKitService/lookupRecords(recordNames:desiredKeys:zoneID:database:)``
 
 ### Write operations
 
-- ``CloudKitService/createRecord(recordType:recordName:fields:zoneID:database:)``
-- ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:zoneID:database:)``
+- ``CloudKitService/createRecord(recordType:recordName:fields:encryptedFields:zoneID:database:)``
+- ``CloudKitService/updateRecord(recordType:recordName:fields:recordChangeTag:encryptedFields:zoneID:database:)``
 - ``CloudKitService/deleteRecord(recordType:recordName:recordChangeTag:zoneID:database:)``
 - ``CloudKitService/modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
 

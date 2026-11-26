@@ -51,6 +51,6 @@ internal struct AltTestRecord: CloudKitRecord {
   }
 
   internal func toCloudKitFields() -> [String: FieldValue] {
-    ["title": .string(title)]
+    ["title": .string(.value(title))]
   }
 }

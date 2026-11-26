@@ -31,43 +31,67 @@ public import Foundation
 
 /// Convenience extensions for extracting typed values from FieldValue cases
 extension FieldValue {
-  /// Extract a String value if this is a .string case
+  /// Extract a String value if this is a `.string(.value)` case.
   ///
-  /// - Returns: The string value, or nil if this is not a .string case
+  /// - Returns: The string value, or nil if this is not a single-string field
   public var stringValue: String? {
-    if case .string(let value) = self {
+    if case .string(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract an Int value if this is an .int64 case
+  /// Extract a string list if this is a `.string(.list)` case.
+  public var stringListValue: [String]? {
+    if case .string(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract an Int value if this is an `.int64(.value)` case.
   ///
-  /// - Returns: The integer value, or nil if this is not an .int64 case
+  /// - Returns: The integer value, or nil if this is not a single-int64 field
   public var intValue: Int? {
-    if case .int64(let value) = self {
+    if case .int64(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract a Double value if this is a .double case
+  /// Extract an int64 list if this is an `.int64(.list)` case.
+  public var int64ListValue: [Int]? {
+    if case .int64(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract a Double value if this is a `.double(.value)` case.
   ///
-  /// - Returns: The double value, or nil if this is not a .double case
+  /// - Returns: The double value, or nil if this is not a single-double field
   public var doubleValue: Double? {
-    if case .double(let value) = self {
+    if case .double(.value(let value)) = self {
       return value
+    }
+    return nil
+  }
+
+  /// Extract a double list if this is a `.double(.list)` case.
+  public var doubleListValue: [Double]? {
+    if case .double(.list(let values)) = self {
+      return values
     }
     return nil
   }
 
   // swiftlint:disable discouraged_optional_boolean
-  /// Extract a Bool value from .int64 cases
+  /// Extract a Bool value from `.int64(.value)` cases
   ///
   /// CloudKit represents booleans as INT64 where 0 is false and 1 is true.
   /// This method asserts that the value is either 0 or 1.
   ///
-  /// - Returns: The boolean value, or nil if this is not an .int64 case
+  /// - Returns: The boolean value, or nil if this is not an `.int64(.value)` case
   public var boolValue: Bool? {
     boolValue(assertionHandler: { condition, message in
       assert(condition, message)
@@ -75,78 +99,100 @@ extension FieldValue {
   }
   // swiftlint:enable discouraged_optional_boolean
 
-  /// Extract a Date value if this is a .date case
+  /// Extract a Date value if this is a `.date(.value)` case.
   ///
-  /// - Returns: The date value, or nil if this is not a .date case
+  /// - Returns: The date value, or nil if this is not a single-date field
   public var dateValue: Date? {
-    if case .date(let value) = self {
+    if case .date(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract base64-encoded bytes if this is a `.bytes` case.
+  /// Extract a date list if this is a `.date(.list)` case.
+  public var dateListValue: [Date]? {
+    if case .date(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract base64-encoded bytes if this is a `.bytes(.value)` case.
   ///
-  /// - Returns: The payload as a base64 string, or nil if this is not a `.bytes` case
+  /// - Returns: The payload as a base64 string, or nil if this is not a single-bytes field
   public var bytesValue: String? {
-    if case .bytes(let value) = self {
+    if case .bytes(.value(let value)) = self {
       return value.base64EncodedString()
     }
     return nil
   }
 
-  /// Extract the binary payload if this is a `.bytes` case.
+  /// Extract a bytes list (as base64 strings) if this is a `.bytes(.list)` case.
+  public var bytesListValue: [Data]? {
+    if case .bytes(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract the binary payload if this is a `.bytes(.value)` case.
   ///
-  /// Matches `.bytes` only. An untagged CloudKit `BYTES` response is claimed by
+  /// Matches `.bytes(.value)` only. An untagged CloudKit `BYTES` response is claimed by
   /// first-match-wins inference as `.string`, so `dataValue` returns `nil` for
   /// it; the base64 text remains available via ``stringValue``. This accessor
   /// does not attempt `Data(base64Encoded:)` on a `.string` payload: base64 has
   /// no false-positive signal, so ordinary strings such as `"Chen"` or `"test"`
   /// would decode as plausible-looking garbage.
   ///
-  /// - Returns: The `Data` payload, or nil if this is not a `.bytes` case
+  /// - Returns: The `Data` payload, or nil if this is not a single-bytes field
   public var dataValue: Data? {
-    if case .bytes(let value) = self {
+    if case .bytes(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract a Location value if this is a .location case
+  /// Extract a Location value if this is a `.location(.value)` case.
   ///
-  /// - Returns: The location value, or nil if this is not a .location case
+  /// - Returns: The location value, or nil if this is not a single-location field
   public var locationValue: Location? {
-    if case .location(let value) = self {
+    if case .location(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract a Reference value if this is a .reference case
+  /// Extract a location list if this is a `.location(.list)` case.
+  public var locationListValue: [Location]? {
+    if case .location(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract a Reference value if this is a `.reference(.value)` case.
   ///
-  /// - Returns: The reference value, or nil if this is not a .reference case
+  /// - Returns: The reference value, or nil if this is not a single-reference field
   public var referenceValue: Reference? {
-    if case .reference(let value) = self {
+    if case .reference(.value(let value)) = self {
       return value
     }
     return nil
   }
 
-  /// Extract an Asset value if this is an .asset case
+  /// Extract a reference list if this is a `.reference(.list)` case.
+  public var referenceListValue: [Reference]? {
+    if case .reference(.list(let values)) = self {
+      return values
+    }
+    return nil
+  }
+
+  /// Extract an Asset value if this is an `.asset(.value)` case.
   ///
-  /// - Returns: The asset value, or nil if this is not an .asset case
+  /// - Returns: The asset value, or nil if this is not a single-asset field
   public var assetValue: Asset? {
-    if case .asset(let value) = self {
-      return value
-    }
-    return nil
-  }
-
-  /// Extract a list of FieldValues if this is a .list case
-  ///
-  /// - Returns: The array of field values, or nil if this is not a .list case
-  public var listValue: [FieldValue]? {
-    if case .list(let value) = self {
+    if case .asset(.value(let value)) = self {
       return value
     }
     return nil
@@ -156,13 +202,13 @@ extension FieldValue {
   /// Internal method to extract Bool value with custom assertion handler
   ///
   /// - Parameter assertionHandler: Custom assertion handler for testing, defaults to system assert
-  /// - Returns: The boolean value, or nil if this is not an .int64 case
+  /// - Returns: The boolean value, or nil if this is not an `.int64(.value)` case
   internal func boolValue(
     assertionHandler: (_ condition: Bool, _ message: String) -> Void = { condition, message in
       assert(condition, message)
     }
   ) -> Bool? {
-    if case .int64(let value) = self {
+    if case .int64(.value(let value)) = self {
       assertionHandler(
         value == 0 || value == 1,
         "Boolean int64 value must be 0 or 1, got \(value)"

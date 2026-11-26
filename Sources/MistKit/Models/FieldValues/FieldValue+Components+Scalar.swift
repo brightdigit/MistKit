@@ -30,6 +30,7 @@
 internal import Foundation
 internal import MistKitOpenAPI
 
+// swiftlint:disable file_length
 /// Scalar-value conversions for `FieldValue` ← `Components.Schemas` response types.
 extension FieldValue {
   /// A decoded response `value` narrowed to its five scalar `oneOf` cases.
@@ -46,28 +47,6 @@ extension FieldValue {
     case double(Double)
     /// Milliseconds since the epoch, as CloudKit sends a `TIMESTAMP`.
     case date(Double)
-
-    /// The `FieldValue` first-match-wins inference produces for this payload. Lossy for the
-    /// ambiguous scalars: a base64 BYTES reads back as `.string`, and a whole-number
-    /// TIMESTAMP reads back as `.int64`. `BytesValue` stays a wire `String`; decode to
-    /// `Data` here, falling back to `.string` if the payload is not valid base64.
-    fileprivate var inferred: FieldValue {
-      switch self {
-      case .string(let strVal):
-        return .string(strVal)
-      case .bytes(let bytesVal):
-        if let data = Data(base64Encoded: bytesVal) {
-          return .bytes(data)
-        }
-        return .string(bytesVal)
-      case .int64(let intVal):
-        return .int64(Int(intVal))
-      case .double(let dblVal):
-        return .double(dblVal)
-      case .date(let dateVal):
-        return .date(Date(timeIntervalSince1970: dateVal / 1_000))
-      }
-    }
 
     /// The numeric payload, or `nil` when the value is string-backed. `Int64Value`,
     /// `DoubleValue`, and `DateValue` all arrive as JSON numbers.
@@ -115,6 +94,28 @@ extension FieldValue {
         return nil
       }
     }
+
+    /// The `FieldValue` first-match-wins inference produces for this payload. Lossy for the
+    /// ambiguous scalars: a base64 BYTES reads back as `.string`, and a whole-number
+    /// TIMESTAMP reads back as `.int64`. `BytesValue` stays a wire `String`; decode to
+    /// `Data` here, falling back to `.string` if the payload is not valid base64.
+    fileprivate func inferred(fieldName: String) throws(ConversionError) -> FieldValue {
+      switch self {
+      case .string(let strVal):
+        return .string(.value(strVal))
+      case .bytes(let bytesVal):
+        if let data = Data(base64Encoded: bytesVal) {
+          return .bytes(.value(data))
+        }
+        return .string(.value(bytesVal))
+      case .int64(let intVal):
+        return .int64(.value(try FieldValue.platformInt(intVal, fieldName: fieldName)))
+      case .double(let dblVal):
+        return .double(.value(dblVal))
+      case .date(let dateVal):
+        return .date(.value(Date(timeIntervalSince1970: dateVal / 1_000)))
+      }
+    }
   }
 
   internal static func makeSimpleFieldValue(
@@ -130,7 +131,7 @@ extension FieldValue {
     if let typed = try makeTypedScalar(from: value, type: fieldType, fieldName: fieldName) {
       return typed
     }
-    return makeInferredScalar(from: value)
+    return try makeInferredScalar(from: value, fieldName: fieldName)
   }
 
   // Build a scalar `FieldValue` from an explicit CloudKit `type`, recovering the value
@@ -158,21 +159,31 @@ extension FieldValue {
     switch ResponseTypeTag(fieldType) {
     case .numeric(.timestamp):
       let number = try requireNumeric(value, fieldName: fieldName, declaredType: declared)
-      return .date(Date(timeIntervalSince1970: number / 1_000))
+      return .date(.value(Date(timeIntervalSince1970: number / 1_000)))
     case .numeric(.double):
-      return .double(try requireNumeric(value, fieldName: fieldName, declaredType: declared))
+      return .double(
+        .value(
+          try requireNumeric(
+            value,
+            fieldName: fieldName,
+            declaredType: declared
+          )
+        )
+      )
     case .numeric(.int64):
       // Validate the category, then defer to inference so a fractional number isn't truncated.
       _ = try requireNumeric(value, fieldName: fieldName, declaredType: declared)
       return nil
     case .text(.bytes):
       let string = try requireString(value, fieldName: fieldName, declaredType: declared)
-      return .bytes(try dataFromBase64(string, fieldName: fieldName, declaredType: declared))
+      return .bytes(
+        .value(try dataFromBase64(string, fieldName: fieldName, declaredType: declared))
+      )
     case .text(.string):
       // Validate the category, then defer to inference, which already produces `.string`.
       _ = try requireString(value, fieldName: fieldName, declaredType: declared)
       return nil
-    case .complex:
+    case .complex, .list:
       return nil
     }
   }
@@ -217,8 +228,23 @@ extension FieldValue {
   /// is present. Lossy for ambiguous scalars: a base64 BYTES reads back as `.string`,
   /// and a whole-number TIMESTAMP reads back as `.int64`.
   private static func makeInferredScalar(
-    from value: Components.Schemas.FieldValueResponse.valuePayload
-  ) -> FieldValue? {
-    ScalarPayload(value)?.inferred
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
+    try ScalarPayload(value)?.inferred(fieldName: fieldName)
+  }
+
+  /// Narrows a CloudKit `INT64` to `Int`, throwing
+  /// ``ConversionError/integerOutOfRange(fieldName:value:)`` where `Int` is
+  /// narrower than 64 bits (WASI) and the value doesn't fit, instead of trapping.
+  internal static func platformInt(
+    _ value: Int64,
+    fieldName: String
+  ) throws(ConversionError) -> Int {
+    guard let int = Int(exactly: value) else {
+      try ConversionError.integerOutOfRange(fieldName: fieldName, value: value).reportAndThrow()
+    }
+    return int
   }
 }
+// swiftlint:enable file_length

@@ -142,7 +142,7 @@ A change is "breaking" when it requires consumers of MistKit to update their cod
 | Enum case removed or renamed | Switches in consumer code stop compiling |
 | Parameter type changed | Existing call sites break |
 
-For MistKit-API breaking changes, prefer the `feat!` / `BREAKING CHANGE:` convention in the commit body, and note the migration in `ReleaseNotes.md`. While the package is pre-1.0 (currently 1.0.0-alpha/beta), some flexibility is acceptable — but the wrapper team has been careful to flag user-visible breakage explicitly.
+For MistKit-API breaking changes, prefer the `feat!` / `BREAKING CHANGE:` convention in the commit body, and call out the break in `ReleaseNotes.md`; no migration path is needed. While the package is pre-1.0 (currently 1.0.0-alpha/beta), some flexibility is acceptable — but the wrapper team has been careful to flag user-visible breakage explicitly.
 
 If only the generated layer changes and the wrapper preserves its public shape, the change is *not* breaking for consumers — they never see the generated types.
 

@@ -127,4 +127,26 @@ internal struct CloudKitErrorTests {
     #expect(description.contains("Error code: \(URLError.Code.notConnectedToInternet.rawValue)"))
     #expect(!description.contains("Failed URL:"))
   }
+
+  @Test(".modifyIncomplete describes and reads through to its underlying error")
+  internal func errorReadsThrough() {
+    let error = CloudKitError.modifyIncomplete(
+      completed: [],
+      unsent: [
+        ZonedRecordOperation(.delete(recordType: "Note", recordName: "n0")),
+        ZonedRecordOperation(.delete(recordType: "Note", recordName: "n1")),
+      ],
+      underlying: .throttled(reason: "slow down", retryAfter: 30)
+    )
+
+    #expect(error.isRetryable)
+    #expect(error.retryAfter == 30)
+    #expect(error.reason == "slow down")
+    #expect(error.httpStatusCode == 429)
+    #expect(error.serverErrorCode == "THROTTLED")
+    let description = error.errorDescription ?? ""
+    #expect(description.contains("0 record results"))
+    #expect(description.contains("2 operations unsent"))
+    #expect(description.contains("THROTTLED"))
+  }
 }

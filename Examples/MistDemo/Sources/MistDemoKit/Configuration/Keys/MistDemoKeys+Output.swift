@@ -44,6 +44,14 @@ extension MistDemoKeys {
       default: MistDemoConstants.Defaults.outputFormat
     )
 
+    /// `--output` / `CLOUDKIT_OUTPUT` — `auth-token` / `auth-tokens` presentation
+    /// (`text` | `env`); see ``AuthTokenOutput``.
+    internal static let authTokenOutput = ConfigKey<String>(
+      "output",
+      envPrefix: MistDemoKeys.envPrefix,
+      default: AuthTokenOutput.text.rawValue
+    )
+
     /// `--verbose` / `CLOUDKIT_VERBOSE`.
     internal static let verbose = ConfigKey<Bool>(
       "verbose", envPrefix: MistDemoKeys.envPrefix, default: false

@@ -33,7 +33,7 @@ let service = CloudKitService(
 )
 
 let result = try await service.queryRecords(
-  recordType: "Note",
+  Query(recordType: "Note"),
   database: .private
 )
 ```
@@ -75,80 +75,139 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 
 ## Topics
 
-### Getting Started
+### Essentials
 
-- <doc:AbstractionLayerArchitecture>
+- <doc:CloudKitAsYourBackend>
 - <doc:ConfiguringMistKit>
-- <doc:WorkingWithRecords>
-- <doc:CloudKitLimitsAndPerformance>
+- <doc:AuthenticationAndDatabases>
+- <doc:AbstractionLayerArchitecture>
 - ``CloudKitService``
 - ``Database``
 - ``Environment``
-- ``CloudKitError``
+
+### Records
+
+- <doc:WorkingWithRecords>
+- <doc:BatchingAndPagination>
 - ``RecordInfo``
 - ``FieldValue``
+- ``Reference``
+- ``Asset``
+- ``Location``
+- ``RecordTimestamp``
+- ``RecordOperation``
+- ``ZonedRecordOperation``
+- ``RecordResult``
+- ``RecordChangesResult``
+- ``OperationClassification``
+- ``BatchSyncResult``
+
+### Queries
+
+- <doc:BuildingQueries>
+- ``Query``
 - ``QueryFilter``
 - ``QuerySort``
+- ``FilterComparator``
 - ``QueryResult``
-- ``RecordOperation``
-- ``RecordChangesResult``
-- ``RecordTimestamp``
+- ``QueryDescriptor``
+- ``QueryPredicate``
+- ``QueryValidation``
+- ``QueryValidationIssue``
+
+### Zones and change tracking
+
+- <doc:SyncingChanges>
 - ``ZoneID``
 - ``ZoneInfo``
+- ``ZoneType``
 - ``ZoneOperation``
+- ``ZoneChangeResult``
+- ``DatabaseChangesResult``
+- ``ZoneChangesRequest``
+- ``RecordZoneChangesResult``
+- ``ZoneRecordChanges``
 - ``ZoneChangesResult``
+
+### Users and sharing
+
+- <doc:SharingAndUsers>
 - ``UserInfo``
 - ``UserIdentity``
 - ``UserIdentityLookupInfo``
 - ``NameComponents``
-- ``OperationClassification``
-- ``BatchSyncResult``
+- ``CreatedShare``
+- ``ShareInfo``
+- ``ShareRecordInfo``
+- ``ShortGUID``
+- ``ShortGUIDDictionary``
+
+### Assets
+
+- <doc:WorkingWithAssets>
+- ``AssetUploader``
 - ``AssetUploadResponse``
 - ``AssetUploadReceipt``
 - ``AssetUploadToken``
-- ``AssetUploader``
+
+### Subscriptions and notifications
+
+- <doc:SubscriptionsAndNotifications>
+- ``SubscriptionInfo``
+- ``SubscriptionOperation``
+- ``SubscriptionResult``
+- ``Courier``
+- ``WebCourierPoller``
+- ``CourierNotification``
+- ``APNsTokenResult``
+
+### Schemas and the Management API
+
+- <doc:ManagingSchemas>
+- ``CloudKitManagementService``
+- ``ManagementToken``
+- ``CloudKitSchema``
+- ``SchemaRecordType``
+- ``SchemaField``
+- ``SchemaFieldType``
+- ``FieldType``
+- ``SchemaSource``
+
+### JSON and wire format
+
+- <doc:EncodingRecordsAsJSON>
+- <doc:FieldTypePolymorphism>
+- ``WireFieldValue``
+- ``WireRecord``
+- ``WireRecordDocument``
+- ``WireRecordOperation``
+- ``ModifyRecordsRequestBody``
+- ``FieldTypeTagging``
 
 ### Authentication
 
-- <doc:AuthenticationAndDatabases>
 - ``Credentials``
 - ``APICredentials``
 - ``ServerToServerCredentials``
 - ``PublicAuthPreference``
 - ``PrivateKeyMaterial``
-- ``Authenticator``
-- ``APITokenAuthenticator``
-- ``WebAuthTokenAuthenticator``
-- ``ServerToServerAuthenticator``
+- ``CredentialVerification``
 - ``TokenManager``
-- ``APITokenManager``
-- ``WebAuthTokenManager``
-- ``AdaptiveTokenManager``
-- ``ServerToServerAuthManager``
 - ``TokenStorage``
-- ``CredentialsValidationError``
-- ``CredentialAvailability``
-- ``InvalidCredentialReason``
-- ``AuthenticationFailedReason``
-- ``NetworkErrorReason``
-- ``InternalErrorReason``
-- ``TokenManagerError``
-- ``TokenStorageError``
+- ``Authenticator``
 
-### Error Handling
+### Errors
 
 - <doc:HandlingErrors>
 - ``CloudKitError``
+- ``CloudKitManagementError``
+- ``ConversionError``
+- ``RecordFieldErrorContext``
+- ``OperationFailure``
 - ``TokenManagerError``
-- ``TokenStorageError``
 - ``CredentialsValidationError``
-- ``InvalidCredentialReason``
-- ``AuthenticationFailedReason``
-- ``NetworkErrorReason``
-- ``InternalErrorReason``
-- ``CredentialAvailability``
 
-### Record management
+### Record management protocols
 
 - ``CloudKitRecord``
 - ``RecordManaging``
@@ -156,22 +215,18 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, [WASI](https://wasi.
 - ``RecordTypeSet``
 - ``RecordTypeIterating``
 
-### OpenAPI code generation
+### Operations and limits
 
-- <doc:OpenAPICodeGeneration>
-- <doc:GeneratedCodeWorkflow>
-- <doc:GeneratedCodeAnalysis>
-
-### Guides
-
-- <doc:CloudKitAsYourBackend>
-- <doc:iOSDevUKTalk>
+- <doc:CloudKitLimitsAndPerformance>
 - <doc:DeployingMistKit>
+- <doc:iOSDevUKTalk>
 
 ### Under the hood
 
 - <doc:RequestSigning>
-- <doc:FieldTypePolymorphism>
+- <doc:OpenAPICodeGeneration>
+- <doc:GeneratedCodeWorkflow>
+- <doc:GeneratedCodeAnalysis>
 
 ### Background
 

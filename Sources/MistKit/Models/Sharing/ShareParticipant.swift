@@ -39,7 +39,7 @@ internal import MistKitOpenAPI
 ///
 /// Invitees may still carry a sparse ``UserIdentity`` (lookup email only,
 /// ``UserRecordName/nonDiscoverable``) — that is identity present, not absent.
-public struct ShareParticipant: Codable, Sendable {
+public struct ShareParticipant: Codable, Sendable, Hashable {
   /// The identity of the participant.
   public let userIdentity: UserIdentity
   /// The participant's read and write permissions.

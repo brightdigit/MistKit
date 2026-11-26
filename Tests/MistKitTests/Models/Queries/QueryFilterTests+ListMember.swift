@@ -13,7 +13,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.listContains("categories", .string("technology"))
+      let filter = QueryFilter.listContains("categories", .string(.value("technology")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .LIST_CONTAINS)
       #expect(components.fieldName == "categories")
@@ -25,7 +25,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.notListContains("blockedUsers", .string("user-456"))
+      let filter = QueryFilter.notListContains("blockedUsers", .string(.value("user-456")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .NOT_LIST_CONTAINS)
       #expect(components.fieldName == "blockedUsers")

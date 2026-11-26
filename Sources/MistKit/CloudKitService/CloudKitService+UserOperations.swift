@@ -74,6 +74,17 @@ extension CloudKitService {
   /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email
   /// returns at most one identity in the result array. Routed against the
   /// public database with web-auth credentials.
+  ///
+  /// > Deprecated: Apple deprecated `users/lookup/email` in favor of POST
+  /// > `users/discover`. Use ``discoverUserIdentities(lookupInfos:)`` with
+  /// > ``UserIdentityLookupInfo`` email addresses.
+  @available(
+    *, deprecated,
+    message: """
+      CloudKit deprecated `users/lookup/email` in favor of POST `users/discover`. \
+      Use discoverUserIdentities(lookupInfos:) instead.
+      """
+  )
   public func lookupUsersByEmail(
     _ emails: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {
@@ -104,6 +115,17 @@ extension CloudKitService {
   ///
   /// Hits CloudKit's POST `users/lookup/id` endpoint. Routed against the
   /// public database with web-auth credentials.
+  ///
+  /// > Deprecated: Apple deprecated `users/lookup/id` in favor of POST
+  /// > `users/discover`. Use ``discoverUserIdentities(lookupInfos:)`` with
+  /// > ``UserIdentityLookupInfo`` user record names.
+  @available(
+    *, deprecated,
+    message: """
+      CloudKit deprecated `users/lookup/id` in favor of POST `users/discover`. \
+      Use discoverUserIdentities(lookupInfos:) instead.
+      """
+  )
   public func lookupUsersByRecordName(
     _ recordNames: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {

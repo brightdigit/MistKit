@@ -61,6 +61,7 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
       RereferenceAssetPhase(),
       QueryRecordsPhase(),
       LookupRecordsPhase(),
+      StringListRoundTripPhase(),
       ModifyRecordsPhase(),
       QueryRequestOptionsPhase(),
       ModifyRequestOptionsPhase(),

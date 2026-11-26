@@ -18,7 +18,7 @@ downstream; a tag carrying `path: "../.."` resolves nowhere.
 **`git subrepo push` does not know this.** It copies the subdir verbatim, so a push
 from the monorepo overwrites the standalone `url:` line with `path:` and breaks the
 published package. Re-apply the swap after every push. Same discipline
-`Examples/BushelCloud/Package.swift:94-98` documents for its own MistKit line.
+`Examples/SwoopMistKit/Package.swift` (formerly `Examples/BushelCloud`) documents for its own MistKit line.
 
 The seeding was done by hand rather than by `git subrepo push`, because the repo was
 empty and GitHub cannot open a PR between unrelated histories: `main` was seeded with

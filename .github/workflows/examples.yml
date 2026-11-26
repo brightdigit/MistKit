@@ -18,7 +18,7 @@ jobs:
   test-examples:
     name: Test ${{ matrix.example }} on Ubuntu
     runs-on: ubuntu-latest
-    # MistDemo / BushelCloud / CelestraCloud / MistKitConfiguration all declare
+    # MistDemo / SwoopMistKit / MistKitConfiguration all declare
     # swift-tools-version: 6.4. Swift 6.4 has no release image yet — use the
     # nightly (same pin as the subrepos).
     container: ${{ matrix.container }}
@@ -30,11 +30,8 @@ jobs:
           - example: MistDemo
             path: Examples/MistDemo
             container: swiftlang/swift:nightly-6.4.x-noble
-          - example: BushelCloud
-            path: Examples/BushelCloud
-            container: swiftlang/swift:nightly-6.4.x-noble
-          - example: CelestraCloud
-            path: Examples/CelestraCloud
+          - example: SwoopMistKit
+            path: Examples/SwoopMistKit
             container: swiftlang/swift:nightly-6.4.x-noble
           - example: MistKitConfiguration
             path: Packages/MistKitConfiguration

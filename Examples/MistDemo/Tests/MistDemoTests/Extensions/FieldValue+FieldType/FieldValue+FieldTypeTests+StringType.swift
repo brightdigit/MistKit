@@ -41,7 +41,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: "Hello World" as String, fieldType: .string)
 
       #expect(fieldValue != nil)
-      if case .string(let value) = fieldValue {
+      if case .string(.value(let value)) = fieldValue {
         #expect(value == "Hello World")
       } else {
         Issue.record("Expected .string case")
@@ -53,7 +53,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: "" as String, fieldType: .string)
 
       #expect(fieldValue != nil)
-      if case .string(let value) = fieldValue {
+      if case .string(.value(let value)) = fieldValue {
         #expect(value.isEmpty)
       } else {
         Issue.record("Expected .string case")

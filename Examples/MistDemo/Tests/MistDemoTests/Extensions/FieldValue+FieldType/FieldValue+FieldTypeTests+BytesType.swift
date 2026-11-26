@@ -41,7 +41,7 @@ extension FieldValueFieldTypeTests {
       let fieldValue = FieldValue(value: "aGVsbG8=" as String, fieldType: .bytes)
 
       #expect(fieldValue != nil)
-      if case .bytes(let value) = fieldValue {
+      if case .bytes(.value(let value)) = fieldValue {
         #expect(value == Data("hello".utf8))
       } else {
         Issue.record("Expected .bytes case")

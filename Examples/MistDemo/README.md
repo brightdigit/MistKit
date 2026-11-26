@@ -40,6 +40,7 @@ swift run mistdemo auth-token              # capture a web-auth token
 swift run mistdemo auth-tokens             # capture sharer + sharee tokens
 swift run mistdemo test-public             # integration suite, public DB
 swift run mistdemo test-private            # integration suite, private DB
+swift run mistdemo probe-encrypted         # encrypted-field probe (standard vs ADP account)
 ```
 
 Configuration comes from `MistDemoConfiguration` — command-line flags or
@@ -47,6 +48,44 @@ Configuration comes from `MistDemoConfiguration` — command-line flags or
 token (`CLOUDKIT_WEB_AUTH_TOKEN` + `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`) and
 the sharee's iCloud email (`CLOUDKIT_SHAREE_EMAIL`); capture them with
 `mistdemo auth-tokens --sharee-email sharee@example.com`.
+
+Add `--output env` to `auth-token` / `auth-tokens` for script-friendly
+output: stdout carries only `KEY=value` lines (`CLOUDKIT_WEB_AUTH_TOKEN`,
+plus `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN` and `CLOUDKIT_SHAREE_EMAIL` for
+`auth-tokens`), and every prompt and progress message goes to stderr.
+
+### Refreshing the CI web-auth secrets
+
+Web-auth tokens expire. When the **MistDemo Integration** workflow's "Live
+CloudKit Integration" job fails with HTTP 421 `AUTHENTICATION_REQUIRED`,
+recapture the tokens and push them to the repo's GitHub secrets from the repo
+root:
+
+```bash
+./Scripts/refresh-web-auth-tokens.sh --update-env --rerun
+```
+
+The script reads `CLOUDKIT_API_TOKEN`, `CLOUDKIT_CONTAINER_ID` (or
+`CLOUDKIT_CONTAINER_IDENTIFIER`) and `CLOUDKIT_SHAREE_EMAIL` from a dotenv file
+(default `../MistDemo.env` next to the repo root; override with
+`--env-file PATH`), builds MistDemo, and runs
+`mistdemo auth-tokens --output env` against the `development` environment —
+sign in as the sharer, then as the sharee. Each value is piped to
+`gh secret set … -R brightdigit/MistKit` over stdin (never echoed or put on a
+command line). `CLOUDKIT_API_TOKEN` and `CLOUDKIT_CONTAINER_ID` are pushed too:
+a web-auth token only works with the API token and container that minted it, so
+refreshing the tokens against a stale `CLOUDKIT_API_TOKEN` secret still fails
+with 421.
+
+| Flag | Effect |
+|---|---|
+| `--env-file PATH` | dotenv file to read (and, with `--update-env`, rewrite) |
+| `--sharee-email EMAIL` | Sharee iCloud email if not in the env file |
+| `--single` | Run `auth-token` and set only `CLOUDKIT_WEB_AUTH_TOKEN` |
+| `--update-env` | Rewrite the captured keys in the env file in place |
+| `--rerun` | Re-run the MistDemo-Integration run for the current branch's head commit if it failed or was cancelled |
+| `--dry-run` | Skip sign-in; list the secret names that would be set |
+| `--environment ENV` | CloudKit environment (default `development`, matching CI) |
 
 ---
 

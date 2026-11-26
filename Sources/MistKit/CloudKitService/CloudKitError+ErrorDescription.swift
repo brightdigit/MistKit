@@ -64,6 +64,10 @@ extension CloudKitError {
       return "CloudKit operation failed with underlying error: \(String(reflecting: error))"
     case .decodingError(let error):
       return Self.decodingErrorDescription(error)
+    case .invalidFieldValue(let recordName, let fieldName, _):
+      let record = recordName.map { "record '\($0)'" } ?? "an unnamed record"
+      return "Field '\(fieldName)' of \(record) has a value JSON can't hold "
+        + "(a NaN or infinite number); the request wasn't sent"
     case .networkError(let error):
       return Self.networkErrorDescription(error)
     case .unsupportedOperationType(let type):
@@ -72,6 +76,12 @@ extension CloudKitError {
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
+    case .modifyIncomplete(let completed, let unsent, let underlying):
+      return Self.modifyIncompleteDescription(
+        completedCount: completed.count,
+        unsentCount: unsent.count,
+        underlying: underlying
+      )
     case .zonePaginationLimitExceeded(let maxPages, let zones):
       return Self.zonePaginationDescription(maxPages: maxPages, zoneCount: zones.count)
     case .missingCredentials(let database, let availability, let reason):
@@ -106,6 +116,17 @@ extension CloudKitError {
       message += "\nHint: \(hint.description)"
     }
     return message
+  }
+
+  private static func modifyIncompleteDescription(
+    completedCount: Int,
+    unsentCount: Int,
+    underlying: CloudKitError
+  ) -> String {
+    "CloudKit modify stopped early: \(completedCount) record results came back, "
+      + "\(unsentCount) operations unsent (the failed request's operations may "
+      + "have been applied)\nUnderlying error: "
+      + (underlying.errorDescription ?? String(describing: underlying))
   }
 
   private static func recordOperationDescription(_ recordError: RecordOperationFailure) -> String {

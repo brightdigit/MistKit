@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKit
 internal import Testing
 
 @testable import MistDemoKit
@@ -140,6 +141,31 @@ internal struct JSONFormatterTests {
     #expect(output.contains("TodoItem"))
     #expect(output.contains("Buy groceries"))
     #expect(output.contains("pending"))
+  }
+
+  @Test("Record fields are written with their CloudKit type")
+  internal func formatRecordFieldsTagged() throws {
+    let record = RecordInfo(
+      recordName: "note-1",
+      recordType: "Note",
+      fields: [
+        "title": .string(.value("Hi")),
+        "due": .date(.value(Date(timeIntervalSince1970: 1_700_000_000))),
+      ]
+    )
+    let formatter = JSONFormatter(pretty: false)
+
+    let output = try formatter.format(record)
+
+    let object = try #require(
+      try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: Any]
+    )
+    let fields = try #require(object["fields"] as? [String: [String: Any]])
+    #expect(fields["title"]?["type"] as? String == "STRING")
+    #expect(fields["title"]?["value"] as? String == "Hi")
+    #expect(fields["due"]?["type"] as? String == "TIMESTAMP")
+    #expect(fields["due"]?["value"] as? Double == 1_700_000_000_000)
+    #expect(try JSONDecoder().decode(RecordInfo.self, from: Data(output.utf8)) == record)
   }
 
   // MARK: - Pretty Printing Tests

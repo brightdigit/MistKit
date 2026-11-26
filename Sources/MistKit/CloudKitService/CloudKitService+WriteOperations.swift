@@ -74,7 +74,9 @@ extension CloudKitService {
   /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
   ///   record, `.failure` (a ``RecordOperationFailure``) for one that CloudKit
   ///   rejected.
-  /// - Throws: CloudKitError if the operation fails
+  /// - Throws: CloudKitError if the operation fails;
+  ///   ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``,
+  ///   with nothing sent, when a field holds a `NaN` or infinite number.
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
@@ -83,6 +85,10 @@ extension CloudKitService {
     numbersAsStrings: Bool? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordResult] {
+    for operation in operations {
+      try operation.validateEncryptedFields(for: database)
+    }
+
     let apiOperations: [Components.Schemas.RecordOperation]
     do {
       apiOperations = try operations.map {
@@ -94,6 +100,46 @@ extension CloudKitService {
       throw CloudKitError.underlyingError(error)
     }
 
+    return try await sendModifyRecords(
+      apiOperations,
+      recordNames: operations.map(\.recordName),
+      atomic: atomic,
+      zoneID: zoneID,
+      desiredKeys: desiredKeys,
+      numbersAsStrings: numbersAsStrings,
+      database: database
+    )
+  }
+
+  /// Sends one `records/modify` request of operations already checked and
+  /// converted, and maps its response and errors.
+  ///
+  /// ``modifyRecords(_:atomic:zoneID:desiredKeys:numbersAsStrings:database:)``
+  /// and ``modifyAllRecords(_:atomicZones:database:batchSize:)`` both send
+  /// through here, so each converts an operation once.
+  ///
+  /// - Parameters:
+  ///   - apiOperations: The converted operations to send.
+  ///   - recordNames: The operations' record names, in order, to name the
+  ///     record behind an `EncodingError`.
+  ///   - atomic: When true, the entire batch fails if any single operation fails.
+  ///   - zoneID: Optional target zone for the operations.
+  ///   - desiredKeys: Optional list of field names limiting the fields returned.
+  ///   - numbersAsStrings: When true, numeric field values are returned as strings.
+  ///   - database: The CloudKit database scope to modify.
+  /// - Returns: A ``RecordResult`` per operation.
+  /// - Throws: ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``,
+  ///   with nothing sent, when encoding refuses a number; otherwise the mapped
+  ///   transport or CloudKit error.
+  internal func sendModifyRecords(
+    _ apiOperations: [Components.Schemas.RecordOperation],
+    recordNames: [String?],
+    atomic: Bool,
+    zoneID: ZoneID?,
+    desiredKeys: [String]?,
+    numbersAsStrings: Bool?,
+    database: Database
+  ) async throws(CloudKitError) -> [RecordResult] {
     do {
       let client = try self.client(for: database)
       let response = try await client.modifyRecords(
@@ -120,12 +166,19 @@ extension CloudKitService {
         try await responseProcessor.processModifyRecordsResponse(response)
 
       return try (modifyResponse.records ?? []).map { try RecordResult(from: $0) }
-    } catch let cloudKitError as CloudKitError {
-      throw cloudKitError.addingQuotaHint(
+    } catch {
+      // Encoding the body fails before anything is sent when a number isn't
+      // finite; name the record and field instead of wrapping `ClientError`.
+      if let fieldError = CloudKitError(encodingError: error, recordNames: recordNames) {
+        throw fieldError
+      }
+      // `mapToCloudKitError` passes a `CloudKitError` through unchanged and
+      // unwraps OpenAPIRuntime's `ClientError`, so a transport failure surfaces
+      // as `.networkError(URLError)` like every other operation, not as
+      // `.underlyingError(ClientError)`.
+      throw mapToCloudKitError(error, context: "modifyRecords").addingQuotaHint(
         Self.recordSizeQuotaHint(for: apiOperations)
       )
-    } catch {
-      throw CloudKitError.underlyingError(error)
     }
   }
 }

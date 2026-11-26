@@ -83,7 +83,7 @@ And the fix came from a **2015 Apple Developer Forums thread**, not from Apple's
 - **Lists are strictly worse than scalars.** The request enum has 17 values including eight `*_LIST` flavors; the response enum has 10, collapsing every list to a single `LIST`, and list elements carry no tag at all. A `[Date]` written as `TIMESTAMP_LIST` reads back as `[.int64]`.
 - **Sub-millisecond precision is destroyed on every write.** CloudKit rejects a fractional `TIMESTAMP`, so values are rounded — including the nested `Location.timestamp`, a second millisecond field with no tag of its own, found only via a live CelestraCloud failure.
 - **Schema strictness on one type is the only discriminator protecting another.** `LocationValue.latitude`/`longitude` are `required` in the spec *only* because, while they were optional, the undiscriminated `oneOf` greedily matched **assets as locations**. Loosen `Location` and `Asset` breaks.
-- **`Bool` does not exist.** It is `INT64` `0`/`1`, so `.int64(1)` and `FieldValue(booleanValue: true)` are `==` with no way to recover the intent.
+- **`Bool` does not exist.** It is `INT64` `0`/`1`, so `.int64(.value(1))` and `FieldValue(booleanValue: true)` are `==` with no way to recover the intent.
 - **The obvious hypothesis about `IN` filters was wrong.** ``QueryFilter`` `IN` returned `400 BadRequestException: Unexpected input` at *every* array size — 97, 20, even 2. The natural guess (an undocumented size limit) was false; the cause was a missing list `type` tag.
 
 ### Fail-loud was genuinely contested

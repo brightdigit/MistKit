@@ -13,7 +13,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let fieldValue = FieldValue.string("test string")
+      let fieldValue = FieldValue.string(.value("test string"))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .StringValue(let value) = components.value {
@@ -31,7 +31,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let fieldValue = FieldValue.int64(42)
+      let fieldValue = FieldValue.int64(.value(42))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .Int64Value(let value) = components.value {
@@ -49,7 +49,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let fieldValue = FieldValue.double(3.14159)
+      let fieldValue = FieldValue.double(.value(3.14159))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .DoubleValue(let value) = components.value {
@@ -92,7 +92,7 @@ extension FieldValueConversionTests {
         return
       }
       let payload = Data("hello".utf8)
-      let fieldValue = FieldValue.bytes(payload)
+      let fieldValue = FieldValue.bytes(.value(payload))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .BytesValue(let value) = components.value {
@@ -111,7 +111,7 @@ extension FieldValueConversionTests {
         return
       }
       let date = Date(timeIntervalSince1970: 1_000_000)
-      let fieldValue = FieldValue.date(date)
+      let fieldValue = FieldValue.date(.value(date))
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
       if case .DateValue(let value) = components.value {
@@ -132,7 +132,7 @@ extension FieldValueConversionTests {
       // Date carries sub-millisecond precision; CloudKit rejects a fractional TIMESTAMP
       // value with BAD_REQUEST, so the millisecond value must be a whole number.
       let date = Date(timeIntervalSince1970: 1_747_999_812.3478923)
-      let components = Components.Schemas.FieldValueRequest(from: .date(date))
+      let components = Components.Schemas.FieldValueRequest(from: .date(.value(date)))
 
       if case .DateValue(let value) = components.value {
         #expect(value == 1_747_999_812_348)

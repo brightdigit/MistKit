@@ -27,131 +27,48 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-
-// MARK: - Codable
-
 extension FieldValue {
-  private static let millisecondsPerSecond: Double = 1_000
-
-  /// Initialize field value from decoder
-  public init(from decoder: any Decoder) throws {
-    let container = try decoder.singleValueContainer()
-
-    if let value = try Self.decodeBasicTypes(from: container) {
-      self = value
-      return
-    }
-
-    if let value = try Self.decodeComplexTypes(from: container) {
-      self = value
-      return
-    }
-
-    throw DecodingError.dataCorruptedError(
-      in: container,
-      debugDescription: "Unable to decode FieldValue"
-    )
-  }
-
-  /// Decode basic field value types (string, int64, double)
-  private static func decodeBasicTypes(from container: any SingleValueDecodingContainer) throws
-    -> FieldValue?
-  {
-    if let value = try? container.decode(String.self) {
-      return .string(value)
-    }
-    if let value = try? container.decode(Int.self) {
-      return .int64(value)
-    }
-    if let value = try? container.decode(Double.self) {
-      return .double(value)
-    }
-    return nil
-  }
-
-  /// Decode complex field value types (list, location, reference, asset, date)
-  private static func decodeComplexTypes(from container: any SingleValueDecodingContainer) throws
-    -> FieldValue?
-  {
-    if let value = try? container.decode([FieldValue].self) {
-      return .list(value)
-    }
-    if let value = try? container.decode(Location.self) {
-      return .location(value)
-    }
-    if let value = try? container.decode(Reference.self) {
-      return .reference(value)
-    }
-    if let value = try? container.decode(Asset.self) {
-      return .asset(value)
-    }
-    // No `.date` branch here on purpose: a CloudKit timestamp arrives as a bare
-    // millisecond `Double`, which `decodeBasicTypes` (run first) already claims
-    // as `.double`. A date fallback at this point was therefore unreachable —
-    // it never ran, so removing it changes no behavior. Encoding still emits
-    // `.date` values as milliseconds (see `encode(to:)`).
-    return nil
-  }
-
-  /// Encode field value to encoder
-  public func encode(to encoder: any Encoder) throws {
-    var container = encoder.singleValueContainer()
-    try encodeValue(to: &container)
-  }
-
-  private func encodeValue(to container: inout any SingleValueEncodingContainer) throws {
-    if try encodeScalar(to: &container) {
-      return
-    }
-    try encodeComplex(to: &container)
-  }
-
-  /// Encode the scalar cases (string, bytes, int64, double, date).
+  /// Decodes a CloudKit field dictionary that carries its type,
+  /// `{"value": …, "type": …}`.
   ///
-  /// - Returns: `true` when `self` was a scalar case and has been encoded;
-  ///   `false` when `self` is a complex case that this method did not handle.
-  private func encodeScalar(to container: inout any SingleValueEncodingContainer) throws -> Bool {
-    switch self {
-    case .string(let val):
-      try container.encode(val)
-    case .bytes(let val):
-      try container.encode(val.base64EncodedString())
-    case .int64(let val):
-      try container.encode(val)
-    case .double(let val):
-      try container.encode(val)
-    case .date(let val):
-      try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
-    default:
-      return false
-    }
-    return true
-  }
-
-  /// Encode the complex cases (location, reference, asset, list).
-  private func encodeComplex(to container: inout any SingleValueEncodingContainer) throws {
-    switch self {
-    case .location(let val):
-      try container.encode(val)
-    case .reference(let val):
-      try container.encode(val)
-    case .asset(let val):
-      try container.encode(val)
-    case .list(let val):
-      try container.encode(val)
-    default:
-      // Scalar cases are handled by `encodeScalar(to:)`, which is always
-      // called first; reaching here would mean a new case was added without
-      // routing, so fail loudly rather than silently emit nothing.
-      throw EncodingError.invalidValue(
-        self,
-        EncodingError.Context(
-          codingPath: container.codingPath,
-          debugDescription: "Unhandled FieldValue case in encodeComplex(to:)"
+  /// This is the shape ``WireFieldValue`` writes with
+  /// ``FieldTypeTagging/always`` and the shape ``encode(to:)`` writes, so
+  /// every value reads back as the kind it was written: a `TIMESTAMP` as
+  /// `.date`, a `BYTES` as `.bytes`, a whole-valued `DOUBLE` as `.double`,
+  /// and an empty list with its element type.
+  ///
+  /// - Throws: `DecodingError.dataCorrupted` when the dictionary has no
+  ///   `type`, or its `value` is `null` (a cleared field isn't a
+  ///   `FieldValue`); otherwise the same errors as ``WireFieldValue``'s
+  ///   decoding.
+  public init(from decoder: any Decoder) throws {
+    let wire = try WireFieldValue(from: decoder)
+    guard let value = wire.value else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath,
+          debugDescription: "A FieldValue can't be null."
         )
       )
     }
+    guard wire.typeTagging == .always else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath,
+          debugDescription: "A FieldValue needs a type: {\"value\": …, \"type\": …}."
+        )
+      )
+    }
+    self = value
+  }
+
+  /// Encodes the value as a CloudKit field dictionary with its type,
+  /// `{"value": …, "type": …}` (see ``WireFieldValue`` with
+  /// ``FieldTypeTagging/always``).
+  ///
+  /// - Throws: `EncodingError` when a number isn't finite.
+  public func encode(to encoder: any Encoder) throws {
+    try WireFieldValue(self, typeTagging: .always).encode(to: encoder)
   }
 }
 
@@ -168,6 +85,6 @@ extension FieldValue {
   ///
   /// - Parameter booleanValue: The boolean value to convert
   public init(booleanValue: Bool) {
-    self = .int64(booleanValue ? 1 : 0)
+    self = .int64(.value(booleanValue ? 1 : 0))
   }
 }

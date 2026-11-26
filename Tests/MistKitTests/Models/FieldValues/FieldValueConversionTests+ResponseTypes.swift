@@ -40,7 +40,7 @@ extension FieldValueConversionTests {
       }
       // A whole number decodes as Int64Value, but type TIMESTAMP must recover .date.
       let value = try Self.decode(#"{"value": 1493382919000, "type": "TIMESTAMP"}"#)
-      #expect(value == .date(Date(timeIntervalSince1970: 1_493_382_919)))
+      #expect(value == .date(.value(Date(timeIntervalSince1970: 1_493_382_919))))
     }
 
     @Test("Fractional TIMESTAMP reads back as .date")
@@ -50,7 +50,7 @@ extension FieldValueConversionTests {
         return
       }
       let value = try Self.decode(#"{"value": 1000500.0, "type": "TIMESTAMP"}"#)
-      #expect(value == .date(Date(timeIntervalSince1970: 1_000.5)))
+      #expect(value == .date(.value(Date(timeIntervalSince1970: 1_000.5))))
     }
 
     @Test("BYTES with type reads back as .bytes, not .string")
@@ -60,7 +60,7 @@ extension FieldValueConversionTests {
         return
       }
       let value = try Self.decode(#"{"value": "aGVsbG8=", "type": "BYTES"}"#)
-      #expect(value == .bytes(Data("hello".utf8)))
+      #expect(value == .bytes(.value(Data("hello".utf8))))
     }
 
     @Test("Whole-valued DOUBLE with type reads back as .double, not .int64")
@@ -70,7 +70,7 @@ extension FieldValueConversionTests {
         return
       }
       let value = try Self.decode(#"{"value": 5, "type": "DOUBLE"}"#)
-      #expect(value == .double(5.0))
+      #expect(value == .double(.value(5.0)))
     }
 
     @Test("Explicit STRING and INT64 types match their inferred value shape")
@@ -79,8 +79,8 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      #expect(try Self.decode(#"{"value": "hello", "type": "STRING"}"#) == .string("hello"))
-      #expect(try Self.decode(#"{"value": 42, "type": "INT64"}"#) == .int64(42))
+      #expect(try Self.decode(#"{"value": "hello", "type": "STRING"}"#) == .string(.value("hello")))
+      #expect(try Self.decode(#"{"value": 42, "type": "INT64"}"#) == .int64(.value(42)))
     }
 
     @Test("A scalar type that contradicts the value's shape throws")
@@ -108,7 +108,7 @@ extension FieldValueConversionTests {
       }
       // 3.5 satisfies the numeric category, so INT64 validates then defers to inference,
       // preserving .double rather than truncating to an integer.
-      #expect(try Self.decode(#"{"value": 3.5, "type": "INT64"}"#) == .double(3.5))
+      #expect(try Self.decode(#"{"value": 3.5, "type": "INT64"}"#) == .double(.value(3.5)))
     }
 
     @Test("A complex or list declared type that contradicts the value's shape throws")
@@ -123,7 +123,7 @@ extension FieldValueConversionTests {
       expectThrows(#"{"value": 42, "type": "REFERENCE"}"#)
       expectThrows(#"{"value": "text", "type": "ASSET"}"#)
       expectThrows(#"{"value": 42, "type": "LOCATION"}"#)
-      expectThrows(#"{"value": 42, "type": "LIST"}"#)
+      expectThrows(#"{"value": 42, "type": "STRING_LIST"}"#)
       // A complex tag over the *wrong* complex value (LOCATION shape under a REFERENCE tag)
       // is likewise a contradiction.
       expectThrows(#"{"value": {"latitude": 1, "longitude": 2}, "type": "REFERENCE"}"#)
@@ -138,12 +138,12 @@ extension FieldValueConversionTests {
       // A declared complex/list type whose value satisfies it round-trips unchanged —
       // the validation only rejects contradictions, never well-formed responses.
       let reference = try Self.decode(#"{"value": {"recordName": "rec1"}, "type": "REFERENCE"}"#)
-      #expect(reference == .reference(Reference(recordName: "rec1")))
+      #expect(reference == .reference(.value(Reference(recordName: "rec1"))))
 
       let locationJSON = #"{"value": {"latitude": 37.3, "longitude": -122}, "type": "LOCATION"}"#
       let location = try Self.decode(locationJSON)
-      guard case .location(let loc) = location else {
-        Issue.record("Expected .location, got \(location)")
+      guard case .location(.value(let loc)) = location else {
+        Issue.record("Expected .location(.value(.value)), got \(location)")
         return
       }
       #expect(loc.latitude == 37.3)
@@ -152,14 +152,14 @@ extension FieldValueConversionTests {
       // ASSETID maps to the same AssetValue as ASSET.
       let assetJSON = #"{"value": {"fileChecksum": "chk"}, "type": "ASSETID"}"#
       let asset = try Self.decode(assetJSON)
-      guard case .asset(let assetValue) = asset else {
-        Issue.record("Expected .asset, got \(asset)")
+      guard case .asset(.value(let assetValue)) = asset else {
+        Issue.record("Expected .asset(.value(.value)), got \(asset)")
         return
       }
       #expect(assetValue.fileChecksum == "chk")
 
-      let list = try Self.decode(#"{"value": ["a", "b"], "type": "LIST"}"#)
-      #expect(list == .list([.string("a"), .string("b")]))
+      let list = try Self.decode(#"{"value": ["a", "b"], "type": "STRING_LIST"}"#)
+      #expect(list == .string(.list(["a", "b"])))
     }
 
     @Test("Without a type, scalars fall back to first-match-wins inference")
@@ -168,10 +168,10 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      #expect(try Self.decode(#"{"value": "plain"}"#) == .string("plain"))
-      #expect(try Self.decode(#"{"value": "Chen"}"#) == .string("Chen"))
-      #expect(try Self.decode(#"{"value": 42}"#) == .int64(42))
-      #expect(try Self.decode(#"{"value": 3.5}"#) == .double(3.5))
+      #expect(try Self.decode(#"{"value": "plain"}"#) == .string(.value("plain")))
+      #expect(try Self.decode(#"{"value": "Chen"}"#) == .string(.value("Chen")))
+      #expect(try Self.decode(#"{"value": 42}"#) == .int64(.value(42)))
+      #expect(try Self.decode(#"{"value": 3.5}"#) == .double(.value(3.5)))
     }
 
     @Test("Tagged BYTES that is not valid base64 throws typeValueMismatch with the raw string")
@@ -192,8 +192,8 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      #expect(try Self.decode(#"{"value": "not!valid!"}"#) == .string("not!valid!"))
-      #expect(try Self.decode(#"{"value": "aGVsbG8="}"#) == .string("aGVsbG8="))
+      #expect(try Self.decode(#"{"value": "not!valid!"}"#) == .string(.value("not!valid!")))
+      #expect(try Self.decode(#"{"value": "aGVsbG8="}"#) == .string(.value("aGVsbG8=")))
     }
 
     /// Expects decoding `json` to throw `typeValueMismatch` whose `value` is the

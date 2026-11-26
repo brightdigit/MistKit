@@ -3,7 +3,7 @@
 > **Source of truth:** configuration keys now live as typed values in
 > `Examples/MistDemo/Sources/MistDemoKit/Configuration/Keys/` (`MistDemoKeys`).
 > The five CloudKit credential keys share their names with `MistKitConfiguration`,
-> BushelCloud and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
+> SwoopMistKit (BushelCloud) and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
 MistDemo supports flexible configuration through files, profiles, environment variables, and command-line arguments using Apple's Swift Configuration package.
 
 ## Configuration Sources

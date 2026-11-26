@@ -80,7 +80,9 @@
     internal func createForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"recordType":"Note","fields":{"title":"Hi"}}"#
+      let jsonBody = """
+        {"recordType":"Note","fields":{"title":{"value":"Hi","type":"STRING"}}}
+        """
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -98,35 +100,12 @@
       #expect(captured?.fields["title"] == "Hi")
     }
 
-    @Test("POST /api/records/create accepts JSON-number fields (Int + Double)")
-    internal func createAcceptsNumericFields() async throws {
-      let fixture = Self.makeFixture(authenticated: true)
-      let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = """
-        {"recordType":"Note","fields":{"title":"Hi","index":5,"score":1.5}}
-        """
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/records/create",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: jsonBody)
-        ) { response in
-          #expect(response.status == .ok)
-        }
-      }
-      let captured = await fixture.backend.lastCreate
-      #expect(captured?.fields["title"] == "Hi")
-      #expect(captured?.fields["index"] == "5")
-      #expect(captured?.fields["score"] == "1.5")
-    }
-
     @Test("POST /api/records/update forwards recordName, fields, changeTag")
     internal func updateForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
-        {"recordType":"Note","recordName":"abc","fields":{"title":"Up"},\
+        {"recordType":"Note","recordName":"abc","fields":{"title":{"value":"Up","type":"STRING"}},\
         "recordChangeTag":"tag-1"}
         """
 
@@ -153,7 +132,7 @@
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
-        {"recordType":"Note","recordName":"abc","fields":{"title":"Up"}}
+        {"recordType":"Note","recordName":"abc","fields":{"title":{"value":"Up","type":"STRING"}}}
         """
 
       try await app.test(.router) { client in

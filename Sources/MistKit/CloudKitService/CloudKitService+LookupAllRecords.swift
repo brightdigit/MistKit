@@ -30,7 +30,7 @@
 extension CloudKitService {
   /// Look up records by name, automatically chunking large inputs.
   ///
-  /// Convenience over ``lookupRecords(recordNames:desiredKeys:database:)`` that
+  /// Convenience over ``lookupRecords(recordNames:desiredKeys:zoneID:database:)`` that
   /// splits `recordNames` into batches of at most `batchSize` (CloudKit caps a
   /// single lookup request at ``maxRecordsPerRequest`` records) and concatenates
   /// the per-batch results in input order. Use this whenever the number of
@@ -40,6 +40,7 @@ extension CloudKitService {
   /// - Parameters:
   ///   - recordNames: Record names to fetch (any length).
   ///   - desiredKeys: Optional array of field names to fetch.
+  ///   - zoneID: The zone the records are in; `nil` for the default zone.
   ///   - database: The CloudKit database scope to read from
   ///     (`.public`, `.private`, `.shared`).
   ///   - batchSize: Maximum record names per request, clamped to
@@ -51,6 +52,7 @@ extension CloudKitService {
   public func lookupAllRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
+    zoneID: ZoneID? = nil,
     database: Database,
     batchSize: Int = CloudKitService.maxRecordsPerRequest
   ) async throws(CloudKitError) -> [RecordResult] {
@@ -62,6 +64,7 @@ extension CloudKitService {
       try await self.lookupRecords(
         recordNames: batch,
         desiredKeys: desiredKeys,
+        zoneID: zoneID,
         database: database
       )
     }

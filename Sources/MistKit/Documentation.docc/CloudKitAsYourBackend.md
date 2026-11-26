@@ -44,15 +44,15 @@ Records are the main way data is stored. Think of a record as a table row with t
 
 | CloudKit type | Native framework type | MistKit ``FieldValue`` case |
 | --- | --- | --- |
-| `STRING` | `String` | ``FieldValue/string(_:)`` |
-| `INT64` | `Int` / `NSNumber` | ``FieldValue/int64(_:)`` |
-| `DOUBLE` | `Double` / `NSNumber` | ``FieldValue/double(_:)`` |
-| `BYTES` | `Data` | ``FieldValue/bytes(_:)`` |
-| `TIMESTAMP` | `Date` | ``FieldValue/date(_:)`` |
-| `LOCATION` | [`CLLocation`](https://developer.apple.com/documentation/corelocation/cllocation) | ``FieldValue/location(_:)`` |
-| `REFERENCE` | [`CKRecord.Reference`](https://developer.apple.com/documentation/cloudkit/ckrecord/reference) | ``FieldValue/reference(_:)`` |
-| `ASSET` | [`CKAsset`](https://developer.apple.com/documentation/cloudkit/ckasset) | ``FieldValue/asset(_:)`` |
-| `LIST` | `Array` | ``FieldValue/list(_:)`` |
+| `STRING` | `String` | ``FieldValue/string(_:)-enum.case`` |
+| `INT64` | `Int` / `NSNumber` | ``FieldValue/int64(_:)-enum.case`` |
+| `DOUBLE` | `Double` / `NSNumber` | ``FieldValue/double(_:)-enum.case`` |
+| `BYTES` | `Data` | ``FieldValue/bytes(_:)-enum.case`` |
+| `TIMESTAMP` | `Date` | ``FieldValue/date(_:)-enum.case`` |
+| `LOCATION` | [`CLLocation`](https://developer.apple.com/documentation/corelocation/cllocation) | ``FieldValue/location(_:)-enum.case`` |
+| `REFERENCE` | [`CKRecord.Reference`](https://developer.apple.com/documentation/cloudkit/ckrecord/reference) | ``FieldValue/reference(_:)-enum.case`` |
+| `ASSET` | [`CKAsset`](https://developer.apple.com/documentation/cloudkit/ckasset) | ``FieldValue/asset(_:)-enum.case`` |
+| `LIST` | `Array` | the `.list` ``FieldValue/Arity`` of any of the above, such as `.string(.list(["a", "b"]))` |
 
 There is no boolean type — CloudKit stores booleans as `INT64` `0`/`1`, which is why MistKit offers ``FieldValue/init(booleanValue:)`` and ``FieldValue/boolValue``.
 
@@ -148,7 +148,7 @@ GitHub Actions (cron) ──▶ bushel-cloud CLI (MistKit) ──▶ CloudKit pu
 
 The same pattern powers [Celestra](https://celestr.app), an RSS reader whose feeds are fetched and synced to a public database on a schedule.
 
-Sources: [brightdigit/BushelCloud](https://github.com/brightdigit/BushelCloud) (also in this repository under `Examples/BushelCloud/`) and [brightdigit/CelestraCloud](https://github.com/brightdigit/CelestraCloud) (`Examples/CelestraCloud/`).
+Sources: [brightdigit/SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) (formerly BushelCloud; also in this repository under `Examples/SwoopMistKit/`) and [brightdigit/CelestraCloud](https://github.com/brightdigit/CelestraCloud).
 
 ### More use cases
 
@@ -342,7 +342,7 @@ openssl ec -in eckey.pem -pubout
 
 Paste the public key into step 3, save, and copy the **Key ID**. The private key never leaves your server.
 
-Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (or the empty string for no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is the request URL with the scheme and host removed — everything from `/database/` onward, for example `/database/1/iCloud.com.example.App/development/public/records/modify` — which is exactly what MistKit signs as the request's path:
+Each request is then signed. The payload is three strings joined by colons — the ISO 8601 date, the base64 SHA-256 of the body (the hash of empty data when there is no body), and the URL subpath — signed with ECDSA P-256 and sent in three headers. The subpath is the request URL with the scheme and host removed — everything from `/database/` onward, for example `/database/1/iCloud.com.example.App/development/public/records/modify` — which is exactly what MistKit signs as the request's path:
 
 | Header | Value |
 | --- | --- |
@@ -488,7 +488,7 @@ internal var headers: HTTPFields {
 }
 ```
 
-where the body hash is `SHA256.cloudKitBodyHash(of:)` — `base64(SHA256(body))`, or `""` when there is no body. The full design, including why `body` is `inout`, is in <doc:RequestSigning>.
+where the body hash is `SHA256.cloudKitBodyHash(of:)` — `base64(SHA256(body))`, with an absent body hashed as empty data. The full design, including why `body` is `inout`, is in <doc:RequestSigning>.
 
 ## Field type polymorphism
 
@@ -522,7 +522,7 @@ public struct Reference: Codable, Equatable, Sendable {
   public let action: Action?
 }
 
-public struct Asset: Codable, Equatable, Sendable {
+public struct Asset: Codable, Hashable, Sendable {
   public let fileChecksum: String?
   public let size: Int64?
   public let referenceChecksum: String?
@@ -584,7 +584,7 @@ Bushel's sync job runs entirely in [GitHub Actions](https://docs.github.com/en/a
 
 ![Repository secrets: CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY, CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN](talk-github-secrets)
 
-The scheduled workflow ([`Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml)) fires three times a day at off-the-hour minutes and hands the secrets to a composite action:
+The scheduled workflow ([`Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml)) fires three times a day at off-the-hour minutes and hands the secrets to a composite action:
 
 ```yaml
 name: Scheduled CloudKit Sync (Development)
@@ -622,7 +622,7 @@ jobs:
           enable-export: 'false'
 ```
 
-The action ([`Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)) downloads a pre-built binary when one is cached, builds it in Docker otherwise, validates the PEM before touching CloudKit, and runs the CLI with the credentials in environment variables:
+The action ([`Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)) downloads a pre-built binary when one is cached, builds it in Docker otherwise, validates the PEM before touching CloudKit, and runs the CLI with the credentials in environment variables:
 
 ```yaml
 name: 'CloudKit Sync Action'
@@ -708,10 +708,10 @@ And one more thing: Leo's apps — [Bushel](https://getbushel.app), virtualizati
 
 ### Use case examples
 
-- [BushelCloud](https://github.com/brightdigit/BushelCloud) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/BushelCloud`](https://github.com/brightdigit/MistKit/tree/main/Examples/BushelCloud))
-  - [`cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
-  - [`cloudkit-sync` composite action](https://github.com/brightdigit/MistKit/blob/main/Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)
-- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting (also at [`Examples/CelestraCloud`](https://github.com/brightdigit/MistKit/tree/main/Examples/CelestraCloud))
+- [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/SwoopMistKit`](https://github.com/brightdigit/MistKit/tree/main/Examples/SwoopMistKit))
+  - [`cloudkit-sync-dev.yml`](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
+  - [`cloudkit-sync` composite action](https://github.com/brightdigit/MistKit/blob/main/Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)
+- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting
 - [HeartWitch](https://github.com/brightdigit/HeartWitch) — the private-database, Apple Watch to Vapor bridge
 - [Rebuilding MistKit with Claude Code, part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/) and [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 

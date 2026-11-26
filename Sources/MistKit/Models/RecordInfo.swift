@@ -40,15 +40,24 @@ internal import MistKitOpenAPI
 /// ``OperationResult/failure(_:)`` on a ``RecordResult`` (a ``RecordOperationFailure``)
 /// and never become a `RecordInfo`. A response record missing its `recordName` is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
-public struct RecordInfo: Codable, Sendable {
+public struct RecordInfo: Codable, Hashable, Sendable, Identifiable {
   /// The record name
   public let recordName: String
+  /// The zone CloudKit reported the record in, or `nil` when the response
+  /// omitted it.
+  public let zoneID: ZoneID?
   /// The record type, or `nil` for tombstones and other typeless responses
   public let recordType: String?
   /// The record change tag for optimistic locking
   public let recordChangeTag: String?
   /// The record fields
   public let fields: [String: FieldValue]
+  /// Field names CloudKit echoed with `isEncrypted: true` on the response.
+  ///
+  /// Empty when the server omits the flag (Apple does not document whether
+  /// read-back always echoes it). Values in ``fields`` are still plaintext
+  /// under standard data protection — decryption happens server-side.
+  public let encryptedFields: Set<String>
   /// Information about when the record was created
   public let created: RecordTimestamp?
   /// Information about when the record was last modified
@@ -57,11 +66,17 @@ public struct RecordInfo: Codable, Sendable {
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
+  /// The record's identity within its zone: its ``recordName``.
+  public var id: String { recordName }
+
   internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
     guard let recordName = record.recordName else {
       try ConversionError.recordMissingRecordName.reportAndThrow()
     }
     self.recordName = recordName
+    self.zoneID = try record.zoneID.map { schema throws(ConversionError) in
+      try ZoneID(from: schema)
+    }
     self.recordType = record.recordType
     self.recordChangeTag = record.recordChangeTag
     if let created = record.created {
@@ -78,14 +93,40 @@ public struct RecordInfo: Codable, Sendable {
 
     // Convert fields to FieldValue representation
     var convertedFields: [String: FieldValue] = [:]
+    var encrypted = Set<String>()
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
         convertedFields[fieldName] = try FieldValue(fieldData, fieldName: fieldName)
+        if fieldData.isEncrypted == true {
+          encrypted.insert(fieldName)
+        }
       }
     }
 
     self.fields = convertedFields
+    self.encryptedFields = encrypted
+  }
+
+  /// Decodes a `RecordInfo` previously encoded with `Codable`.
+  ///
+  /// `encryptedFields` is optional on the wire so JSON written before the
+  /// property existed (and hand-written stubs) still decodes; it defaults to
+  /// an empty set.
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.recordName = try container.decode(String.self, forKey: .recordName)
+    self.zoneID = try container.decodeIfPresent(ZoneID.self, forKey: .zoneID)
+    self.recordType = try container.decodeIfPresent(String.self, forKey: .recordType)
+    self.recordChangeTag = try container.decodeIfPresent(
+      String.self, forKey: .recordChangeTag
+    )
+    self.fields = try container.decode([String: FieldValue].self, forKey: .fields)
+    self.encryptedFields =
+      try container.decodeIfPresent(Set<String>.self, forKey: .encryptedFields) ?? []
+    self.created = try container.decodeIfPresent(RecordTimestamp.self, forKey: .created)
+    self.modified = try container.decodeIfPresent(RecordTimestamp.self, forKey: .modified)
+    self.deleted = try container.decodeIfPresent(Bool.self, forKey: .deleted) ?? false
   }
 
   /// Public initializer for creating RecordInfo instances
@@ -95,25 +136,31 @@ public struct RecordInfo: Codable, Sendable {
   ///
   /// - Parameters:
   ///   - recordName: The unique record name
+  ///   - zoneID: The record's zone, or `nil` when unknown
   ///   - recordType: The CloudKit record type, or `nil` for a tombstone
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
+  ///   - encryptedFields: Field names marked encrypted on the response
   ///   - created: Optional timestamp when the record was created
   ///   - modified: Optional timestamp when the record was last modified
   ///   - deleted: Whether the record has been deleted
   public init(
     recordName: String,
+    zoneID: ZoneID? = nil,
     recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],
+    encryptedFields: Set<String> = [],
     created: RecordTimestamp? = nil,
     modified: RecordTimestamp? = nil,
     deleted: Bool = false
   ) {
     self.recordName = recordName
+    self.zoneID = zoneID
     self.recordType = recordType
     self.recordChangeTag = recordChangeTag
     self.fields = fields
+    self.encryptedFields = encryptedFields
     self.created = created
     self.modified = modified
     self.deleted = deleted

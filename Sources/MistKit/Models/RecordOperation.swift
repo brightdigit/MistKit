@@ -30,9 +30,9 @@
 internal import Foundation
 
 /// Represents a CloudKit record operation (create, update, delete, etc.)
-public struct RecordOperation: Sendable {
+public struct RecordOperation: Sendable, Hashable {
   /// The type of operation to perform
-  public enum OperationType: Sendable {
+  public enum OperationType: Sendable, Hashable {
     /// Create a new record
     case create
     /// Update an existing record
@@ -57,6 +57,17 @@ public struct RecordOperation: Sendable {
   public let recordName: String?
   /// The record fields as FieldValue types
   public let fields: [String: FieldValue]
+  /// Field names to clear: each is sent as `{"value": null}`, which removes
+  /// the field's value on the server.
+  ///
+  /// A name in both ``fields`` and `clearedFields` is sent with its value.
+  public let clearedFields: Set<String>
+  /// Field names that should be written with `isEncrypted: true` on the wire.
+  ///
+  /// Those fields must be declared `ENCRYPTED` in the container schema and are
+  /// only valid on private or shared databases with web-auth credentials.
+  /// Values are still sent as plaintext over TLS; CloudKit encrypts server-side.
+  public let encryptedFields: Set<String>
   /// Optional record change tag for optimistic locking
   public let recordChangeTag: String?
   /// When `true`, ask CloudKit to mint a short GUID so this record can be
@@ -77,6 +88,8 @@ public struct RecordOperation: Sendable {
     recordType: String,
     recordName: String?,
     fields: [String: FieldValue] = [:],
+    clearedFields: Set<String> = [],
+    encryptedFields: Set<String> = [],
     recordChangeTag: String? = nil,
     createShortGUID: Bool? = nil,
     forRecord: ShareTargetReference? = nil,
@@ -87,6 +100,8 @@ public struct RecordOperation: Sendable {
     self.recordType = recordType
     self.recordName = recordName
     self.fields = fields
+    self.clearedFields = clearedFields
+    self.encryptedFields = encryptedFields
     self.recordChangeTag = recordChangeTag
     self.createShortGUID = createShortGUID
     self.forRecord = forRecord
@@ -98,28 +113,43 @@ public struct RecordOperation: Sendable {
   public static func create(
     recordType: String,
     recordName: String? = nil,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    encryptedFields: Set<String> = []
   ) -> RecordOperation {
     RecordOperation(
       operationType: .create,
       recordType: recordType,
       recordName: recordName,
-      fields: fields
+      fields: fields,
+      encryptedFields: encryptedFields
     )
   }
 
   /// Convenience initializer for updating an existing record
+  ///
+  /// - Parameters:
+  ///   - recordType: The record type.
+  ///   - recordName: The record to update.
+  ///   - fields: The fields to set.
+  ///   - clearedFields: Field names to clear (sent as `{"value": null}`).
+  ///   - recordChangeTag: The change tag the update is checked against.
+  ///   - encryptedFields: Field names to send with `isEncrypted: true`.
+  /// - Returns: An `update` operation.
   public static func update(
     recordType: String,
     recordName: String,
     fields: [String: FieldValue],
-    recordChangeTag: String?
+    clearedFields: Set<String> = [],
+    recordChangeTag: String?,
+    encryptedFields: Set<String> = []
   ) -> RecordOperation {
     RecordOperation(
       operationType: .update,
       recordType: recordType,
       recordName: recordName,
       fields: fields,
+      clearedFields: clearedFields,
+      encryptedFields: encryptedFields,
       recordChangeTag: recordChangeTag
     )
   }

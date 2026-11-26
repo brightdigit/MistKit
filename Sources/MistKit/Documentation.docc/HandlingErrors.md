@@ -87,6 +87,9 @@ Every operation on ``CloudKitService`` throws ``CloudKitError``. The cases group
 | ``CloudKitError/underlyingError(_:)`` | Depends | Unclassified throw from the transport stack |
 | ``CloudKitError/unsupportedOperationType(_:)`` | No | Bug — server returned a record op MistKit doesn't model |
 | ``CloudKitError/paginationLimitExceeded(maxPages:records:)`` | Yes — but inspect | Auto-paginator hit its guard with records still collected |
+| ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)`` | Inspect `underlying` | `modifyAllRecords` stopped at a failed request; carries the results so far and the unsent operations |
+| ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)`` | No | A field held a `NaN` or infinite number; nothing was sent |
+| ``CloudKitError/conversionFailed(_:)`` | No | A response value couldn't become a domain type; carries a ``ConversionError`` |
 | ``CloudKitError/missingCredentials(database:availability:reason:)`` | No | The configured ``Credentials`` don't cover the call's database/auth combo |
 | ``CloudKitError/invalidPrivateKey(path:underlying:)`` | No | S2S key file is missing, unreadable, or not a valid ECDSA P-256 PEM |
 
@@ -118,17 +121,25 @@ OpenAPI spec enumerates onto a dedicated case:
 | `ACCESS_DENIED` | 403 | ``CloudKitError/accessDenied(reason:)`` |
 | `ATOMIC_ERROR` | 400 | ``CloudKitError/atomicFailure(reason:)`` |
 | `AUTHENTICATION_FAILED` | 401 | ``CloudKitError/authenticationFailed(reason:)`` |
-| `AUTHENTICATION_REQUIRED` | 421 | ``CloudKitError/authenticationRequired(reason:)`` |
+| `AUTHENTICATION_REQUIRED` | 421 | ``CloudKitError/authenticationRequired(reason:redirectURL:)`` |
 | `BAD_REQUEST` | 400 | ``CloudKitError/badRequest(reason:)`` |
 | `CONFLICT` | 409 | ``CloudKitError/conflict(reason:)`` |
 | `EXISTS` | 409 | ``CloudKitError/exists(reason:)`` |
 | `INTERNAL_ERROR` | 500 | ``CloudKitError/internalServerError(reason:)`` |
 | `NOT_FOUND` | 404 | ``CloudKitError/notFound(reason:)`` |
 | `QUOTA_EXCEEDED` | 413 | ``CloudKitError/quotaExceeded(reason:hint:)`` |
-| `THROTTLED` | 429 | ``CloudKitError/throttled(reason:)`` |
-| `TRY_AGAIN_LATER` | 503 | ``CloudKitError/tryAgainLater(reason:)`` |
+| `THROTTLED` | 429 | ``CloudKitError/throttled(reason:retryAfter:)`` |
+| `TRY_AGAIN_LATER` | 503 | ``CloudKitError/tryAgainLater(reason:retryAfter:)`` |
 | `VALIDATING_REFERENCE_ERROR` | 412 | ``CloudKitError/validatingReferenceError(reason:)`` |
 | `ZONE_NOT_FOUND` | 404 | ``CloudKitError/zoneNotFound(reason:)`` |
+
+``CloudKitError/reason``, ``CloudKitError/retryAfter`` and
+``CloudKitError/redirectURL`` read the failure body's fields whatever the case.
+``CloudKitError/isRetryable`` is `true` for `THROTTLED` and `TRY_AGAIN_LATER`
+(request-level or per-record); MistKit never retries on its own, so a caller
+that does should wait `retryAfter` seconds when it's set and back off otherwise.
+``CloudKitService/fetchWebAuthSignInURL()`` returns the `redirectURL` of an
+`AUTHENTICATION_REQUIRED` answer to an API-token-only request: the web sign-in page.
 
 ```swift
 do {
@@ -162,6 +173,29 @@ logging; use the cases themselves for control flow.
 > which reports the observed status because there is nothing documented to
 > report.
 
+### Errors that name a record and field
+
+``CloudKitError`` and ``ConversionError`` both conform to ``RecordFieldErrorContext``, so a catch site can report *which* record and field went wrong without switching on cases:
+
+```swift
+do {
+  _ = try await service.modifyRecords(operations, database: .private)
+} catch let error as any RecordFieldErrorContext {
+  logger.error("Bad value in \(error.recordName ?? "<new record>").\(error.fieldName ?? "?")")
+  throw error
+}
+```
+
+The names are filled in for:
+
+- ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``, thrown before anything is sent when a `DOUBLE`, a location coordinate or a timestamp is `NaN` or infinite. `JSONEncoder` refuses those, and MistKit checks every field first, so a bad value never reaches CloudKit. `recordName` is `nil` for a create that leaves naming to CloudKit.
+- ``CloudKitError/recordOperationFailed(_:)`` (the record name) and ``CloudKitError/conversionFailed(_:)`` (the field name, when the ``ConversionError`` has one).
+- ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``, which reads through to `underlying`.
+
+If you encode the public wire types yourself (``WireRecord``, ``ModifyRecordsRequestBody``), ``CloudKitError/init(encodingError:recordNames:)`` turns the `EncodingError` `JSONEncoder` threw into the same ``CloudKitError/invalidFieldValue(recordName:fieldName:underlying:)``, using the coding path to find the field and your list of record names to find the record.
+
+On 32-bit platforms such as WASI, an `INT64` that doesn't fit in `Int` throws ``ConversionError/integerOutOfRange(fieldName:value:)`` rather than trapping.
+
 ### `paginationLimitExceeded` carries partial results
 
 ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)`` walks the continuation marker for you and stops at `maxPages` (default `1_000`) as a runaway guard. When it trips, the records collected so far are attached to the error so the caller can decide:
@@ -178,6 +212,24 @@ do {
   // Either accept the partial result, raise the cap, or narrow the query.
 }
 ```
+
+### `modifyIncomplete` carries completed results and unsent operations
+
+``CloudKitService/modifyAllRecords(_:atomicZones:database:batchSize:)`` sends one `records/modify` request per zone and `batchSize` chunk. When a request fails — or the task is cancelled between requests — it stops and throws ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)``, whichever request failed (when it is the first, `completed` is empty):
+
+```swift
+do {
+  let results = try await service.modifyAllRecords(operations, database: .private)
+} catch CloudKitError.modifyIncomplete(let completed, let unsent, let underlying) {
+  // `completed`: results of every request that came back (per-record failures included).
+  // `unsent`: the failed request's operations, then every later request's.
+  logger.warning("Saved \(completed.records.count), \(unsent.count) unsent: \(underlying)")
+}
+```
+
+`reason`, `retryAfter`, `redirectURL`, `isRetryable`, `httpStatusCode` and `serverErrorCode` read through to `underlying`.
+
+> Important: The failed request's own operations are reported as unsent, but CloudKit may have applied them — for example when the connection drops after the request was sent. A caller that re-sends them should expect `CONFLICT` (or `EXISTS` for a create) for a record that was in fact saved, and re-fetch it.
 
 ### Subscription duplicates surface as `INTERNAL_ERROR`
 
@@ -280,36 +332,36 @@ HTTP 400  {"serverErrorCode": "BAD_REQUEST", "reason": "Invalid filter"}
 
 ## Retry and recovery
 
-Recoverable failures fall into three buckets:
+MistKit never retries on its own. Recoverable failures fall into four buckets:
 
-1. **Transient network** (``CloudKitError/networkError(_:)``, ``TokenManagerError/networkError(_:)``) — retry with exponential backoff and a jitter, bounded to ~3 attempts.
-2. **Expired web-auth token** (``TokenManagerError/tokenExpired``) — refresh the token in your token store, then retry the call once.
-3. **5xx HTTP** (``CloudKitError/httpStatusCode`` in `500..<600`) — same backoff strategy as transient network.
+1. **CloudKit asked you to wait** (``CloudKitError/isRetryable``: `THROTTLED` and `TRY_AGAIN_LATER`, at the request level or on a single-record convenience's per-record failure). Wait ``CloudKitError/retryAfter`` seconds when CloudKit sent it, and back off otherwise.
+2. **Transient network** (``CloudKitError/networkError(_:)``, ``TokenManagerError/networkError(_:)``). `isRetryable` is deliberately `false` for these: whether to resend after losing the connection is your call, because a write may already have landed. Retry reads with exponential backoff and jitter, bounded to about three attempts.
+3. **Expired web-auth token** (``TokenManagerError/tokenExpired``, or ``CloudKitError/authenticationRequired(reason:redirectURL:)``). Send the user to ``CloudKitError/redirectURL`` (or ``CloudKitService/fetchWebAuthSignInURL()``) to sign in again, store the new token, then retry once.
+4. **5xx HTTP** (``CloudKitError/httpStatusCode`` in `500..<600`). Same backoff as transient network.
 
-Everything else — auth failures, decoding errors, missing credentials, 4xx HTTP — is a programming or configuration error. Surface it, do not retry.
+Everything else (auth failures, decoding errors, missing credentials, other 4xx responses) is a programming or configuration error. Surface it; do not retry.
 
-A minimal retry helper:
+A minimal retry helper that honors CloudKit's hint:
 
 ```swift
 func retrying<T>(
   attempts: Int = 3,
   _ operation: () async throws -> T
 ) async throws -> T {
-  var lastError: any Error
-  for attempt in 1...attempts {
+  var attempt = 1
+  while true {
     do {
       return try await operation()
-    } catch let error as CloudKitError where isTransient(error) {
-      lastError = error
-      try await Task.sleep(for: .milliseconds(100 * (1 << attempt)))
-    } catch {
-      throw error
+    } catch let error as CloudKitError where attempt < attempts && isTransient(error) {
+      let seconds = error.retryAfter.map(Double.init) ?? 0.1 * Double(1 << attempt)
+      try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+      attempt += 1
     }
   }
-  throw lastError
 }
 
 func isTransient(_ error: CloudKitError) -> Bool {
+  if error.isRetryable { return true }
   if case .networkError = error { return true }
   if let status = error.httpStatusCode, (500..<600).contains(status) {
     return true
@@ -317,6 +369,8 @@ func isTransient(_ error: CloudKitError) -> Bool {
   return false
 }
 ```
+
+For ``CloudKitError/modifyIncomplete(completed:unsent:underlying:)`` the retry hints read through to `underlying`; resend only ``CloudKitError/unsentOperations`` rather than the whole batch.
 
 > Warning: Do not retry ``CloudKitError/missingCredentials(database:availability:reason:)`` or ``CloudKitError/invalidPrivateKey(path:underlying:)``. These indicate the deployment is misconfigured and the next attempt will fail identically.
 
@@ -336,6 +390,11 @@ func isTransient(_ error: CloudKitError) -> Bool {
 - ``NetworkErrorReason``
 - ``InternalErrorReason``
 - ``CredentialAvailability``
+
+### Record and field context
+
+- ``RecordFieldErrorContext``
+- ``ConversionError``
 
 ### Per-operation failures
 

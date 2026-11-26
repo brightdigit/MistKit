@@ -13,7 +13,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.equals("name", .string("Alice"))
+      let filter = QueryFilter.equals("name", .string(.value("Alice")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .EQUALS)
       #expect(components.fieldName == "name")
@@ -25,7 +25,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let filter = QueryFilter.notEquals("status", .string("deleted"))
+      let filter = QueryFilter.notEquals("status", .string(.value("deleted")))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .NOT_EQUALS)
       #expect(components.fieldName == "status")

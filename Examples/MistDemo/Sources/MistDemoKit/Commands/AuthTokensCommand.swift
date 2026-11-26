@@ -62,10 +62,16 @@
         --no-browser             Don't open browser (overrides --browser)
         --sharee-email <email>   Sharee's iCloud email; included in the export
                                  block as CLOUDKIT_SHAREE_EMAIL
+        --output <mode>          text (default) | env — env prints only
+                                 KEY=value lines (CLOUDKIT_WEB_AUTH_TOKEN,
+                                 CLOUDKIT_SHAREE_WEB_AUTH_TOKEN, and
+                                 CLOUDKIT_SHAREE_EMAIL when given) on stdout;
+                                 prompts and progress go to stderr
 
       EXAMPLES:
         mistdemo auth-tokens --sharee-email sharee@example.com
         CLOUDKIT_API_TOKEN=… mistdemo auth-tokens
+        mistdemo auth-tokens --sharee-email sharee@example.com --output env
 
       NOTES:
         - Sign in as the sharer first, then as a different Apple ID for sharee.
@@ -82,10 +88,11 @@
 
     /// Executes the command.
     public func execute() async throws {
-      print("📍 Server URL: http://\(config.host):\(config.port)")
-      print("🔄 Reset auth is always on for dual capture.")
+      let output = config.output
+      output.progress("📍 Server URL: http://\(config.host):\(config.port)")
+      output.progress("🔄 Reset auth is always on for dual capture.")
 
-      print(
+      output.progress(
         """
 
         1️⃣  Sign in as the SHARER (primary Apple ID).
@@ -103,9 +110,9 @@
       )
       // Let the 205 reach the browser before restarting the server.
       try? await Task.sleep(nanoseconds: 500_000_000)
-      print("✅ Sharer token captured.")
+      output.progress("✅ Sharer token captured.")
 
-      print(
+      output.progress(
         """
 
         2️⃣  Sign in as the SHAREE (a different Apple ID).
@@ -122,7 +129,24 @@
         resetAuth: true
       )
       try? await Task.sleep(nanoseconds: 500_000_000)
-      print("✅ Sharee token captured.")
+      output.progress("✅ Sharee token captured.")
+
+      printTokens(sharerToken: sharerToken, shareeToken: shareeToken)
+    }
+
+    /// Prints the captured tokens to stdout in the configured ``AuthTokenOutput``.
+    private func printTokens(sharerToken: String, shareeToken: String) {
+      if config.output == .env {
+        let lines = AuthTokenOutput.envLines(
+          webAuthToken: sharerToken,
+          shareeWebAuthToken: shareeToken,
+          shareeEmail: config.shareeEmail
+        )
+        for line in lines {
+          print(line)
+        }
+        return
+      }
 
       print(
         """

@@ -43,14 +43,14 @@ extension CloudKitServiceTests.Query {
         return
       }
       // Test equality filter
-      let equalFilter = QueryFilter.equals("title", .string("Test"))
+      let equalFilter = QueryFilter.equals("title", .string(.value("Test")))
       let componentsFilter = Components.Schemas.Filter(from: equalFilter)
 
       #expect(componentsFilter.fieldName == "title")
       #expect(componentsFilter.comparator == .EQUALS)
 
       // Test comparison filter
-      let greaterThanFilter = QueryFilter.greaterThan("count", .int64(10))
+      let greaterThanFilter = QueryFilter.greaterThan("count", .int64(.value(10)))
       let componentsGT = Components.Schemas.Filter(from: greaterThanFilter)
 
       #expect(componentsGT.fieldName == "count")
@@ -64,11 +64,11 @@ extension CloudKitServiceTests.Query {
         return
       }
       let testCases: [(FieldValue, String)] = [
-        (.string("test"), "string"),
-        (.int64(42), "int64"),
-        (.double(3.14), "double"),
+        (.string(.value("test")), "string"),
+        (.int64(.value(42)), "int64"),
+        (.double(.value(3.14)), "double"),
         (FieldValue(booleanValue: true), "boolean"),
-        (.date(Date()), "date"),
+        (.date(.value(Date())), "date"),
       ]
 
       for (fieldValue, typeName) in testCases {

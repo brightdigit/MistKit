@@ -105,6 +105,12 @@ jobs:
             -Xcc -D_WASI_EMULATED_MMAN
             -Xlinker -lwasi-emulated-signal
             -Xlinker -lwasi-emulated-mman
+          # Only read on the wasm / wasm-embedded lanes. Skips the Sharing suite
+          # (createShare) which intermittently hits `wasm trap: out of bounds
+          # memory access` under Wasmtime — remove once
+          # https://github.com/brightdigit/MistKit/issues/514 is fixed.
+          # swift-build splits this on whitespace, so the regex has no spaces.
+          wasm-swift-test-flags: --skip CloudKitServiceTests.Sharing
       - name: Install curl (required by Codecov uploader)
         if: steps.build.outputs.contains-code-coverage == 'true'
         run: |
@@ -134,29 +140,23 @@ jobs:
     needs: configure
     runs-on: ${{ matrix.runs-on }}
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    # No Swift 6.2: it silently aborts while emitting MistKitTests once the test
+    # module crosses a size threshold (no `error:`, no stack dump, just exit 1),
+    # a toolchain bug that 6.1 and 6.3 don't have. Dropped rather than run as a
+    # permanently red, non-gating job; restore it if #488 is fixed.
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [windows-2022, windows-2025]
+        # windows-2022 only. windows-2025's MSVC STL (14.52 as of the 2026-11
+        # image) requires Clang 22, newer than any released Swift toolchain
+        # (STL1000 via swift-crypto's CCryptoBoringSSL), so no Swift version
+        # builds there.
+        runs-on: [windows-2022]
         swift:
           - version: swift-6.1-release
             build: 6.1-RELEASE
-          - version: swift-6.2-release
-            build: 6.2-RELEASE
           - version: swift-6.3-release
             build: 6.3-RELEASE
-        exclude:
-          # windows-2025's default MSVC 14.51 STL requires Clang 20+, but Swift 6.1/6.2
-          # ship Clang 19 (STL1000 error via swift-crypto's CCryptoBoringSSL). Those run on
-          # windows-2022 (older 14.4x toolset); only Swift 6.3 (Clang 20) builds on windows-2025.
-          - runs-on: windows-2025
-            swift:
-              version: swift-6.1-release
-              build: 6.1-RELEASE
-          - runs-on: windows-2025
-            swift:
-              version: swift-6.2-release
-              build: 6.2-RELEASE
     steps:
       - uses: actions/checkout@v6
       - uses: brightdigit/swift-build@v1
@@ -178,7 +178,9 @@ jobs:
   build-android:
     name: Build on Android
     needs: configure
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, and swift.org
+    # publishes no ubuntu26.04 host toolchain, so the Android SDK setup 404s.
+    runs-on: ubuntu-24.04
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
@@ -200,12 +202,23 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
+      - name: Stage test data for the emulator
+        run: |
+          mkdir -p .android-test-data
+          git ls-files 'Examples/*/schema.ckdb' | xargs -I{} cp --parents {} .android-test-data/
+          find .android-test-data -type f
       - uses: brightdigit/swift-build@v1
         with:
           type: android
           android-swift-version: ${{ matrix.swift.version }}
           android-api-level: ${{ matrix.android-api-level }}
           android-run-tests: true
+          # The example-schema tests read Examples/*/schema.ckdb relative to the
+          # working directory (Tests/MistKitTests/Helpers/PackageFile.swift); the
+          # emulator runs the test binary from the copied folder, not the checkout.
+          # Only the staged schema files go: `adb push` can't create symlinks,
+          # and copying all of Examples/ is megabytes the tests never read.
+          android-copy-files: ".android-test-data/Examples"
       # Note: Code coverage is not supported on Android builds
       # The Swift Android SDK does not include LLVM coverage tools (llvm-profdata, llvm-cov)
 
@@ -306,46 +319,45 @@ jobs:
 
           # ── Xcode 27 (preview image, beta toolchain) ─────────────────────
           # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
-          # is marked Preview in actions/runner-images. It ships exactly one
-          # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
+          # is marked Preview in actions/runner-images. As of the 2026-11-04
+          # image it ships Xcode 27.0, 27.1 (default) and 27.2; these lanes pin
+          # /Applications/Xcode_27.2.app, whose simulator runtimes are 27.2 for
+          # every platform. 27.2 renamed the devices: iPhone 18 Pro, Apple Watch
+          # Ultra 4 (49mm), Apple TV 4K (4th generation).
           #
-          # Pin the /Applications/Xcode_27.0.app symlink, NOT the real
-          # Xcode_27_beta_4.app path: the beta number changes on every image
-          # refresh and would silently break these lanes.
-          #
-          # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
+          # tvOS uses "Apple TV 4K (4th generation)" — this image has no plain
           # "Apple TV" device, unlike macos-26 above. A wrong device name fails
           # the simulator boot outright.
           - type: macos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
 
           - type: ios
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "iPhone 17 Pro"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "iPhone 18 Pro"
+            osVersion: "27.2"
             download-platform: true
 
           - type: watchos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple Watch Ultra 4 (49mm)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: tvos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
-            deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "27.0"
+            xcode: "/Applications/Xcode_27.2.app"
+            deviceName: "Apple TV 4K (4th generation)"
+            osVersion: "27.2"
             download-platform: true
 
           - type: visionos
             runs-on: xcode-27
-            xcode: "/Applications/Xcode_27.0.app"
+            xcode: "/Applications/Xcode_27.2.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "27.0"
+            osVersion: "27.2"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -373,7 +385,9 @@ jobs:
 
   lint:
     name: Linting
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: ubuntu-latest is Ubuntu 26.04, which lacks
+    # libxml2.so.2, so the mise-installed SwiftLint Linux binary can't start.
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
     # Shared with MistDemo's lint job: serialize across workflows so a cold

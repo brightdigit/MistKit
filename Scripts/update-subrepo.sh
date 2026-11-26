@@ -2,12 +2,11 @@
 set -e
 
 # Generic script to update any example subrepo
-# Usage: ./Scripts/update-subrepo.sh Examples/BushelCloud
-#        ./Scripts/update-subrepo.sh Examples/CelestraCloud
+# Usage: ./Scripts/update-subrepo.sh Examples/SwoopMistKit
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <subrepo-path>"
-    echo "Example: $0 Examples/BushelCloud"
+    echo "Example: $0 Examples/SwoopMistKit"
     exit 1
 fi
 
@@ -27,8 +26,8 @@ restore_local_mistkit_path_dep() {
 
     if grep -qF "$MISTKIT_URL_DEP" "$package_swift"; then
         echo "🔧 Restoring local MistKit path dependency for monorepo development..."
-        if [ "$SUBREPO_NAME" = "BushelCloud" ]; then
-            sed -i '' "s|$MISTKIT_URL_DEP|        // Local path: BushelCloud develops as Examples/BushelCloud inside the\\
+        if [ "$SUBREPO_NAME" = "SwoopMistKit" ]; then
+            sed -i '' "s|$MISTKIT_URL_DEP|        // Local path: BushelCloud develops as Examples/SwoopMistKit inside the\\
         // MistKit repo, so ../.. resolves to the parent MistKit checkout. On main\\
         // this is a tagged remote release; this one-line overlay is reapplied when\\
         // the branch is recreated from main (never merged, so it never conflicts).\\

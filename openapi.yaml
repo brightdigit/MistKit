@@ -193,6 +193,8 @@ paths:
             schema:
               type: object
               properties:
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
                 records:
                   type: array
                   items:
@@ -1374,6 +1376,12 @@ components:
           type: string
         fieldValue:
           $ref: '#/components/schemas/FieldValueRequest'
+        distance:
+          type: number
+          format: double
+          description: |
+            The radius, in meters, around the `fieldValue` location. Used only
+            with the NEAR comparator on a LOCATION field.
 
     Sort:
       type: object
@@ -1467,6 +1475,8 @@ components:
         recordName:
           type: string
           description: The unique identifier for the record
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
         recordType:
           type: string
           description: The record type (schema name)
@@ -1529,6 +1539,59 @@ components:
         The type field is optional. It is required for the scalar types whose JSON
         representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
         IN/NOT_IN list filters (the *_LIST types specify the list element type).
+        Set isEncrypted to true when writing a field declared ENCRYPTED in the
+        container schema (private/shared databases only; web-auth required).
+      properties:
+        value:
+          oneOf:
+            - $ref: '#/components/schemas/StringValue'
+            - $ref: '#/components/schemas/Int64Value'
+            - $ref: '#/components/schemas/DoubleValue'
+            - $ref: '#/components/schemas/BytesValue'
+            - $ref: '#/components/schemas/DateValue'
+            - $ref: '#/components/schemas/LocationValue'
+            - $ref: '#/components/schemas/ReferenceValue'
+            - $ref: '#/components/schemas/AssetValue'
+            - $ref: '#/components/schemas/ListValue'
+            - $ref: '#/components/schemas/ClearedValue'
+        type:
+          type: string
+          enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
+          description: |
+            Optional CloudKit field type. Sent for scalar values whose JSON form is
+            ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
+            wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
+        isEncrypted:
+          type: boolean
+          description: |
+            When true, CloudKit encrypts the field value using the authenticated
+            user's CloudKit Service key. Only valid for private or shared databases
+            with web-auth credentials, against fields declared ENCRYPTED in the
+            schema. The value is sent as plaintext over TLS; under standard data
+            protection encryption happens on Apple's servers, which can also decrypt
+            it on read. Under Advanced Data Protection the service keys leave Apple's
+            servers entirely, making these fields end-to-end encrypted and
+            undecryptable by CloudKit Web Services — but web-auth sign-in cannot
+            complete for an ADP account, so this API is unreachable there.
+      required:
+        - value
+
+    ClearedValue:
+      type: string
+      nullable: true
+      description: |
+        JSON `null`. A modify request that sets a field's value to null clears
+        the field. Request-only: listed last in `FieldValueRequest.value` so a
+        non-null value never decodes as it.
+
+    FieldValueResponse:
+      type: object
+      description: |
+        A CloudKit field value from API responses.
+        May include optional type field for explicit type information.
+        List fields carry the granular *_LIST family (e.g. STRING_LIST), matching
+        live CloudKit responses — not a flat LIST tag.
+        May echo isEncrypted when the field was stored encrypted.
       properties:
         value:
           oneOf:
@@ -1545,33 +1608,17 @@ components:
           type: string
           enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
           description: |
-            Optional CloudKit field type. Sent for scalar values whose JSON form is
-            ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
-            wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
-      required:
-        - value
-
-    FieldValueResponse:
-      type: object
-      description: |
-        A CloudKit field value from API responses.
-        May include optional type field for explicit type information.
-      properties:
-        value:
-          oneOf:
-            - $ref: '#/components/schemas/StringValue'
-            - $ref: '#/components/schemas/Int64Value'
-            - $ref: '#/components/schemas/DoubleValue'
-            - $ref: '#/components/schemas/BytesValue'
-            - $ref: '#/components/schemas/DateValue'
-            - $ref: '#/components/schemas/LocationValue'
-            - $ref: '#/components/schemas/ReferenceValue'
-            - $ref: '#/components/schemas/AssetValue'
-            - $ref: '#/components/schemas/ListValue'
-        type:
-          type: string
-          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
-          description: The CloudKit field type (optional, may be inferred from value)
+            The CloudKit field type (optional). List responses use STRING_LIST,
+            INT64_LIST, etc. (verified live against MistDemo, 2026-09-09).
+        isEncrypted:
+          type: boolean
+          description: |
+            Present when CloudKit echoes that the field is encrypted. Under
+            standard data protection the value in the response is plaintext,
+            decrypted server-side. Under Advanced Data Protection the field is
+            end-to-end encrypted and CloudKit Web Services cannot decrypt it —
+            though in practice web-auth sign-in cannot complete for such an
+            account, so these routes are unreachable there.
       required:
         - value
 
@@ -1647,6 +1694,8 @@ components:
         recordName:
           type: string
           description: The record name being referenced
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
         action:
           type: string
           enum: [NONE, DELETE_SELF, VALIDATE]
@@ -2499,8 +2548,14 @@ components:
             Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
         reason:
           type: string
+        retryAfter:
+          type: integer
+          description: |
+            Suggested seconds to wait before retrying. Sent with THROTTLED and
+            TRY_AGAIN_LATER; absent otherwise.
         redirectURL:
           type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
 
   responses:
     Failure:

@@ -35,6 +35,8 @@ internal import Testing
 extension CloudKitServiceTests.LookupUsersByRecordName {
   @Suite("Success Cases")
   internal struct SuccessCases {
+    private typealias Lookup = CloudKitServiceTests.LookupUsersByRecordName
+
     @Test("lookupUsersByRecordName() returns a single identity")
     internal func returnsSingleIdentity() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -44,7 +46,7 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
       let service = try await CloudKitServiceTests.LookupUsersByRecordName
         .makeSuccessfulService(identityCount: 1)
 
-      let identities = try await service.lookupUsersByRecordName(["_user-0"])
+      let identities = try await Lookup.lookupUsersByRecordName(service, ["_user-0"])
 
       #expect(identities.count == 1)
       #expect(identities.first?.userRecordName == .recordName("_user-0"))
@@ -59,9 +61,10 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
       let service = try await CloudKitServiceTests.LookupUsersByRecordName
         .makeSuccessfulService(identityCount: 3)
 
-      let identities = try await service.lookupUsersByRecordName([
-        "_user-0", "_user-1", "_user-2",
-      ])
+      let identities = try await Lookup.lookupUsersByRecordName(
+        service,
+        ["_user-0", "_user-1", "_user-2"]
+      )
 
       #expect(identities.count == 3)
     }
@@ -75,7 +78,7 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
       let service = try await CloudKitServiceTests.LookupUsersByRecordName
         .makeSuccessfulService(identityCount: 0)
 
-      let identities = try await service.lookupUsersByRecordName(["_user-unknown"])
+      let identities = try await Lookup.lookupUsersByRecordName(service, ["_user-unknown"])
 
       #expect(identities.isEmpty)
     }

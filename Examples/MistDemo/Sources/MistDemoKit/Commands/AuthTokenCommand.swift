@@ -57,6 +57,9 @@
         --no-browser             Don't open browser on startup (overrides --browser)
         --reset-auth             Sign out any persisted CloudKit JS session before
                                  capturing (force Apple ID picker)
+        --output <mode>          text (default) | env — env prints only
+                                 CLOUDKIT_WEB_AUTH_TOKEN=… on stdout; prompts
+                                 and progress go to stderr
 
       NOTES:
         For sharer + sharee tokens (test-private create→accept), use
@@ -72,9 +75,10 @@
 
     /// Executes the command.
     public func execute() async throws {
-      print("📍 Server URL: http://\(config.host):\(config.port)")
+      let output = config.output
+      output.progress("📍 Server URL: http://\(config.host):\(config.port)")
       if config.resetAuth {
-        print("🔄 Reset auth — browser will clear any persisted Apple ID session.")
+        output.progress("🔄 Reset auth — browser will clear any persisted Apple ID session.")
       }
 
       let token = try await WebAuthTokenCapture.capture(
@@ -89,7 +93,14 @@
 
       // Let the 205 response reach the browser before the process exits.
       try? await Task.sleep(nanoseconds: 500_000_000)
-      print(token)
+      switch output {
+      case .text:
+        print(token)
+      case .env:
+        for line in AuthTokenOutput.envLines(webAuthToken: token) {
+          print(line)
+        }
+      }
     }
   }
 #endif

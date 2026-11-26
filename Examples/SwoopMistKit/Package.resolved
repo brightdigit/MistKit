@@ -1,0 +1,186 @@
+{
+  "originHash" : "77febf31dc0cadebfe55f25b509078683c5b34e3377c47d9b606ac4dfcbe1c2b",
+  "pins" : [
+    {
+      "identity" : "bushelkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/BushelKit.git",
+      "state" : {
+        "revision" : "6bfae4b2282d36a76158e79e7f47b497c9809a55",
+        "version" : "3.0.0-alpha.4"
+      }
+    },
+    {
+      "identity" : "configkeykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/ConfigKeyKit.git",
+      "state" : {
+        "revision" : "3c8ae3825b4cdcbf60fb1adeaaaf324557e7fd41",
+        "version" : "1.0.0-beta.3"
+      }
+    },
+    {
+      "identity" : "felinepine",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/FelinePine.git",
+      "state" : {
+        "revision" : "7abf84e0cded44bc99fae106030e8e25e270dae0",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "felinepineswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/FelinePineSwift.git",
+      "state" : {
+        "revision" : "e0a414b8ee7ba1290e9d3b32f4c6cceff95af508",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "ipswdownloads",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/IPSWDownloads.git",
+      "state" : {
+        "revision" : "2e8ad36b5f74285dbe104e7ae99f8be0cd06b7b8",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "osver",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/OSVer",
+      "state" : {
+        "revision" : "448f170babc2f6c9897194a4b42719994639325d",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "radiantkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/brightdigit/RadiantKit.git",
+      "state" : {
+        "revision" : "a65d6721b6b396f0503a3876ddab3f2399b21d4e",
+        "version" : "1.0.0-beta.5"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "swift-asn1",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-asn1.git",
+      "state" : {
+        "revision" : "97fd57437fc94cfa6b62f2b8f84c50f433534e17",
+        "version" : "1.7.5"
+      }
+    },
+    {
+      "identity" : "swift-async-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-async-algorithms.git",
+      "state" : {
+        "revision" : "13713a4ffdee8abd929f92568ee9462a46ae26e0",
+        "version" : "1.1.7"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections",
+      "state" : {
+        "revision" : "88754449ab766a739610b660e117762115fabc9c",
+        "version" : "1.7.6"
+      }
+    },
+    {
+      "identity" : "swift-configuration",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-configuration.git",
+      "state" : {
+        "revision" : "0b0c23215764302f7db752b079c024fbaff12e62",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "swift-crypto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-crypto.git",
+      "state" : {
+        "revision" : "da9d28d69ebe3894b18376c8f2395c2f37b8448f",
+        "version" : "4.5.2"
+      }
+    },
+    {
+      "identity" : "swift-http-types",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-http-types",
+      "state" : {
+        "revision" : "bff4b6903cdc99dda49649dd52f46c11cfd3ed50",
+        "version" : "1.8.0"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "c7413d967b97aae67c46452bf7645bdb7b200e8e",
+        "version" : "1.17.2"
+      }
+    },
+    {
+      "identity" : "swift-openapi-runtime",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-openapi-runtime",
+      "state" : {
+        "revision" : "b9ebb3f06f1dac717156a04f0919ad444cbcf8f5",
+        "version" : "1.13.4"
+      }
+    },
+    {
+      "identity" : "swift-openapi-urlsession",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-openapi-urlsession",
+      "state" : {
+        "revision" : "c97e0f0187d95542b4a254f5bb4dc67f43bf73c9",
+        "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "swift-service-lifecycle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-server/swift-service-lifecycle",
+      "state" : {
+        "revision" : "a18ee16b8039866fd919bdb4e8e906882d4ecc75",
+        "version" : "2.13.0"
+      }
+    },
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system",
+      "state" : {
+        "revision" : "640e5755b5826f4437eaeedd366fd776737db62c",
+        "version" : "1.9.0"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "8397a860c6955924b584c50c5265c6aac0970015",
+        "version" : "2.14.4"
+      }
+    }
+  ],
+  "version" : 3
+}

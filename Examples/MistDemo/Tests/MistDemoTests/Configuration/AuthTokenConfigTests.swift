@@ -28,10 +28,10 @@
 //
 
 internal import ConfigKeyKit
-internal import MistKitConfiguration
 internal import Configuration
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 internal import Testing
 
 @testable import MistDemoKit
@@ -56,6 +56,7 @@ internal struct AuthTokenConfigTests {
     // auth-token defaults to opening the browser.
     #expect(config.openBrowser == true)
     #expect(config.resetAuth == false)
+    #expect(config.output == .text)
   }
 
   @Test("Memberwise init accepts custom values for every field")
@@ -157,6 +158,30 @@ internal struct AuthTokenConfigTests {
     let configuration = Self.configuration(values: [
       (MistDemoKeys.Auth.apiToken, "tok-xyz"),
       (MistDemoKeys.cloudKit.environment, "staging"),
+    ])
+
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
+      _ = try await AuthTokenConfig(configuration: configuration)
+    }
+  }
+
+  @Test("Configuration init parses --output env")
+  internal func parsesOutputEnv() async throws {
+    let configuration = Self.configuration(values: [
+      (MistDemoKeys.Auth.apiToken, "tok-xyz"),
+      (MistDemoKeys.Output.authTokenOutput, "env"),
+    ])
+
+    let config = try await AuthTokenConfig(configuration: configuration)
+
+    #expect(config.output == .env)
+  }
+
+  @Test("Configuration init throws on an unknown --output")
+  internal func invalidOutputThrows() async {
+    let configuration = Self.configuration(values: [
+      (MistDemoKeys.Auth.apiToken, "tok-xyz"),
+      (MistDemoKeys.Output.authTokenOutput, "yaml"),
     ])
 
     await #expect(throws: MistDemoKit.ConfigurationError.self) {

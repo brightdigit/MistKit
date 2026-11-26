@@ -35,7 +35,7 @@ internal import MistKitConfiguration
 /// Every key resolves to a command-line flag and an environment variable:
 ///
 /// - **CloudKit credential keys** come from ``CloudKitConfigurationKeys`` (shared with
-///   MistKitConfiguration, BushelCloud and CelestraCloud).
+///   MistKitConfiguration and SwoopMistKit).
 /// - **Every other key** keeps its historical base and passes ``envPrefix``, faithfully
 ///   reproducing the blanket `prefixKeys(with: "cloudkit")` the provider stack used to
 ///   apply to the whole key space. Bases stay unchanged so no flag or variable moves.

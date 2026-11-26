@@ -49,7 +49,10 @@
           method: .post,
           headers: [.contentType: "application/json"],
           body: ByteBuffer(
-            string: #"{"recordType":"Note","fields":{"title":"x"},"zoneOwner":"_abc"}"#
+            string: """
+              {"recordType":"Note","fields":{"title":{"value":"x","type":"STRING"}},\
+              "zoneOwner":"_abc"}
+              """
           )
         ) { response in
           #expect(response.status == .badRequest)
@@ -62,7 +65,7 @@
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
-        {"recordType":"Note","fields":{"title":"Hi"},\
+        {"recordType":"Note","fields":{"title":{"value":"Hi","type":"STRING"}},\
         "zoneName":"Articles","zoneOwner":"_abc123"}
         """
 
@@ -106,7 +109,7 @@
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
-        {"recordType":"Note","recordName":"n1","fields":{"title":"Hi"},\
+        {"recordType":"Note","recordName":"n1","fields":{"title":{"value":"Hi","type":"STRING"}},\
         "recordChangeTag":"t1","zoneName":"Articles","zoneOwner":"_abc123"}
         """
 

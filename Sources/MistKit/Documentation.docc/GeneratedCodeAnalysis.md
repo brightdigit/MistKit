@@ -434,7 +434,7 @@ import struct Foundation.Date
 #endif
 ```
 
-The wrapper layer follows the same convention. WASI excludes `URLSessionTransport` entirely — the URLSession-backed public initializers on ``CloudKitService`` are compiled only for non-WASI platforms, and the transport-accepting initializer is internal today, so WASI has no public entry point yet (see <doc:ConfiguringMistKit>).
+The wrapper layer follows the same convention. WASI excludes `URLSessionTransport` entirely — the URLSession-backed public initializers on ``CloudKitService`` are compiled only for non-WASI platforms, so WASI builds construct the service through the public transport-accepting initializers instead (see <doc:ConfiguringMistKit>).
 
 ## See Also
 

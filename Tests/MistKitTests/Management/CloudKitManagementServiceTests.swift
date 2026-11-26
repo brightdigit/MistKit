@@ -1,0 +1,78 @@
+//
+//  CloudKitManagementServiceTests.swift
+//  MistKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+internal import Foundation
+internal import HTTPTypes
+internal import OpenAPIRuntime
+internal import Testing
+
+@testable import MistKit
+
+@Suite("CloudKit Management Service")
+internal enum CloudKitManagementServiceTests {
+  internal static let teamIdentifier = "ABCDE12345"
+  internal static let containerIdentifier = "iCloud.com.example.Tabletop"
+  internal static let token = "management-token-value"
+
+  internal static func makeService(
+    response: ResponseConfig
+  ) -> (CloudKitManagementService, RecordingTransport) {
+    let transport = RecordingTransport(response: response)
+    let service = CloudKitManagementService(
+      teamIdentifier: teamIdentifier,
+      containerIdentifier: containerIdentifier,
+      managementToken: ManagementToken(token),
+      transport: transport
+    )
+    return (service, transport)
+  }
+
+  internal static func makeService(
+    transport: any ClientTransport
+  ) -> CloudKitManagementService {
+    CloudKitManagementService(
+      teamIdentifier: teamIdentifier,
+      containerIdentifier: containerIdentifier,
+      managementToken: ManagementToken(token),
+      transport: transport
+    )
+  }
+
+  /// The error `exportSchemaText` throws, or `nil` when it succeeds.
+  internal static func exportTextError(
+    _ service: CloudKitManagementService
+  ) async -> (any Error)? {
+    do {
+      _ = try await service.exportSchemaText(environment: .development)
+      return nil
+    } catch {
+      return error
+    }
+  }
+}

@@ -56,7 +56,7 @@ internal struct SubscriptionConversionTests {
     let info = SubscriptionInfo.query(
       subscriptionID: "sub-1",
       recordType: "Article",
-      filters: [.equals("published", .string("true"))],
+      filters: [.equals("published", .string(.value("true")))],
       sortBy: [.ascending("title")],
       firesOn: [.create, .update]
     )

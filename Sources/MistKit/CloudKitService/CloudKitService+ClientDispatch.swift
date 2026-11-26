@@ -62,7 +62,12 @@ extension CloudKitService {
       )
     }
 
-    return Client(
+    return client(tokenManager: tokenManager)
+  }
+
+  /// Build an OpenAPI `Client` that authenticates with `tokenManager`.
+  internal func client(tokenManager: any TokenManager) -> Client {
+    Client(
       serverURL: CloudKitService.baseURL,
       transport: transport,
       middlewares: [

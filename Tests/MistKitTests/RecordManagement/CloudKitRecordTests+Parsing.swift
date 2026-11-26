@@ -41,10 +41,10 @@ extension CloudKitRecordTests {
         recordName: "test-3",
         recordType: "TestRecord",
         fields: [
-          "name": .string("Parsed Record"),
-          "count": .int64(25),
+          "name": .string(.value("Parsed Record")),
+          "count": .int64(.value(25)),
           "isActive": FieldValue(booleanValue: true),
-          "score": .double(75.0),
+          "score": .double(.value(75.0)),
         ]
       )
 
@@ -63,7 +63,7 @@ extension CloudKitRecordTests {
         recordName: "test-4",
         recordType: "TestRecord",
         fields: [
-          "name": .string("Minimal Record"),
+          "name": .string(.value("Minimal Record")),
           "isActive": FieldValue(booleanValue: false),
         ]
       )
@@ -84,7 +84,7 @@ extension CloudKitRecordTests {
         recordName: "test-5",
         recordType: "TestRecord",
         fields: [
-          "count": .int64(10)
+          "count": .int64(.value(10))
           // Missing required "name" and "isActive" fields
         ]
       )
@@ -99,8 +99,8 @@ extension CloudKitRecordTests {
         recordName: "test-6",
         recordType: "TestRecord",
         fields: [
-          "name": .string("Legacy Record"),
-          "isActive": .int64(1),  // Legacy boolean as int64
+          "name": .string(.value("Legacy Record")),
+          "isActive": .int64(.value(1)),  // Legacy boolean as int64
         ]
       )
 

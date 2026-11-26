@@ -3,7 +3,7 @@
 > **Source of truth:** configuration keys now live as typed values in
 > `Examples/MistDemo/Sources/MistDemoKit/Configuration/Keys/` (`MistDemoKeys`).
 > The five CloudKit credential keys share their names with `MistKitConfiguration`,
-> BushelCloud and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
+> SwoopMistKit (BushelCloud) and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
 ## Architecture
 
 MistDemo is a CLI tool with a subcommand architecture where each CloudKit Web Services operation maps to a dedicated subcommand. The tool demonstrates MistKit's capabilities while providing a practical interface for CloudKit operations.

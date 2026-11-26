@@ -201,6 +201,15 @@ fi
 # build still run there; run ./Scripts/lint.sh locally for full coverage.
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
 	RUN_SWIFTLINT=0
+	# The toolchain may expose only a `swift` symlink on PATH; put the
+	# toolchain's bin directory (which holds swift-format) on PATH too.
+	if ! command -v swift-format >/dev/null 2>&1 && command -v swift >/dev/null 2>&1; then
+		SWIFT_TOOLCHAIN_BIN="$(dirname "$(readlink -f "$(command -v swift)")")"
+		if [ -x "$SWIFT_TOOLCHAIN_BIN/swift-format" ]; then
+			PATH="$SWIFT_TOOLCHAIN_BIN:$PATH"
+			export PATH
+		fi
+	fi
 else
 	RUN_SWIFTLINT=1
 fi
@@ -284,9 +293,13 @@ fi
 # unreachable per above).
 periphery_index_store() {
 	local candidate
-	for candidate in "$PACKAGE_DIR"/.build/*/debug/index/store \
-		"$PACKAGE_DIR"/.build/debug/index/store \
-		"$PACKAGE_DIR"/.build/out; do
+	# Prefer swiftbuild's `.build/out` when present. An older
+	# `.build/<triple>/debug/index/store` may still exist from prior
+	# toolchains and yields false-positive unused declarations if chosen
+	# first (test-only and freshly-added public APIs look dead).
+	for candidate in "$PACKAGE_DIR"/.build/out \
+		"$PACKAGE_DIR"/.build/*/debug/index/store \
+		"$PACKAGE_DIR"/.build/debug/index/store; do
 		if [ -d "$candidate/v5/units" ]; then
 			printf '%s\n' "$candidate"
 			return 0

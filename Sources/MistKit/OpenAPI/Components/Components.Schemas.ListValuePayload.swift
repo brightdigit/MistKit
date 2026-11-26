@@ -31,42 +31,42 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 extension Components.Schemas.ListValuePayload {
-  /// Initialize from MistKit FieldValue for list elements
+  /// Initialize from a MistKit ``FieldValue`` used as an IN/NOT_IN (or similar) list element.
   ///
-  /// The `switch` is deliberately `default`-free: it is the single dispatch point from the
-  /// domain enum to a list element's wire representation, so a new `FieldValue` case breaks
-  /// the build here instead of silently degrading. (It previously fell through to a
-  /// `default: assertionFailure(...)` that returned an empty list — a debug-only trap that
-  /// in release builds would have written `[]` in place of the value.)
+  /// Only ``FieldValue/Arity/value(_:)`` payloads are valid list elements — CloudKit has no
+  /// nested lists (issue #481). Passing a `.list` arity traps rather than emitting a nested
+  /// `ListValue` on the wire.
   ///
-  /// The complexity is the nine-case dispatch itself and is irreducible without
-  /// reintroducing a catch-all, so it is suppressed below as in the sibling switches
-  /// (`Components.Schemas.FieldValueRequest`, `FilterBuilder`, `FieldValue.ResponseTypeTag`).
+  /// The `switch` is deliberately `default`-free so a new `FieldValue` case breaks the build
+  /// here instead of silently degrading.
   internal init(from fieldValue: FieldValue) {  // swiftlint:disable:this cyclomatic_complexity
     switch fieldValue {
-    case .string(let value):
+    case .string(.value(let value)):
       self = .StringValue(value)
-    case .int64(let value):
+    case .int64(.value(let value)):
       self = .Int64Value(Int64(value))
-    case .double(let value):
+    case .double(.value(let value)):
       self = .DoubleValue(value)
-    case .bytes(let value):
+    case .bytes(.value(let value)):
       self = .BytesValue(value.base64EncodedString())
-    case .date(let value):
+    case .date(.value(let value)):
       // Round to whole milliseconds, same constraint as the scalar `.date` case in
       // `Components.Schemas.FieldValueRequest`: CloudKit rejects a fractional TIMESTAMP
       // with BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond
       // precision. List elements carry no `type` tag of their own, so the value's shape
-      // is all CloudKit has to go on.
+      // is all CloudKit has to go on for IN/NOT_IN element arrays.
       self = .DateValue((value.timeIntervalSince1970 * 1_000).rounded())
-    case .location(let location):
+    case .location(.value(let location)):
       self = .LocationValue(Self.makeLocationValue(location))
-    case .reference(let reference):
+    case .reference(.value(let reference)):
       self = .ReferenceValue(Self.makeReferenceValue(reference))
-    case .asset(let asset):
+    case .asset(.value(let asset)):
       self = .AssetValue(Self.makeAssetValue(asset))
-    case .list(let nestedList):
-      self = .ListValue(nestedList.map { Self(from: $0) })
+    case .string(.list), .int64(.list), .double(.list), .bytes(.list),
+      .date(.list), .location(.list), .reference(.list), .asset(.list):
+      preconditionFailure(
+        "Nested FieldValue lists are not valid CloudKit list elements (issue #481)"
+      )
     }
   }
 

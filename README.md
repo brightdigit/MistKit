@@ -3,11 +3,11 @@
 # MistKit
 
 
-[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
+[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20Windows%20%7C%20Android%20%7C%20WASI%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20visionOS-success?logo=swift)](https://swift.org)
 [![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/MistKit)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/MistKit)
 [![License](https://img.shields.io/github/license/brightdigit/MistKit)](LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/MistKit/MistKit.yml?label=actions&logo=github&?branch=main)](https://github.com/brightdigit/MistKit/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/MistKit/MistKit.yml?label=actions&logo=github&branch=main)](https://github.com/brightdigit/MistKit/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/MistKit)](https://codecov.io/gh/brightdigit/MistKit)
 [![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/MistKit)
 [![Documentation](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/MistKit/documentation)
@@ -25,6 +25,7 @@ A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Service
     - [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Authentication](#authentication)
+    - [Advanced Data Protection](#advanced-data-protection)
     - [Error Handling](#error-handling)
     - [Advanced Usage](#advanced-usage)
     - [Examples](#examples)
@@ -44,7 +45,7 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 
 ## Key Features
 
-- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, Linux, and Windows
+- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, Linux, Windows, Android, and WebAssembly (WASI)
 - **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
 - **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
 - **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
@@ -55,8 +56,8 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 
 Apple's CloudKit framework only runs on Apple platforms. MistKit wraps the CloudKit Web Services REST API so server-side Swift, Linux services, and command-line tools can take part in the same containers as your apps. Four patterns cover most uses:
 
-- **Public database as a managed catalog** — a scheduled job writes data every user wants and the app just queries it. [BushelCloud](https://github.com/brightdigit/BushelCloud) ([`Examples/BushelCloud`](Examples/BushelCloud/)) syncs macOS restore images and Xcode/Swift versions for [Bushel](https://getbushel.app); [CelestraCloud](https://github.com/brightdigit/CelestraCloud) ([`Examples/CelestraCloud`](Examples/CelestraCloud/)) syncs RSS feeds for [Celestra](https://celestr.app). Software-version catalogs, asset packs, feature flags, and MDM configuration fit the same shape.
-- **Private database on behalf of a user** — the user signs in once, the server keeps their web auth token, and reads or writes their private database while they are away. [HeartWitch](https://github.com/brightdigit/HeartWitch) links an Apple Watch to a Vapor backend this way; wearable data pipelines, two-way sync with external services, and server-side processing of uploads are the same idea.
+- **Public database as a managed catalog** — a scheduled job writes data every user wants and the app just queries it. [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) ([`Examples/SwoopMistKit`](Examples/SwoopMistKit/)) syncs macOS restore images and Xcode/Swift versions for [Bushel](https://getbushel.app); [CelestraCloud](https://github.com/brightdigit/CelestraCloud) syncs RSS feeds for [Celestra](https://celestr.app). Software-version catalogs, asset packs, feature flags, and MDM configuration fit the same shape.
+- **Private database on behalf of a user** — the user signs in once, the server keeps their web auth token, and reads or writes their private database while they are away. [HeartWitch](https://heartwitch.app) links an Apple Watch to a Vapor backend this way; wearable data pipelines, two-way sync with external services, and server-side processing of uploads are the same idea.
 - **Web app ↔ Apple device bridge** — a browser portal for a CloudKit-backed app, or a webhook handler that writes straight into a user's records.
 - **Data aggregation** — anonymized telemetry read through `records/changes`, or crowdsourced data cleaned up by a background job.
 
@@ -83,8 +84,9 @@ Or add it through Xcode:
 ### Requirements
 
 - Swift 6.1+
-- Xcode 16.0+ (for iOS/macOS development)
-- Linux: Ubuntu 18.04+ with Swift 6.1+
+- Xcode 16.3+ (for iOS/macOS development; the first Xcode with Swift 6.1)
+- Linux: Ubuntu 22.04+ with Swift 6.1+
+- WebAssembly (WASI): Swift 6.2+
 
 ### Platform Support
 
@@ -97,8 +99,10 @@ Or add it through Xcode:
 | tvOS | 14.0+ |
 | watchOS | 7.0+ |
 | visionOS | 1.0+ |
-| Linux | Ubuntu 18.04+ |
+| Linux | Ubuntu 22.04+ |
 | Windows | 10+ |
+| Android | API 33+ |
+| WASI | `wasm32-unknown-wasi`, Swift 6.2+ |
 
 ### Quick Start
 
@@ -227,7 +231,7 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    openssl ec -in private_key.pem -pubout -out public_key.pem
    ```
 
-2. **Upload Public Key**: Upload the public key to Apple Developer Console
+2. **Upload Public Key**: Add it under **Server-to-Server Keys** in the [CloudKit Console](https://icloud.developer.apple.com/dashboard/)
 
 3. **Use in Code** (the simplest path — `Credentials` resolves the PEM at first use):
    ```swift
@@ -266,6 +270,20 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    )
    ```
 
+### Advanced Data Protection
+
+**An iCloud account with [Advanced Data Protection](https://support.apple.com/en-us/102651) (ADP) turned on cannot obtain a web auth token for a third-party container.** This is a consequence of the ADP key model, not a bug or a missing feature in MistKit, and there is no workaround other than the user turning ADP off. Server-to-server access to the **public** database is unaffected.
+
+Three things Apple documents combine to close the door:
+
+1. **The keys leave Apple's servers.** A container's private database is rooted in a CloudKit Service key. Under standard protection those keys live in Apple's hardware security modules, which is exactly what lets a web service decrypt your data. Turning on ADP deletes them from the HSMs and keeps them in the account's iCloud Keychain, so Apple "can no longer access any of the data protected by the user's service keys."
+2. **The web-access window is allow-listed to iCloud.com.** Enabling web access opens a one-hour window in which a trusted device re-uploads individual service keys — but "only those corresponding to an allow list of services normally accessible on iCloud.com," each encrypted to the specific web session the user authorized. A third-party developer container is not on that list and is not party to that session.
+3. **It fails inside CloudKit's own session setup.** Apple ID sign-in and the trusted-device approval both succeed and hand CloudKit an OAuth token; CloudKit's `oauth/validateToken` then returns a status its own sign-in page has no handler for, and the popup ends on a generic "Authentication Error" (or "iCloud Data Web Access is Off" while web access is disabled).
+
+Because the failure happens during sign-in, **no request ever reaches the CloudKit API — there is no `CloudKitError` for your code to catch.** Treat it as a user-account precondition, not a runtime error path: if a user reports that token capture never completes, ADP is the first thing to check.
+
+For the full causal chain and the verification against a live container, see [Authentication and Databases](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/authenticationanddatabases). Encrypted record fields have their own constraints — see [Working with Records](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/workingwithrecords).
+
 ### Error Handling
 
 MistKit provides comprehensive error handling with typed errors:
@@ -285,13 +303,13 @@ do {
         database: .public(.prefers(.serverToServer))
     ).records
 } catch let error as CloudKitError {
-    print("CloudKit error: \\(error.localizedDescription)")
+    print("CloudKit error: \(error.localizedDescription)")
 } catch let error as TokenManagerError {
-    print("Authentication error: \\(error.localizedDescription)")
+    print("Authentication error: \(error.localizedDescription)")
 } catch let error as CredentialsValidationError {
-    print("Credentials error: \\(error.localizedDescription)")
+    print("Credentials error: \(error.localizedDescription)")
 } catch {
-    print("Unexpected error: \\(error)")
+    print("Unexpected error: \(error)")
 }
 ```
 
@@ -418,11 +436,23 @@ Non-WASI platforms default to `URLSessionTransport` — no transport plumbing is
 required. On Apple platforms, the default convenience initializer used in the
 examples above wires up `URLSessionTransport` automatically.
 
-WASI builds use the generic, transport-accepting initializer; see
-`Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift` for the
-internal entry point. A custom transport on Apple platforms (e.g. for
-server-side Swift with AsyncHTTPClient) is not yet exposed in the public
-v1.0.0-beta surface — track via the project roadmap.
+To use another HTTP client (e.g. AsyncHTTPClient on the server), replay
+recorded responses in your own tests, or wrap the default transport with a
+request log, pass any OpenAPIRuntime `ClientTransport`:
+
+```swift
+let service = CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    credentials: credentials,
+    environment: .production,
+    transport: AsyncHTTPClientTransport()
+)
+```
+
+The transport sees each request after it has been signed, so a logging
+decorator must redact the `ckAPIToken` / `ckWebAuthToken` query items and the
+`X-Apple-CloudKit-*` headers. Asset uploads to the CDN don't go through it.
+See *Configuring MistKit* in the documentation for details.
 
 #### Adaptive Token Manager
 
@@ -443,8 +473,7 @@ try await adaptiveManager.upgradeToWebAuthentication(webAuthToken: webToken)
 Check out the `Examples/` directory for complete working examples:
 
 - **[MistDemo](Examples/MistDemo/)**: Web-based CloudKit authentication demo with automatic token capture
-- **[BushelCloud](Examples/BushelCloud/)** ([standalone repo](https://github.com/brightdigit/BushelCloud)): Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions from a scheduled GitHub Actions job — backend for the [Bushel app](https://getbushel.app)
-- **[CelestraCloud](Examples/CelestraCloud/)** ([standalone repo](https://github.com/brightdigit/CelestraCloud)): RSS reader demonstrating CloudKit query filtering, sorting, and web etiquette patterns — backend for the [Celestra app](https://celestr.app), built with [SyndiKit](https://github.com/brightdigit/SyndiKit)
+- **[SwoopMistKit](Examples/SwoopMistKit/)** (formerly BushelCloud) ([standalone repo](https://github.com/brightdigit/SwoopMistKit)): Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions from a scheduled GitHub Actions job — backend for the [Bushel app](https://getbushel.app)
 
 ## Documentation
 
@@ -452,12 +481,20 @@ Check out the `Examples/` directory for complete working examples:
 
 ### Guides
 
-The DocC catalog (`Sources/MistKit/Documentation.docc/`) carries the long-form guides. Links below point at the published pages; pages added on this branch appear once Swift Package Index rebuilds the default branch.
+The DocC catalog (`Sources/MistKit/Documentation.docc/`) carries the long-form guides. Links below point at the published pages; a newly added guide appears once Swift Package Index rebuilds the default branch.
 
 - **[CloudKit as Your Backend](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/cloudkitasyourbackend)**: the conference talk in article form — see [below](#cloudkit-as-your-backend-talk)
 - **[Authentication and Databases](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/authenticationanddatabases)**: which credentials reach which database, obtaining tokens and keys from the CloudKit Console
 - **[Request Signing](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/requestsigning)**: token managers, authenticators, the middleware, and the ECDSA payload
 - **[Working with Records](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/workingwithrecords)**: query, create, update, delete, batch, and sync
+- **[Building Queries](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/buildingqueries)**: filters and sorts, the `Codable` `QueryDescriptor`, NSPredicate-format text, and validation against a schema
+- **[Batching and Pagination](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/batchingandpagination)**: working past the 200-item request limit and paging through large result sets
+- **[Syncing Changes](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/syncingchanges)**: record zones and fetching only what changed since the last sync
+- **[Sharing and Users](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/sharingandusers)**: the signed-in user, user discovery, and sharing records between iCloud accounts
+- **[Working with Assets](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/workingwithassets)**: uploading, attaching, downloading, and re-referencing assets
+- **[Subscriptions and Notifications](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/subscriptionsandnotifications)**: subscriptions and APNs tokens
+- **[Managing Schemas](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/managingschemas)**: exporting a schema through the CloudKit Management API and reading or writing CloudKit Schema Language
+- **[Encoding Records as JSON](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/encodingrecordsasjson)**: CloudKit's own JSON shape via the public wire codecs
 - **[Field Type Polymorphism](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/fieldtypepolymorphism)**: how nine CloudKit field types map onto one Swift enum, and the wire-format traps
 - **[Handling Errors](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/handlingerrors)**: typed errors at every layer and how CloudKit's JSON becomes a `CloudKitError`
 - **[Deploying MistKit](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit/deployingmistkit)**: static Linux builds, credentials in CI, scheduling, idempotency, observability
@@ -489,11 +526,11 @@ Links from the talk:
 
 #### Use case examples
 
-- [BushelCloud](https://github.com/brightdigit/BushelCloud) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/BushelCloud`](Examples/BushelCloud/))
-  - [`cloudkit-sync-dev.yml`](Examples/BushelCloud/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
-  - [`cloudkit-sync` composite action](Examples/BushelCloud/.github/actions/cloudkit-sync/action.yml)
-- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting (also at [`Examples/CelestraCloud`](Examples/CelestraCloud/))
-- [HeartWitch](https://github.com/brightdigit/HeartWitch) — the private-database, Apple Watch to Vapor bridge
+- [SwoopMistKit](https://github.com/brightdigit/SwoopMistKit) — server-to-server sync of macOS restore images, Xcode and Swift versions for Bushel; the GitHub Actions deployment shown in the talk (also at [`Examples/SwoopMistKit`](Examples/SwoopMistKit/))
+  - [`cloudkit-sync-dev.yml`](Examples/SwoopMistKit/.github/workflows/cloudkit-sync-dev.yml) — scheduled workflow
+  - [`cloudkit-sync` composite action](Examples/SwoopMistKit/.github/actions/cloudkit-sync/action.yml)
+- [CelestraCloud](https://github.com/brightdigit/CelestraCloud) — RSS feed sync into a public database for Celestra, with query filtering and sorting
+- [HeartWitch](https://heartwitch.app) — the private-database, Apple Watch to Vapor bridge
 - [Rebuilding MistKit with Claude Code, part 1](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/) and [part 2](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 
 #### What is CloudKit
@@ -590,9 +627,22 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Roadmap
 
+### v1.0.0-beta.6
+
+- [x] [Make `FieldValue` lists homogeneous by construction (`Arity`)](https://github.com/brightdigit/MistKit/issues/481) ✅
+- [x] [Encrypted fields (`isEncrypted`, `encryptedFields`)](https://github.com/brightdigit/MistKit/issues/392) ✅
+- [x] [Schema export through the CloudKit Management API (`CloudKitManagementService`)](https://github.com/brightdigit/MistKit/issues/135) ✅ *(phase 1 of #135)*
+- [x] [CloudKit Schema Language parsing and writing (`CloudKitSchema`)](https://github.com/brightdigit/MistKit/issues/502) ✅
+- [x] [NSPredicate-format queries and `QueryDescriptor`](https://github.com/brightdigit/MistKit/issues/500) ✅
+- [x] [Public wire codecs (`WireFieldValue`, `WireRecord`, …)](https://github.com/brightdigit/MistKit/issues/503) ✅
+- [x] [`modifyAllRecords` keeps completed results when a later request fails](https://github.com/brightdigit/MistKit/issues/504) ✅
+- [x] [Verify credentials for a container (`verifyCredentials()`)](https://github.com/brightdigit/MistKit/issues/505) ✅
+- [x] [`Hashable` / `Identifiable` record value types](https://github.com/brightdigit/MistKit/issues/501) ✅
+- [x] [Server-to-server signing of body-less requests](https://github.com/brightdigit/MistKit/issues/507) ✅
+
 ### v1.1.0
 
-- [ ] [Add CloudKit Schema Management APIs (cktool/cktooljs functionality)](https://github.com/brightdigit/MistKit/issues/135)
+- [ ] [Add CloudKit Schema Management APIs (cktool/cktooljs functionality)](https://github.com/brightdigit/MistKit/issues/135) *(schema export shipped in 1.0.0-beta.6)*
 - [ ] [Add KeyPath-based QueryFilter API for Type-Safe Filtering](https://github.com/brightdigit/MistKit/issues/149)
 
 ## Support

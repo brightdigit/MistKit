@@ -31,7 +31,7 @@ set -uo pipefail
 
 # Used only when no .swift-version can be found on disk. Keep in sync with the
 # repo's .swift-version.
-FALLBACK_SWIFT_VERSION="6.3.2"
+FALLBACK_SWIFT_VERSION="6.4.2"
 
 SWIFTLY_ENV="$HOME/.local/share/swiftly/env.sh"
 

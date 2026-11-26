@@ -50,8 +50,8 @@ extension RecordManagingTests {
           recordName: "test-1",
           recordType: "TestRecord",
           fields: [
-            "name": .string("First"),
-            "count": .int64(10),
+            "name": .string(.value("First")),
+            "count": .int64(.value(10)),
             "isActive": FieldValue(booleanValue: true),
           ]
         ),
@@ -59,8 +59,8 @@ extension RecordManagingTests {
           recordName: "test-2",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Second"),
-            "count": .int64(20),
+            "name": .string(.value("Second")),
+            "count": .int64(.value(20)),
             "isActive": FieldValue(booleanValue: false),
           ]
         ),
@@ -95,7 +95,7 @@ extension RecordManagingTests {
           recordName: "test-1",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Active"),
+            "name": .string(.value("Active")),
             "isActive": FieldValue(booleanValue: true),
           ]
         ),
@@ -103,7 +103,7 @@ extension RecordManagingTests {
           recordName: "test-2",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Inactive"),
+            "name": .string(.value("Inactive")),
             "isActive": FieldValue(booleanValue: false),
           ]
         ),
@@ -111,7 +111,7 @@ extension RecordManagingTests {
           recordName: "test-3",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Also Active"),
+            "name": .string(.value("Also Active")),
             "isActive": FieldValue(booleanValue: true),
           ]
         ),
@@ -143,7 +143,7 @@ extension RecordManagingTests {
           recordName: "test-1",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Valid"),
+            "name": .string(.value("Valid")),
             "isActive": FieldValue(booleanValue: true),
           ]
         ),
@@ -152,14 +152,14 @@ extension RecordManagingTests {
           recordType: "TestRecord",
           fields: [
             // Missing required "name" and "isActive" fields
-            "count": .int64(10)
+            "count": .int64(.value(10))
           ]
         ),
         RecordInfo(
           recordName: "test-3",
           recordType: "TestRecord",
           fields: [
-            "name": .string("Also Valid"),
+            "name": .string(.value("Also Valid")),
             "isActive": FieldValue(booleanValue: false),
           ]
         ),

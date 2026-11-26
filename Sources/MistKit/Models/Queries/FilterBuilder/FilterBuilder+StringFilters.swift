@@ -75,4 +75,20 @@ extension FilterBuilder {
       fieldValue: .init(value: .StringValue(tokens))
     )
   }
+
+  /// Creates a CONTAINS_ANY_TOKENS filter for string fields
+  /// - Parameters:
+  ///   - field: The field name to filter on
+  ///   - tokens: The string whose tokens, any one of which must be present
+  /// - Returns: A configured Filter
+  internal static func containsAnyTokens(
+    _ field: String,
+    _ tokens: String
+  ) -> Components.Schemas.Filter {
+    .init(
+      comparator: .CONTAINS_ANY_TOKENS,
+      fieldName: field,
+      fieldValue: .init(value: .StringValue(tokens))
+    )
+  }
 }

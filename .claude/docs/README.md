@@ -63,9 +63,17 @@ implementation phases.
 `research/` holds dated investigations into specific failures, kept for the
 reasoning rather than as current reference. Each is a point-in-time record.
 
+| Doc | Size | Consult when |
+|-----|------|--------------|
+| [research/asset-filechecksum.md](research/asset-filechecksum.md) | 10 KB | Anyone proposes verifying asset bytes against `fileChecksum` — it is a server-minted opaque token, not a client-derivable digest (#466, #473) |
+| [research/adp-web-auth-signin.md](research/adp-web-auth-signin.md) | 30 KB | Web-auth sign-in (CloudKit JS popup, `ckWebAuthToken`) fails for an Advanced Data Protection account — by design of the ADP key model, no workaround except turning ADP off (#392 B1a/B2) |
+| [research/windows-6.2-ci-failure-462.md](research/windows-6.2-ci-failure-462.md) | 2 KB | The Windows Swift 6.2 CI job aborts silently while emitting `MistKitTests` (#462) |
+| [research/481-homogeneous-list-without-duplicate-enums.md](research/481-homogeneous-list-without-duplicate-enums.md) | — | Designing `FieldValue` list storage — why `Arity<T>` per kind beat a parallel list enum / protocol storage, and why only scalar polyfills are deprecated (#481) |
+| [research/135-management-api-request-format.md](research/135-management-api-request-format.md) | 4 KB | Implementing or debugging Management API calls (schema export/import, management token) — host, path, auth header and error body from CKTool JS 1.3.2, with sources (#135) |
+
 ## Related
 
 Example-specific domain docs live with their examples, not here:
 
-- `Examples/BushelCloud/.claude/` — firmware/MobileAsset wikis, data-source research
-- `Examples/CelestraCloud/.claude/` — public-database architecture, schema setup
+- `Examples/SwoopMistKit/.claude/` — firmware/MobileAsset wikis, data-source research
+- CelestraCloud's `.claude/` (standalone repo, https://github.com/brightdigit/CelestraCloud/tree/mistkit/.claude) — public-database architecture, schema setup

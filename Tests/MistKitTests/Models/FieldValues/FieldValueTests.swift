@@ -8,67 +8,69 @@ internal import Testing
 internal struct FieldValueTests {
   /// Cases that survive a full JSON encode → decode round-trip unchanged.
   ///
-  /// Exercises both encode paths in `FieldValue+Codable`: the scalar arm
-  /// (`.string`/`.int64`/`.double` via `encodeScalar`) and the complex arm
-  /// (`.list`/`.location`/`.reference`/`.asset` via `encodeComplex`). The
-  /// complex cases are exactly those `encodeScalar` returns `false` for, so
-  /// this drives the `encodeScalar` → `encodeComplex` delegation.
-  ///
-  /// The throwing `default` in `encodeComplex` is intentionally unreachable —
-  /// every `FieldValue` case is routed by one of the two arms — so it is a
-  /// defensive guard covered by switch exhaustiveness, not by a test.
+  /// Every value is written with its `type`, so the ambiguous scalars
+  /// (whole-valued `DOUBLE`, `TIMESTAMP`, `BYTES`) and empty lists come back
+  /// as the kind they were written.
   private static let roundTripCases: [FieldValue] = [
-    .string("test"),
-    .int64(123),
-    // Fractional on purpose: a whole-valued double decodes back as `.int64`.
-    .double(3.14),
-    .list([.string("item1"), .int64(42)]),
-    .location(
-      Location(latitude: 37.7749, longitude: -122.4194, horizontalAccuracy: 10.0)
-    ),
-    .reference(Reference(recordName: "test-record")),
+    .string(.value("test")),
+    .int64(.value(123)),
+    .double(.value(3.14)),
+    .double(.value(5)),
+    .bytes(.value(Data("abc123".utf8))),
+    .date(.value(Date(timeIntervalSince1970: 1_700_000_000.5))),
+    .string(.list(["item1", "item2"])),
+    .string(.list([])),
+    .int64(.list([1, 2, 42])),
+    .double(.list([1, 2.5])),
+    .bytes(.list([Data("a".utf8)])),
+    .date(.list([Date(timeIntervalSince1970: 1_700_000_000)])),
+    .location(.value(Location(latitude: 37.7749, longitude: -122.4194, horizontalAccuracy: 10.0))),
+    .reference(.value(Reference(recordName: "test-record"))),
+    .reference(.list([Reference(recordName: "a"), Reference(recordName: "b")])),
     .asset(
-      Asset(fileChecksum: "abc123", size: 1_024, downloadURL: "https://example.com/file")
+      .value(
+        Asset(fileChecksum: "abc123", size: 1_024, downloadURL: "https://example.com/file")
+      )
     ),
   ]
 
   /// Tests FieldValue string type creation and equality
   @Test("FieldValue string type creation and equality")
   internal func fieldValueString() {
-    let value = FieldValue.string("test")
-    #expect(value == .string("test"))
+    let value = FieldValue.string(.value("test"))
+    #expect(value == .string(.value("test")))
   }
 
   /// Tests FieldValue int64 type creation and equality
   @Test("FieldValue int64 type creation and equality")
   internal func fieldValueInt64() {
-    let value = FieldValue.int64(123)
-    #expect(value == .int64(123))
+    let value = FieldValue.int64(.value(123))
+    #expect(value == .int64(.value(123)))
   }
 
   /// Tests FieldValue double type creation and equality
   @Test("FieldValue double type creation and equality")
   internal func fieldValueDouble() {
-    let value = FieldValue.double(3.14)
-    #expect(value == .double(3.14))
+    let value = FieldValue.double(.value(3.14))
+    #expect(value == .double(.value(3.14)))
   }
 
   /// Tests FieldValue boolean helper creation and equality
   @Test("FieldValue boolean helper creation and equality")
   internal func fieldValueBoolean() {
     let trueValue = FieldValue(booleanValue: true)
-    #expect(trueValue == .int64(1))
+    #expect(trueValue == .int64(.value(1)))
 
     let falseValue = FieldValue(booleanValue: false)
-    #expect(falseValue == .int64(0))
+    #expect(falseValue == .int64(.value(0)))
   }
 
   /// Tests FieldValue date type creation and equality
   @Test("FieldValue date type creation and equality")
   internal func fieldValueDate() {
     let date = Date()
-    let value = FieldValue.date(date)
-    #expect(value == .date(date))
+    let value = FieldValue.date(.value(date))
+    #expect(value == .date(.value(date)))
   }
 
   /// Tests FieldValue location type creation and equality
@@ -79,16 +81,16 @@ internal struct FieldValueTests {
       longitude: -122.4194,
       horizontalAccuracy: 10.0
     )
-    let value = FieldValue.location(location)
-    #expect(value == .location(location))
+    let value = FieldValue.location(.value(location))
+    #expect(value == .location(.value(location)))
   }
 
   /// Tests FieldValue reference type creation and equality
   @Test("FieldValue reference type creation and equality")
   internal func fieldValueReference() {
     let reference = Reference(recordName: "test-record")
-    let value = FieldValue.reference(reference)
-    #expect(value == .reference(reference))
+    let value = FieldValue.reference(.value(reference))
+    #expect(value == .reference(.value(reference)))
   }
 
   /// Tests FieldValue asset type creation and equality
@@ -99,16 +101,15 @@ internal struct FieldValueTests {
       size: 1_024,
       downloadURL: "https://example.com/file"
     )
-    let value = FieldValue.asset(asset)
-    #expect(value == .asset(asset))
+    let value = FieldValue.asset(.value(asset))
+    #expect(value == .asset(.value(asset)))
   }
 
-  /// Tests FieldValue list type creation and equality
-  @Test("FieldValue list type creation and equality")
+  /// Tests FieldValue homogeneous string list creation and equality
+  @Test("FieldValue homogeneous string list creation and equality")
   internal func fieldValueList() {
-    let list = [FieldValue.string("item1"), FieldValue.int64(42)]
-    let value = FieldValue.list(list)
-    #expect(value == .list(list))
+    let value = FieldValue.string(.list(["item1", "item2"]))
+    #expect(value == .string(.list(["item1", "item2"])))
   }
 
   /// Tests FieldValue JSON encode → decode round-trips for scalar and complex cases
@@ -122,32 +123,58 @@ internal struct FieldValueTests {
     #expect(decoded == value)
   }
 
-  /// Tests that `.date` encodes as CloudKit milliseconds.
-  ///
-  /// `.date` does not round-trip: the decoder has no date branch on purpose
-  /// (a bare millisecond number is claimed by `.int64`/`.double` first — see
-  /// `decodeComplexTypes`), so this asserts the encoded wire value directly.
-  @Test("FieldValue date encodes as milliseconds")
-  internal func fieldValueDateEncodesMilliseconds() throws {
-    let date = Date(timeIntervalSince1970: 1_700_000_000)
-    let data = try JSONEncoder().encode(FieldValue.date(date))
-    let milliseconds = try JSONDecoder().decode(Double.self, from: data)
-    #expect(milliseconds == date.timeIntervalSince1970 * 1_000)
+  /// Tests that a value encodes as a field dictionary that carries its type.
+  @Test(
+    "FieldValue encodes as {\"value\": …, \"type\": …}",
+    arguments: [
+      (
+        FieldValue.date(.value(Date(timeIntervalSince1970: 1_700_000_000))),
+        #"{"type":"TIMESTAMP","value":1700000000000}"#
+      ),
+      (.bytes(.value(Data("abc123".utf8))), #"{"type":"BYTES","value":"YWJjMTIz"}"#),
+      (.double(.value(5)), #"{"type":"DOUBLE","value":5}"#),
+      (.string(.value("Chen")), #"{"type":"STRING","value":"Chen"}"#),
+      (.int64(.list([])), #"{"type":"INT64_LIST","value":[]}"#),
+    ]
+  )
+  internal func fieldValueEncodesTagged(_ value: FieldValue, _ json: String) throws {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+    let data = try encoder.encode(value)
+    #expect(String(decoding: data, as: UTF8.self) == json)
   }
 
-  /// Tests that `.bytes` encodes as a base64 string payload.
-  ///
-  /// Encoding emits `Data.base64EncodedString()`. Decoding still has no bytes
-  /// branch, so the payload reads back as `.string`.
-  @Test("FieldValue bytes encodes as its base64 string payload")
-  internal func fieldValueBytesEncodesAsString() throws {
-    let payload = Data("abc123".utf8)
-    let encoded = payload.base64EncodedString()
-    let bytesData = try JSONEncoder().encode(FieldValue.bytes(payload))
-    let stringData = try JSONEncoder().encode(FieldValue.string(encoded))
-    #expect(bytesData == stringData)
+  /// Tests that input without a `type`, or with a null value, is a decoding error.
+  @Test(
+    "FieldValue rejects a value without a type",
+    arguments: [
+      #""Chen""#,
+      "42",
+      #"["a","b"]"#,
+      #"{"value":"Chen"}"#,
+      #"{"value":1700000000000}"#,
+      #"{"value":null}"#,
+      #"{"value":null,"type":"STRING"}"#,
+    ]
+  )
+  internal func fieldValueRejectsUntagged(_ json: String) {
+    #expect(throws: DecodingError.self) {
+      try JSONDecoder().decode(FieldValue.self, from: Data(json.utf8))
+    }
+  }
 
-    let decoded = try JSONDecoder().decode(FieldValue.self, from: bytesData)
-    #expect(decoded == .string(encoded))
+  /// An INT64 past `Int32.max` decodes where `Int` is 64 bits, and is a
+  /// decoding error (not a trap) where `Int` is 32 bits, as on WASI.
+  @Test("FieldValue INT64 beyond Int32 range decodes or throws, never traps")
+  internal func fieldValueLargeInt64() throws {
+    let json = Data(#"{"value":3000000000,"type":"INT64"}"#.utf8)
+    if Int.bitWidth == 64 {
+      let decoded = try JSONDecoder().decode(FieldValue.self, from: json)
+      #expect(decoded == .int64(.value(Int(exactly: Int64(3_000_000_000)) ?? 0)))
+    } else {
+      #expect(throws: DecodingError.self) {
+        try JSONDecoder().decode(FieldValue.self, from: json)
+      }
+    }
   }
 }

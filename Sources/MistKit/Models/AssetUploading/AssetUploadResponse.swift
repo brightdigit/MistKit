@@ -43,7 +43,10 @@ public struct AssetUploadResponse: Codable, Sendable {
   public struct AssetData: Codable, Sendable {
     /// Wrapping key for encrypted assets
     public let wrappingKey: String?
-    /// SHA256 checksum of the uploaded file
+    /// Server-minted content identifier for the uploaded bytes (a version
+    /// byte plus a 20-byte digest). It is not a SHA-256 and can't be
+    /// recomputed client-side, so use it as an identity token, not to verify
+    /// a download.
     public let fileChecksum: String?
     /// Receipt token proving successful upload
     public let receipt: String?
