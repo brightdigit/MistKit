@@ -28,9 +28,9 @@
 //
 
 public import ConfigKeyKit
-internal import MistKitConfiguration
 internal import Foundation
 public import MistKit
+internal import MistKitConfiguration
 
 /// Configuration for auth-token command.
 public struct AuthTokenConfig: Sendable, ConfigurationParseable {
@@ -58,6 +58,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   /// session before `setUpAuth`, so the user must pick an Apple ID again
   /// (`--reset-auth` / `CLOUDKIT_RESET_AUTH`).
   public let resetAuth: Bool
+  /// How the captured token(s) are written (`--output text|env`).
+  public let output: AuthTokenOutput
 
   /// Creates a new instance.
   public init(
@@ -68,7 +70,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     port: Int = 8_080,
     host: String = "127.0.0.1",
     openBrowser: Bool = true,
-    resetAuth: Bool = false
+    resetAuth: Bool = false,
+    output: AuthTokenOutput = .text
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
@@ -77,6 +80,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     self.host = host
     self.openBrowser = openBrowser
     self.resetAuth = resetAuth
+    self.output = output
   }
 
   /// Parse configuration from command line arguments.
@@ -118,6 +122,9 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     )
     let resetAuth =
       configReader.read(MistDemoKeys.Auth.resetAuth)
+    let output = try AuthTokenOutput(
+      parsing: configReader.read(MistDemoKeys.Output.authTokenOutput)
+    )
 
     self.init(
       apiToken: apiToken,
@@ -126,7 +133,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
       port: port,
       host: host,
       openBrowser: openBrowser,
-      resetAuth: resetAuth
+      resetAuth: resetAuth,
+      output: output
     )
   }
 }

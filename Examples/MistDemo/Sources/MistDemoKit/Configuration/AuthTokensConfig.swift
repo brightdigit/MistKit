@@ -28,9 +28,9 @@
 //
 
 public import ConfigKeyKit
-internal import MistKitConfiguration
 internal import Foundation
 public import MistKit
+internal import MistKitConfiguration
 
 /// Configuration for `auth-tokens` — sequential sharer + sharee capture.
 public struct AuthTokensConfig: Sendable, ConfigurationParseable {
@@ -54,6 +54,8 @@ public struct AuthTokensConfig: Sendable, ConfigurationParseable {
   /// Optional sharee iCloud email (`CLOUDKIT_SHAREE_EMAIL` / `--sharee-email`).
   /// When set, included in the printed export block; capture cannot discover it.
   public let shareeEmail: String?
+  /// How the captured token(s) are written (`--output text|env`).
+  public let output: AuthTokenOutput
 
   /// Creates a new instance.
   public init(
@@ -63,7 +65,8 @@ public struct AuthTokensConfig: Sendable, ConfigurationParseable {
     port: Int = 8_080,
     host: String = "127.0.0.1",
     openBrowser: Bool = true,
-    shareeEmail: String? = nil
+    shareeEmail: String? = nil,
+    output: AuthTokenOutput = .text
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
@@ -72,6 +75,7 @@ public struct AuthTokensConfig: Sendable, ConfigurationParseable {
     self.host = host
     self.openBrowser = openBrowser
     self.shareeEmail = shareeEmail
+    self.output = output
   }
 
   /// Parse configuration from command line arguments.
@@ -109,6 +113,9 @@ public struct AuthTokensConfig: Sendable, ConfigurationParseable {
       default: true
     )
     let shareeEmail = configReader.read(MistDemoKeys.Auth.shareeEmail)
+    let output = try AuthTokenOutput(
+      parsing: configReader.read(MistDemoKeys.Output.authTokenOutput)
+    )
 
     self.init(
       apiToken: apiToken,
@@ -117,7 +124,8 @@ public struct AuthTokensConfig: Sendable, ConfigurationParseable {
       port: port,
       host: host,
       openBrowser: openBrowser,
-      shareeEmail: shareeEmail
+      shareeEmail: shareeEmail,
+      output: output
     )
   }
 }

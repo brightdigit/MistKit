@@ -36,6 +36,7 @@ internal enum ConfigurationError: LocalizedError {
   case missingRequired(String, suggestion: String)
   case unsupportedPlatform(String)
   case badCredentialsOnPublicDB
+  case invalidOutput(String, allowed: [String])
 
   // MARK: Internal
 
@@ -54,6 +55,9 @@ internal enum ConfigurationError: LocalizedError {
       "The bad-credentials error demo is only supported on the "
         + "private and shared databases (it uses web auth). "
         + "Re-run with `--database private`."
+    case .invalidOutput(let output, let allowed):
+      "Invalid output '\(output)'. Must be one of: "
+        + allowed.joined(separator: ", ")
     }
   }
 }
