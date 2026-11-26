@@ -72,7 +72,10 @@ The script reads `CLOUDKIT_API_TOKEN`, `CLOUDKIT_CONTAINER_ID` (or
 `mistdemo auth-tokens --output env` against the `development` environment —
 sign in as the sharer, then as the sharee. Each value is piped to
 `gh secret set … -R brightdigit/MistKit` over stdin (never echoed or put on a
-command line).
+command line). `CLOUDKIT_API_TOKEN` and `CLOUDKIT_CONTAINER_ID` are pushed too:
+a web-auth token only works with the API token and container that minted it, so
+refreshing the tokens against a stale `CLOUDKIT_API_TOKEN` secret still fails
+with 421.
 
 | Flag | Effect |
 |---|---|
@@ -80,7 +83,7 @@ command line).
 | `--sharee-email EMAIL` | Sharee iCloud email if not in the env file |
 | `--single` | Run `auth-token` and set only `CLOUDKIT_WEB_AUTH_TOKEN` |
 | `--update-env` | Rewrite the captured keys in the env file in place |
-| `--rerun` | Re-run failed jobs of the latest failed MistDemo-Integration run on the current branch |
+| `--rerun` | Re-run the MistDemo-Integration run for the current branch's head commit if it failed or was cancelled |
 | `--dry-run` | Skip sign-in; list the secret names that would be set |
 | `--environment ENV` | CloudKit environment (default `development`, matching CI) |
 

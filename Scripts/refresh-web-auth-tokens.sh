@@ -10,9 +10,10 @@
 #      CLOUDKIT_SHAREE_EMAIL) from a dotenv file,
 #   2. builds and runs `mistdemo auth-tokens --output env` (or `auth-token`
 #      with --single), which opens the browser for Apple ID sign-in,
-#   3. pipes each captured value to `gh secret set` over stdin,
+#   3. pipes each captured value, plus the CLOUDKIT_API_TOKEN and
+#      CLOUDKIT_CONTAINER_ID that minted them, to `gh secret set` over stdin,
 #   4. optionally rewrites the same keys in the env file and re-runs the
-#      most recent failed MistDemo-Integration run for the current branch.
+#      MistDemo-Integration run for the current branch's head commit.
 #
 # Token values are never echoed and never passed on a command line.
 #
@@ -50,8 +51,8 @@ GitHub secrets on $REPO.
   --single              capture only the sharer token (mistdemo auth-token)
                         and set only CLOUDKIT_WEB_AUTH_TOKEN
   --update-env          also rewrite the captured keys in the env file
-  --rerun               re-run the most recent failed $WORKFLOW run for the
-                        current branch (failed jobs only)
+  --rerun               re-run the $WORKFLOW run for the current branch's
+                        head commit if it failed or was cancelled
   --dry-run             skip sign-in and print which secrets would be set
   --environment ENV     CloudKit environment (default: development, as CI uses)
   -h, --help            show this help
@@ -133,37 +134,65 @@ else
 	SECRET_NAMES=(CLOUDKIT_WEB_AUTH_TOKEN CLOUDKIT_SHAREE_WEB_AUTH_TOKEN CLOUDKIT_SHAREE_EMAIL)
 fi
 
+[ -n "$CONTAINER_ID" ] || die "CLOUDKIT_CONTAINER_ID (or CLOUDKIT_CONTAINER_IDENTIFIER) is not set in $ENV_FILE"
+
+# A web-auth token only works with the API token and container that minted it,
+# so CI must get the same pair. Refreshing only the tokens against a stale
+# CLOUDKIT_API_TOKEN secret still fails with 421 AUTHENTICATION_REQUIRED.
+PAIR_NAMES=(CLOUDKIT_API_TOKEN CLOUDKIT_CONTAINER_ID)
+PAIR_VALUES=("$API_TOKEN" "$CONTAINER_ID")
+
 current_branch() {
 	git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD
 }
 
-rerun_failed() {
-	local branch run_id
+# Re-run the run for the branch's current head commit. Re-running an older
+# failed run instead would make it the workflow's one pending run, and GitHub
+# cancels the head commit's pending run in its favour (concurrency group).
+rerun_head() {
+	local branch sha run status conclusion run_id
 	branch="$(current_branch)"
-	run_id="$(gh run list -R "$REPO" --workflow "$WORKFLOW" --branch "$branch" \
-		--status failure -L1 --json databaseId --jq '.[0].databaseId // empty')"
-	if [ -z "$run_id" ]; then
-		info "no failed $WORKFLOW run found on $branch; nothing to re-run"
+	sha="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+	run="$(gh run list -R "$REPO" --workflow "$WORKFLOW" --branch "$branch" --commit "$sha" \
+		-L1 --json databaseId,status,conclusion \
+		--jq '.[0] // empty | "\(.databaseId) \(.status) \(.conclusion)"')"
+	if [ -z "$run" ]; then
+		info "no $WORKFLOW run for $branch at ${sha:0:7} (is it pushed?); nothing to re-run"
 		return 0
 	fi
+	read -r run_id status conclusion <<<"$run"
+	if [ "$status" != completed ]; then
+		info "run $run_id for ${sha:0:7} is $status; its integration job uses the new secrets if it hasn't started"
+		return 0
+	fi
+	case "$conclusion" in
+		success)
+			info "run $run_id for ${sha:0:7} already passed; nothing to re-run"
+			return 0
+			;;
+	esac
 	if [ "$DRY_RUN" = true ]; then
-		echo "[dry-run] would re-run failed jobs of $WORKFLOW run $run_id ($branch)"
+		echo "[dry-run] would re-run $WORKFLOW run $run_id ($branch @ ${sha:0:7}, $conclusion)"
 		return 0
 	fi
-	gh run rerun "$run_id" -R "$REPO" --failed
-	echo "✅ Re-running failed jobs of run $run_id ($branch)"
+	if [ "$conclusion" = failure ]; then
+		gh run rerun "$run_id" -R "$REPO" --failed
+	else
+		gh run rerun "$run_id" -R "$REPO"
+	fi
+	echo "✅ Re-running $WORKFLOW run $run_id ($branch @ ${sha:0:7})"
 }
 
 if [ "$DRY_RUN" = true ]; then
 	echo "[dry-run] would capture tokens with: mistdemo $([ "$SINGLE" = true ] && echo auth-token || echo auth-tokens) --output env"
-	for name in "${SECRET_NAMES[@]}"; do
+	for name in "${PAIR_NAMES[@]}" "${SECRET_NAMES[@]}"; do
 		echo "[dry-run] would set secret $name on $REPO"
 	done
 	if [ "$UPDATE_ENV" = true ]; then
 		echo "[dry-run] would update ${SECRET_NAMES[*]} in $ENV_FILE"
 	fi
 	if [ "$RERUN" = true ]; then
-		rerun_failed
+		rerun_head
 	fi
 	exit 0
 fi
@@ -221,6 +250,10 @@ for name in "${SECRET_NAMES[@]}"; do
 	VALUES+=("$value")
 done
 
+for i in "${!PAIR_NAMES[@]}"; do
+	printf '%s' "${PAIR_VALUES[$i]}" | gh secret set "${PAIR_NAMES[$i]}" -R "$REPO"
+	echo "✅ Set secret ${PAIR_NAMES[$i]}"
+done
 for i in "${!SECRET_NAMES[@]}"; do
 	printf '%s' "${VALUES[$i]}" | gh secret set "${SECRET_NAMES[$i]}" -R "$REPO"
 	echo "✅ Set secret ${SECRET_NAMES[$i]}"
@@ -256,5 +289,5 @@ if [ "$UPDATE_ENV" = true ]; then
 fi
 
 if [ "$RERUN" = true ]; then
-	rerun_failed
+	rerun_head
 fi
