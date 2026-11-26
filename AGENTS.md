@@ -124,6 +124,9 @@ swift run mistdemo export-schema [--raw] [--environment production]  # Managemen
 # CLOUDKIT_MANAGEMENT_TOKEN and DEVELOPMENT_TEAM (unprefixed; shared with
 # Xcode signing) for export-schema.
 # Capture sharer+sharee tokens: swift run mistdemo auth-tokens --sharee-email …
+#   (add --output env for KEY=value-only stdout)
+# Refresh the MistDemo Integration CI secrets after a 421 AUTHENTICATION_REQUIRED
+# (from repo root): ./Scripts/refresh-web-auth-tokens.sh [--update-env] [--rerun]
 swift run mistdemo query
 ```
 
@@ -193,7 +196,8 @@ MistKit/
 ├── Tests/
 │   └── MistKitTests/
 ├── Scripts/
-│   └── generate-openapi.sh # Generates both OpenAPI targets
+│   ├── generate-openapi.sh # Generates both OpenAPI targets
+│   └── refresh-web-auth-tokens.sh # Recapture MistDemo web-auth tokens → GitHub secrets
 ├── openapi.yaml           # CloudKit Web Services OpenAPI specification
 ├── management-openapi.yaml # CloudKit Management API OpenAPI specification
 └── openapi-generator-config.yaml # Configuration for code generation

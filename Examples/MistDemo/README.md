@@ -49,6 +49,41 @@ token (`CLOUDKIT_WEB_AUTH_TOKEN` + `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`) and
 the sharee's iCloud email (`CLOUDKIT_SHAREE_EMAIL`); capture them with
 `mistdemo auth-tokens --sharee-email sharee@example.com`.
 
+Add `--output env` to `auth-token` / `auth-tokens` for script-friendly
+output: stdout carries only `KEY=value` lines (`CLOUDKIT_WEB_AUTH_TOKEN`,
+plus `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN` and `CLOUDKIT_SHAREE_EMAIL` for
+`auth-tokens`), and every prompt and progress message goes to stderr.
+
+### Refreshing the CI web-auth secrets
+
+Web-auth tokens expire. When the **MistDemo Integration** workflow's "Live
+CloudKit Integration" job fails with HTTP 421 `AUTHENTICATION_REQUIRED`,
+recapture the tokens and push them to the repo's GitHub secrets from the repo
+root:
+
+```bash
+./Scripts/refresh-web-auth-tokens.sh --update-env --rerun
+```
+
+The script reads `CLOUDKIT_API_TOKEN`, `CLOUDKIT_CONTAINER_ID` (or
+`CLOUDKIT_CONTAINER_IDENTIFIER`) and `CLOUDKIT_SHAREE_EMAIL` from a dotenv file
+(default `../MistDemo.env` next to the repo root; override with
+`--env-file PATH`), builds MistDemo, and runs
+`mistdemo auth-tokens --output env` against the `development` environment —
+sign in as the sharer, then as the sharee. Each value is piped to
+`gh secret set … -R brightdigit/MistKit` over stdin (never echoed or put on a
+command line).
+
+| Flag | Effect |
+|---|---|
+| `--env-file PATH` | dotenv file to read (and, with `--update-env`, rewrite) |
+| `--sharee-email EMAIL` | Sharee iCloud email if not in the env file |
+| `--single` | Run `auth-token` and set only `CLOUDKIT_WEB_AUTH_TOKEN` |
+| `--update-env` | Rewrite the captured keys in the env file in place |
+| `--rerun` | Re-run failed jobs of the latest failed MistDemo-Integration run on the current branch |
+| `--dry-run` | Skip sign-in; list the secret names that would be set |
+| `--environment ENV` | CloudKit environment (default `development`, matching CI) |
+
 ---
 
 ## Web — `mistdemo web`
