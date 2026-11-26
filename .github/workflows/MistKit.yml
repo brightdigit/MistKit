@@ -105,6 +105,12 @@ jobs:
             -Xcc -D_WASI_EMULATED_MMAN
             -Xlinker -lwasi-emulated-signal
             -Xlinker -lwasi-emulated-mman
+          # Only read on the wasm / wasm-embedded lanes. Skips the Sharing suite
+          # (createShare) which intermittently hits `wasm trap: out of bounds
+          # memory access` under Wasmtime — remove once
+          # https://github.com/brightdigit/MistKit/issues/514 is fixed.
+          # swift-build splits this on whitespace, so the regex has no spaces.
+          wasm-swift-test-flags: --skip CloudKitServiceTests.Sharing
       - name: Install curl (required by Codecov uploader)
         if: steps.build.outputs.contains-code-coverage == 'true'
         run: |
