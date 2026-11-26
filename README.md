@@ -650,6 +650,8 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - **Issues**: [GitHub Issues](https://github.com/brightdigit/MistKit/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/brightdigit/MistKit/discussions)
 - **Documentation**: [API Reference](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation/mistkit)
+- **Security**: Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Don't open a public issue.
+- **Governance**: See [GOVERNANCE.md](GOVERNANCE.md) for project roles and decision making.
 
 ---
 
